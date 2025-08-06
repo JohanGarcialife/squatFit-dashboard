@@ -1,122 +1,91 @@
 import {
-  Home,
-  ChartPie,
-  Grid2X2,
-  ChartLine,
-  ShoppingBag,
-  BookA,
-  Forklift,
-  Mail,
-  MessageSquare,
-  Calendar,
-  Kanban,
-  ReceiptText,
+  LayoutDashboard,
   Users,
-  Lock,
+  ShoppingCart,
+  BarChart,
+  Settings,
   Fingerprint,
   SquareArrowUpRight,
+  Shield,
   type LucideIcon,
 } from "lucide-react";
 
-export interface NavSubItem {
+export interface SidebarItem {
   title: string;
-  url: string;
-  icon?: LucideIcon;
-  comingSoon?: boolean;
-  newTab?: boolean;
+  icon: LucideIcon;
+  items: {
+    title: string;
+    url: string;
+    newTab?: boolean;
+  }[];
 }
 
-export interface NavMainItem {
-  title: string;
-  url: string;
-  icon?: LucideIcon;
-  subItems?: NavSubItem[];
-  comingSoon?: boolean;
-  newTab?: boolean;
-}
-
-export interface NavGroup {
-  id: number;
-  label?: string;
-  items: NavMainItem[];
-}
-
-export const sidebarItems: NavGroup[] = [
+export const sidebarItems: SidebarItem[] = [
   {
-    id: 1,
-    label: "Dashboards",
+    title: "Dashboard",
+    icon: LayoutDashboard,
     items: [
-      {
-        title: "Dashboards",
-        url: "/dashboard",
-        icon: Home,
-        // subItems: [
-        //   { title: "Default", url: "/dashboard/default", icon: ChartPie },
-        //   { title: "CRM", url: "/dashboard/crm", icon: Grid2X2 },
-        //   { title: "Analytics", url: "/dashboard/finance", icon: ChartLine, comingSoon: true },
-        //   { title: "eCommerce", url: "/dashboard/e-commerce", icon: ShoppingBag, comingSoon: true },
-        //   { title: "Academy", url: "/dashboard/academy", icon: BookA, comingSoon: true },
-        //   { title: "Logistics", url: "/dashboard/logistics", icon: Forklift, comingSoon: true },
-        // ],
-      },
+      { title: "Overview", url: "/dashboard" },
+      { title: "Analytics", url: "/dashboard/analytics" },
+      { title: "Reports", url: "/dashboard/reports" },
     ],
   },
   {
-    id: 2,
-    label: "Pages",
+    title: "Management",
+    icon: Users,
     items: [
-      {
-        title: "Authentication",
-        url: "/auth",
-        icon: Fingerprint,
-        subItems: [
-          { title: "Login v1", url: "/auth/v1/login", newTab: true },
-          { title: "Register v1", url: "/auth/v1/register", newTab: true },
-        ],
-      },
-      {
-        title: "Email",
-        url: "/mail",
-        icon: Mail,
-        comingSoon: true,
-      },
-      {
-        title: "Chat",
-        url: "/chat",
-        icon: MessageSquare,
-        comingSoon: true,
-      },
-      {
-        title: "Calendar",
-        url: "/calendar",
-        icon: Calendar,
-        comingSoon: true,
-      },
-      {
-        title: "Kanban",
-        url: "/kanban",
-        icon: Kanban,
-        comingSoon: true,
-      },
-      {
-        title: "Invoice",
-        url: "/invoice",
-        icon: ReceiptText,
-        comingSoon: true,
-      },
-      {
-        title: "Users",
-        url: "/users",
-        icon: Users,
-        comingSoon: true,
-      },
-      {
-        title: "Roles",
-        url: "/roles",
-        icon: Lock,
-        comingSoon: true,
-      },
+      { title: "Customers", url: "/dashboard/customers" },
+      { title: "Orders", url: "/dashboard/orders" },
+      { title: "Products", url: "/dashboard/products" },
     ],
   },
- 
+  {
+    title: "Sales",
+    icon: ShoppingCart,
+    items: [
+      { title: "Orders", url: "/dashboard/orders" },
+      { title: "Invoices", url: "/dashboard/invoices" },
+      { title: "Refunds", url: "/dashboard/refunds" },
+    ],
+  },
+  {
+    title: "Analytics",
+    icon: BarChart,
+    items: [
+      { title: "Overview", url: "/dashboard/analytics" },
+      { title: "Sales", url: "/dashboard/analytics/sales" },
+      { title: "Customers", url: "/dashboard/analytics/customers" },
+    ],
+  },
+  {
+    title: "Settings",
+    icon: Settings,
+    items: [
+      { title: "General", url: "/dashboard/settings" },
+      { title: "Security", url: "/dashboard/settings/security" },
+      { title: "Billing", url: "/dashboard/settings/billing" },
+    ],
+  },
+  {
+    title: "Auth Pages",
+    icon: Fingerprint,
+    items: [{ title: "Login v1", url: "/auth/v1/login", newTab: true }],
+  },
+  {
+    title: "Security",
+    icon: Shield,
+    items: [
+      { title: "Security Overview", url: "/dashboard/security" },
+      { title: "Access Logs", url: "/dashboard/security/logs" },
+      { title: "Permissions", url: "/dashboard/security/permissions" },
+    ],
+  },
+  {
+    title: "External",
+    icon: SquareArrowUpRight,
+    items: [
+      { title: "Documentation", url: "https://ui.shadcn.com", newTab: true },
+      { title: "GitHub", url: "https://github.com/shadcn/ui", newTab: true },
+    ],
+  },
 ];
