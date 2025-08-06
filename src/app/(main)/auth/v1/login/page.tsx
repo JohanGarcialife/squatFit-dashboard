@@ -1,10 +1,6 @@
-import Link from "next/link";
-
 import { Command } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-
-import { LoginFormV1 } from "./_components/login-form";
+import { LoginForm } from "@/components/auth";
 
 export default function LoginV1() {
   return (
@@ -25,21 +21,13 @@ export default function LoginV1() {
         <div className="w-full max-w-md space-y-10 py-24 lg:py-32">
           <div className="space-y-4 text-center">
             <div className="text-foreground font-medium tracking-tight">Iniciar Sesión</div>
-            <div className="text-muted-foreground mx-auto max-w-xl">
-              Bienvenido. ingresa tu email y contraseña.
-            </div>
+            <div className="text-muted-foreground mx-auto max-w-xl">Bienvenido. ingresa tu email y contraseña.</div>
           </div>
           <div className="space-y-4">
-            <LoginFormV1 />
+            <LoginForm />
             {/* <Button className="w-full" variant="outline">
               Continue with Google
             </Button> */}
-            <p className="text-muted-foreground text-center text-xs font-medium">
-              No tienes cuenta?{" "}
-              <Link href="register" className="text-primary font-semibold">
-                Registrate
-              </Link>
-            </p>
           </div>
         </div>
       </div>
