@@ -41,15 +41,13 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
               <SearchDialog />
             </div>
             <div className="flex items-center gap-2">
-              <LayoutControls contentLayout={contentLayout} variant={sidebarVariant} collapsible={sidebarCollapsible} />
+              {/* <LayoutControls contentLayout={contentLayout} variant={sidebarVariant} collapsible={sidebarCollapsible} /> */}
               <ThemeSwitcher />
               <AccountSwitcher users={users} />
             </div>
           </div>
         </header>
-        <div className="p-4 md:p-6">
-         
-          {children}</div>
+        <div className="p-4 md:p-6">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

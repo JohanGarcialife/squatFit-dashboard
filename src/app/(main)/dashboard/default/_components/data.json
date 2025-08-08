@@ -1,615 +1,616 @@
 [
     {
       "id": 1,
-      "header": "Cover page",
-      "type": "Cover page",
-      "status": "In Process",
+      "header": "Página de portada",
+      "type": "Página de portada",
+      "status": "En proceso",
       "target": "18",
       "limit": "5",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 2,
-      "header": "Table of contents",
-      "type": "Table of contents",
-      "status": "Done",
+      "header": "Tabla de contenidos",
+      "type": "Tabla de contenidos",
+      "status": "Completado",
       "target": "29",
       "limit": "24",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 3,
-      "header": "Executive summary",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Resumen ejecutivo",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "10",
       "limit": "13",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 4,
-      "header": "Technical approach",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Enfoque técnico",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "27",
       "limit": "23",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 5,
-      "header": "Design",
-      "type": "Narrative",
-      "status": "In Process",
+      "header": "Diseño",
+      "type": "Narrativa",
+      "status": "En proceso",
       "target": "2",
       "limit": "16",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 6,
-      "header": "Capabilities",
-      "type": "Narrative",
-      "status": "In Process",
+      "header": "Capacidades",
+      "type": "Narrativa",
+      "status": "En proceso",
       "target": "20",
       "limit": "8",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 7,
-      "header": "Integration with existing systems",
-      "type": "Narrative",
-      "status": "In Process",
+      "header": "Integración con sistemas existentes",
+      "type": "Narrativa",
+      "status": "En proceso",
       "target": "19",
       "limit": "21",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 8,
-      "header": "Innovation and Advantages",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Innovación y Ventajas",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "25",
       "limit": "26",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 9,
-      "header": "Overview of EMR's Innovative Solutions",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Resumen de las Soluciones Innovadoras de EMR",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "7",
       "limit": "23",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 10,
-      "header": "Advanced Algorithms and Machine Learning",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Algoritmos Avanzados y Aprendizaje Automático",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "30",
       "limit": "28",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 11,
-      "header": "Adaptive Communication Protocols",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Protocolos de Comunicación Adaptativos",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "9",
       "limit": "31",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 12,
-      "header": "Advantages Over Current Technologies",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Ventajas Sobre las Tecnologías Actuales",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "12",
       "limit": "0",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 13,
-      "header": "Past Performance",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Rendimiento Pasado",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "22",
       "limit": "33",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 14,
-      "header": "Customer Feedback and Satisfaction Levels",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Comentarios de Clientes y Niveles de Satisfacción",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "15",
       "limit": "34",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 15,
-      "header": "Implementation Challenges and Solutions",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Desafíos de Implementación y Soluciones",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "3",
       "limit": "35",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 16,
-      "header": "Security Measures and Data Protection Policies",
-      "type": "Narrative",
-      "status": "In Process",
+      "header": "Medidas de Seguridad y Políticas de Protección de Datos",
+      "type": "Narrativa",
+      "status": "En proceso",
       "target": "6",
       "limit": "36",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 17,
-      "header": "Scalability and Future Proofing",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Escalabilidad y Preparación para el Futuro",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "4",
       "limit": "37",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 18,
-      "header": "Cost-Benefit Analysis",
-      "type": "Plain language",
-      "status": "Done",
+      "header": "Análisis de Costo-Beneficio",
+      "type": "Lenguaje sencillo",
+      "status": "Completado",
       "target": "14",
       "limit": "38",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 19,
-      "header": "User Training and Onboarding Experience",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Capacitación de Usuarios y Experiencia de Incorporación",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "17",
       "limit": "39",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 20,
-      "header": "Future Development Roadmap",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Hoja de Ruta de Desarrollo Futuro",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "11",
       "limit": "40",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 21,
-      "header": "System Architecture Overview",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Descripción General de la Arquitectura del Sistema",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "24",
       "limit": "18",
       "reviewer": "Maya Johnson"
     },
     {
       "id": 22,
-      "header": "Risk Management Plan",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Plan de Gestión de Riesgos",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "15",
       "limit": "22",
       "reviewer": "Carlos Rodriguez"
     },
     {
       "id": 23,
-      "header": "Compliance Documentation",
+      "header": "Documentación de Cumplimiento",
       "type": "Legal",
-      "status": "In Process",
+      "status": "En proceso",
       "target": "31",
       "limit": "27",
       "reviewer": "Sarah Chen"
     },
     {
       "id": 24,
-      "header": "API Documentation",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Documentación de la API",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "8",
       "limit": "12",
       "reviewer": "Raj Patel"
     },
     {
       "id": 25,
-      "header": "User Interface Mockups",
+      "header": "Maquetas de la Interfaz de Usuario",
       "type": "Visual",
-      "status": "In Process",
+      "status": "En proceso",
       "target": "19",
       "limit": "25",
       "reviewer": "Leila Ahmadi"
     },
     {
       "id": 26,
-      "header": "Database Schema",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Esquema de la Base de Datos",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "22",
       "limit": "20",
       "reviewer": "Thomas Wilson"
     },
     {
       "id": 27,
-      "header": "Testing Methodology",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Metodología de Pruebas",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "17",
       "limit": "14",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 28,
-      "header": "Deployment Strategy",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Estrategia de Despliegue",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "26",
       "limit": "30",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 29,
-      "header": "Budget Breakdown",
-      "type": "Financial",
-      "status": "In Process",
+      "header": "Desglose del Presupuesto",
+      "type": "Financiero",
+      "status": "En proceso",
       "target": "13",
       "limit": "16",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 30,
-      "header": "Market Analysis",
-      "type": "Research",
-      "status": "Done",
+      "header": "Análisis de Mercado",
+      "type": "Investigación",
+      "status": "Completado",
       "target": "29",
       "limit": "32",
       "reviewer": "Sophia Martinez"
     },
     {
       "id": 31,
-      "header": "Competitor Comparison",
-      "type": "Research",
-      "status": "In Process",
+      "header": "Comparación de Competidores",
+      "type": "Investigación",
+      "status": "En proceso",
       "target": "21",
       "limit": "19",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 32,
-      "header": "Maintenance Plan",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Plan de Mantenimiento",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "16",
       "limit": "23",
       "reviewer": "Alex Thompson"
     },
     {
       "id": 33,
-      "header": "User Personas",
-      "type": "Research",
-      "status": "In Process",
+      "header": "Perfiles de Usuario",
+      "type": "Investigación",
+      "status": "En proceso",
       "target": "27",
       "limit": "24",
       "reviewer": "Nina Patel"
     },
     {
       "id": 34,
-      "header": "Accessibility Compliance",
+      "header": "Cumplimiento de Accesibilidad",
       "type": "Legal",
-      "status": "Done",
+      "status": "Completado",
       "target": "18",
       "limit": "21",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 35,
-      "header": "Performance Metrics",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Métricas de Rendimiento",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "23",
       "limit": "26",
       "reviewer": "David Kim"
     },
     {
       "id": 36,
-      "header": "Disaster Recovery Plan",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Plan de Recuperación ante Desastres",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "14",
       "limit": "17",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 37,
-      "header": "Third-party Integrations",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Integraciones de Terceros",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "25",
       "limit": "28",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 38,
-      "header": "User Feedback Summary",
-      "type": "Research",
-      "status": "Done",
+      "header": "Resumen de Comentarios de Usuarios",
+      "type": "Investigación",
+      "status": "Completado",
       "target": "20",
       "limit": "15",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 39,
-      "header": "Localization Strategy",
-      "type": "Narrative",
-      "status": "In Process",
+      "header": "Estrategia de Localización",
+      "type": "Narrativa",
+      "status": "En proceso",
       "target": "12",
       "limit": "19",
       "reviewer": "Maria Garcia"
     },
     {
       "id": 40,
-      "header": "Mobile Compatibility",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Compatibilidad Móvil",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "28",
       "limit": "31",
       "reviewer": "James Wilson"
     },
     {
       "id": 41,
-      "header": "Data Migration Plan",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Plan de Migración de Datos",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "19",
       "limit": "22",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 42,
-      "header": "Quality Assurance Protocols",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Protocolos de Garantía de Calidad",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "30",
       "limit": "33",
       "reviewer": "Priya Singh"
     },
     {
       "id": 43,
-      "header": "Stakeholder Analysis",
-      "type": "Research",
-      "status": "In Process",
+      "header": "Análisis de las Partes Interesadas",
+      "type": "Investigación",
+      "status": "En proceso",
       "target": "11",
       "limit": "14",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 44,
-      "header": "Environmental Impact Assessment",
-      "type": "Research",
-      "status": "Done",
+      "header": "Evaluación de Impacto Ambiental",
+      "type": "Investigación",
+      "status": "Completado",
       "target": "24",
       "limit": "27",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 45,
-      "header": "Intellectual Property Rights",
+      "header": "Derechos de Propiedad Intelectual",
       "type": "Legal",
-      "status": "In Process",
+      "status": "En proceso",
       "target": "17",
       "limit": "20",
       "reviewer": "Sarah Johnson"
     },
     {
       "id": 46,
-      "header": "Customer Support Framework",
-      "type": "Narrative",
-      "status": "Done",
+      "header": "Marco de Soporte al Cliente",
+      "type": "Narrativa",
+      "status": "Completado",
       "target": "22",
       "limit": "25",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 47,
-      "header": "Version Control Strategy",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Estrategia de Control de Versiones",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "15",
       "limit": "18",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 48,
-      "header": "Continuous Integration Pipeline",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Pipeline de Integración Continua",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "26",
       "limit": "29",
       "reviewer": "Michael Chen"
     },
     {
       "id": 49,
-      "header": "Regulatory Compliance",
+      "header": "Cumplimiento Normativo",
       "type": "Legal",
-      "status": "In Process",
+      "status": "En proceso",
       "target": "13",
       "limit": "16",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 50,
-      "header": "User Authentication System",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Sistema de Autenticación de Usuarios",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "28",
       "limit": "31",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 51,
-      "header": "Data Analytics Framework",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Marco de Análisis de Datos",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "21",
       "limit": "24",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 52,
-      "header": "Cloud Infrastructure",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Infraestructura en la Nube",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "16",
       "limit": "19",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 53,
-      "header": "Network Security Measures",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Medidas de Seguridad de Red",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "29",
       "limit": "32",
       "reviewer": "Lisa Wong"
     },
     {
       "id": 54,
-      "header": "Project Timeline",
-      "type": "Planning",
-      "status": "Done",
+      "header": "Cronograma del Proyecto",
+      "type": "Planificación",
+      "status": "Completado",
       "target": "14",
       "limit": "17",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 55,
-      "header": "Resource Allocation",
-      "type": "Planning",
-      "status": "In Process",
+      "header": "Asignación de Recursos",
+      "type": "Planificación",
+      "status": "En proceso",
       "target": "27",
       "limit": "30",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 56,
-      "header": "Team Structure and Roles",
-      "type": "Planning",
-      "status": "Done",
+      "header": "Estructura y Roles del Equipo",
+      "type": "Planificación",
+      "status": "Completado",
       "target": "20",
       "limit": "23",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 57,
-      "header": "Communication Protocols",
-      "type": "Planning",
-      "status": "In Process",
+      "header": "Protocolos de Comunicación",
+      "type": "Planificación",
+      "status": "En proceso",
       "target": "15",
       "limit": "18",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 58,
-      "header": "Success Metrics",
-      "type": "Planning",
-      "status": "Done",
+      "header": "Métricas de Éxito",
+      "type": "Planificación",
+      "status": "Completado",
       "target": "30",
       "limit": "33",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 59,
-      "header": "Internationalization Support",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Soporte de Internacionalización",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "23",
       "limit": "26",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 60,
-      "header": "Backup and Recovery Procedures",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Procedimientos de Copia de Seguridad y Recuperación",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "18",
       "limit": "21",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 61,
-      "header": "Monitoring and Alerting System",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Sistema de Monitoreo y Alertas",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "25",
       "limit": "28",
       "reviewer": "Daniel Park"
     },
     {
       "id": 62,
-      "header": "Code Review Guidelines",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Directrices de Revisión de Código",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "12",
       "limit": "15",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 63,
-      "header": "Documentation Standards",
-      "type": "Technical content",
-      "status": "In Process",
+      "header": "Estándares de Documentación",
+      "type": "Contenido técnico",
+      "status": "En proceso",
       "target": "27",
       "limit": "30",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 64,
-      "header": "Release Management Process",
-      "type": "Planning",
-      "status": "Done",
+      "header": "Proceso de Gestión de Versiones",
+      "type": "Planificación",
+      "status": "Completado",
       "target": "22",
       "limit": "25",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     },
     {
       "id": 65,
-      "header": "Feature Prioritization Matrix",
-      "type": "Planning",
-      "status": "In Process",
+      "header": "Matriz de Priorización de Características",
+      "type": "Planificación",
+      "status": "En proceso",
       "target": "19",
       "limit": "22",
       "reviewer": "Emma Davis"
     },
     {
       "id": 66,
-      "header": "Technical Debt Assessment",
-      "type": "Technical content",
-      "status": "Done",
+      "header": "Evaluación de la Deuda Técnica",
+      "type": "Contenido técnico",
+      "status": "Completado",
       "target": "24",
       "limit": "27",
       "reviewer": "Eddie Lake"
     },
     {
       "id": 67,
-      "header": "Capacity Planning",
-      "type": "Planning",
-      "status": "In Process",
+      "header": "Planificación de Capacidad",
+      "type": "Planificación",
+      "status": "En proceso",
       "target": "21",
       "limit": "24",
       "reviewer": "Jamik Tashpulatov"
     },
     {
       "id": 68,
-      "header": "Service Level Agreements",
+      "header": "Acuerdos de Nivel de Servicio",
       "type": "Legal",
-      "status": "Done",
+      "status": "Completado",
       "target": "26",
       "limit": "29",
-      "reviewer": "Assign reviewer"
+      "reviewer": "Asignar revisor"
     }
   ]
+  
   

@@ -102,15 +102,15 @@ export function AccountSwitcher({
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <BadgeCheck />
-            Account
+            Cuenta
           </DropdownMenuItem>
           <DropdownMenuItem>
             <CreditCard />
-            Billing
+            Facturación
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Bell />
-            Notifications
+            Notificaciones
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
@@ -120,7 +120,7 @@ export function AccountSwitcher({
           className={isLoggingOut ? "cursor-not-allowed opacity-50" : ""}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          {isLoggingOut ? "Cerrando sesión..." : "Log out"}
+          {isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

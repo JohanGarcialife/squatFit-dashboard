@@ -30,13 +30,13 @@ export function LayoutControls({ variant, collapsible, contentLayout }: LayoutCo
       <PopoverContent align="end">
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
-            <h4 className="text-sm leading-none font-medium">Layout Settings</h4>
-            <p className="text-muted-foreground text-xs">Customize your dashboard layout preferences.</p>
+            <h4 className="text-sm leading-none font-medium">Configuración de Diseño</h4>
+            <p className="text-muted-foreground text-xs">Personaliza las preferencias de diseño de tu panel.</p>
           </div>
 
           <div className="flex flex-col gap-3">
             <div className="space-y-1">
-              <Label className="text-xs font-medium">Sidebar Variant</Label>
+              <Label className="text-xs font-medium">Variante de la Barra Lateral</Label>
               <ToggleGroup
                 className="w-full"
                 size="sm"
@@ -46,19 +46,19 @@ export function LayoutControls({ variant, collapsible, contentLayout }: LayoutCo
                 onValueChange={(value) => handleValueChange("sidebar_variant", value)}
               >
                 <ToggleGroupItem className="text-xs" value="inset" aria-label="Toggle inset">
-                  Inset
+                  Insertada
                 </ToggleGroupItem>
                 <ToggleGroupItem className="text-xs" value="sidebar" aria-label="Toggle sidebar">
-                  Sidebar
+                  Barra Lateral
                 </ToggleGroupItem>
                 <ToggleGroupItem className="text-xs" value="floating" aria-label="Toggle floating">
-                  Floating
+                  Flotante
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs font-medium">Sidebar Collapsible</Label>
+              <Label className="text-xs font-medium">Barra Lateral Colapsable</Label>
               <ToggleGroup
                 className="w-full"
                 size="sm"
@@ -68,16 +68,16 @@ export function LayoutControls({ variant, collapsible, contentLayout }: LayoutCo
                 onValueChange={(value) => handleValueChange("sidebar_collapsible", value)}
               >
                 <ToggleGroupItem className="text-xs" value="icon" aria-label="Toggle icon">
-                  Icon
+                  Icono
                 </ToggleGroupItem>
                 <ToggleGroupItem className="text-xs" value="offcanvas" aria-label="Toggle offcanvas">
-                  OffCanvas
+                  Menú Lateral
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs font-medium">Content Layout</Label>
+              <Label className="text-xs font-medium">Diseño del Contenido</Label>
               <ToggleGroup
                 className="w-full"
                 size="sm"
@@ -87,10 +87,10 @@ export function LayoutControls({ variant, collapsible, contentLayout }: LayoutCo
                 onValueChange={(value) => handleValueChange("content_layout", value)}
               >
                 <ToggleGroupItem className="text-xs" value="centered" aria-label="Toggle centered">
-                  Centered
+                  Centrado
                 </ToggleGroupItem>
                 <ToggleGroupItem className="text-xs" value="full-width" aria-label="Toggle full-width">
-                  Full Width
+                  Ancho Completo
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>

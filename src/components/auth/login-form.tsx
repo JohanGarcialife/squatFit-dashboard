@@ -45,7 +45,7 @@ export function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Correo Electrónico</FormLabel>
               <FormControl>
                 <Input id="email" type="email" placeholder="admin@example.com" autoComplete="email" {...field} />
               </FormControl>

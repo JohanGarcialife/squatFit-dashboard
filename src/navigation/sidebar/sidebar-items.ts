@@ -1,91 +1,127 @@
 import {
-  LayoutDashboard,
+  ShoppingBag,
+  Forklift,
+  Mail,
+  MessageSquare,
+  Calendar,
+  Kanban,
+  ReceiptText,
   Users,
-  ShoppingCart,
-  BarChart,
-  Settings,
+  Lock,
   Fingerprint,
   SquareArrowUpRight,
-  Shield,
+  LayoutDashboard,
+  ChartBar,
+  Banknote,
+  Gauge,
+  GraduationCap,
   type LucideIcon,
 } from "lucide-react";
 
-export interface SidebarItem {
+export interface NavSubItem {
   title: string;
-  icon: LucideIcon;
-  items: {
-    title: string;
-    url: string;
-    newTab?: boolean;
-  }[];
+  url: string;
+  icon?: LucideIcon;
+  comingSoon?: boolean;
+  newTab?: boolean;
+  isNew?: boolean;
 }
 
-export const sidebarItems: SidebarItem[] = [
+export interface NavMainItem {
+  title: string;
+  url: string;
+  icon?: LucideIcon;
+  subItems?: NavSubItem[];
+  comingSoon?: boolean;
+  newTab?: boolean;
+  isNew?: boolean;
+}
+
+export interface NavGroup {
+  id: number;
+  label?: string;
+  items: NavMainItem[];
+}
+
+export const sidebarItems: NavGroup[] = [
   {
-    title: "Dashboard",
-    icon: LayoutDashboard,
+    id: 1,
+    label: "Home",
     items: [
-      { title: "Overview", url: "/dashboard" },
-      { title: "Analytics", url: "/dashboard/analytics" },
-      { title: "Reports", url: "/dashboard/reports" },
+      {
+        title: "Home",
+        url: "/dashboard/default",
+        icon: LayoutDashboard,
+      },
+      {
+        title: "Entrenadores",
+        url: "/dashboard/entrenadores",
+        icon: Users,
+      },
+      {
+        title: "Cursos",
+        url: "/dashboard/cursos",
+        icon: GraduationCap,
+      },
+      {
+        title: "Entrenadores",
+        url: "/dashboard/entrenadores",
+        icon: Users,
+      },
+      {
+        title: "Finanzas",
+        url: "/dashboard/finanzas",
+        icon: Banknote,
+      },
+      {
+        title: "Analiticas",
+        url: "/dashboard/analiticas",
+        icon: Gauge,
+        comingSoon: true,
+      },
+      {
+        title: "Roles",
+        url: "/roles",
+        icon: Lock,
+        comingSoon: true,
+      },
     ],
   },
   {
-    title: "Management",
-    icon: Users,
+    id: 2,
+    label: "Clientes",
     items: [
-      { title: "Customers", url: "/dashboard/customers" },
-      { title: "Orders", url: "/dashboard/orders" },
-      { title: "Products", url: "/dashboard/products" },
-    ],
-  },
-  {
-    title: "Sales",
-    icon: ShoppingCart,
-    items: [
-      { title: "Orders", url: "/dashboard/orders" },
-      { title: "Invoices", url: "/dashboard/invoices" },
-      { title: "Refunds", url: "/dashboard/refunds" },
-    ],
-  },
-  {
-    title: "Analytics",
-    icon: BarChart,
-    items: [
-      { title: "Overview", url: "/dashboard/analytics" },
-      { title: "Sales", url: "/dashboard/analytics/sales" },
-      { title: "Customers", url: "/dashboard/analytics/customers" },
-    ],
-  },
-  {
-    title: "Settings",
-    icon: Settings,
-    items: [
-      { title: "General", url: "/dashboard/settings" },
-      { title: "Security", url: "/dashboard/settings/security" },
-      { title: "Billing", url: "/dashboard/settings/billing" },
-    ],
-  },
-  {
-    title: "Auth Pages",
-    icon: Fingerprint,
-    items: [{ title: "Login v1", url: "/auth/v1/login", newTab: true }],
-  },
-  {
-    title: "Security",
-    icon: Shield,
-    items: [
-      { title: "Security Overview", url: "/dashboard/security" },
-      { title: "Access Logs", url: "/dashboard/security/logs" },
-      { title: "Permissions", url: "/dashboard/security/permissions" },
-    ],
-  },
-  {
-    title: "External",
-    icon: SquareArrowUpRight,
-    items: [
-      { title: "Documentation", url: "https://ui.shadcn.com", newTab: true },
-      { title: "GitHub", url: "https://github.com/shadcn/ui", newTab: true },
+      {
+        title: "Alumnos",
+        url: "/alumnos",
+        icon: Users,
+        comingSoon: true,
+      },
+      {
+        title: "Chat",
+        url: "/chat",
+        icon: MessageSquare,
+        comingSoon: true,
+      },
+
+      {
+        title: "Facturas",
+        url: "/facturas",
+        icon: ReceiptText,
+        comingSoon: true,
+      },
+
+      // {
+      //   title: "Authentication",
+      //   url: "/auth",
+      //   icon: Fingerprint,
+      //   subItems: [
+      //     { title: "Login v1", url: "/auth/v1/login", newTab: true },
+      //     { title: "Login v2", url: "/auth/v2/login", newTab: true },
+      //     { title: "Register v1", url: "/auth/v1/register", newTab: true },
+      //     { title: "Register v2", url: "/auth/v2/register", newTab: true },
+      //   ],
+      // },
     ],
   },
 ];

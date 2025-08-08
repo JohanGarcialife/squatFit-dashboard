@@ -14,14 +14,14 @@ import {
 } from "@/components/ui/command";
 
 const searchItems = [
-  { group: "Dashboards", icon: ChartPie, label: "Default" },
-  { group: "Dashboards", icon: Grid2X2, label: "CRM", disabled: true },
-  { group: "Dashboards", icon: ChartLine, label: "Analytics", disabled: true },
-  { group: "Dashboards", icon: ShoppingBag, label: "E-Commerce", disabled: true },
-  { group: "Dashboards", icon: BookA, label: "Academy", disabled: true },
-  { group: "Dashboards", icon: Forklift, label: "Logistics", disabled: true },
-  { group: "Authentication", label: "Login v1" },
-  { group: "Authentication", label: "Register v1" },
+  { group: "Paneles", icon: ChartPie, label: "Predeterminado" },
+  { group: "Paneles", icon: Grid2X2, label: "CRM", disabled: true },
+  { group: "Paneles", icon: ChartLine, label: "Analíticas", disabled: true },
+  { group: "Paneles", icon: ShoppingBag, label: "Comercio Electrónico", disabled: true },
+  { group: "Paneles", icon: BookA, label: "Academia", disabled: true },
+  { group: "Paneles", icon: Forklift, label: "Logística", disabled: true },
+  { group: "Autenticación", label: "Iniciar Sesión v1" },
+  { group: "Autenticación", label: "Registrarse v1" },
 ];
 
 export function SearchDialog() {
@@ -44,15 +44,15 @@ export function SearchDialog() {
         onClick={() => setOpen(true)}
       >
         <Search className="size-4" />
-        Search
+        Buscar
         <kbd className="bg-muted inline-flex h-5 items-center gap-1 rounded border px-1.5 text-[10px] font-medium select-none">
           <span className="text-xs">⌘</span>J
         </kbd>
       </div>
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search dashboards, users, and more…" />
+        <CommandInput placeholder="Buscar paneles, usuarios y más..." />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>No se encontraron resultados.</CommandEmpty>
           {[...new Set(searchItems.map((item) => item.group))].map((group, i) => (
             <React.Fragment key={group}>
               {i !== 0 && <CommandSeparator />}
