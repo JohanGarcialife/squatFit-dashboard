@@ -93,20 +93,19 @@ export const sidebarItems: NavGroup[] = [
     items: [
       {
         title: "Alumnos",
-        url: "/alumnos",
+        url: "/dashboard/alumnos",
         icon: Users,
         comingSoon: true,
       },
       {
         title: "Chat",
-        url: "/chat",
+        url: "/dashboard/chat",
         icon: MessageSquare,
-        comingSoon: true,
       },
 
       {
         title: "Facturas",
-        url: "/facturas",
+        url: "/dashboard/facturas",
         icon: ReceiptText,
         comingSoon: true,
       },
