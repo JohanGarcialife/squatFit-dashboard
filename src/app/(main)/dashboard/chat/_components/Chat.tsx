@@ -30,7 +30,7 @@ export default function Chat() {
     {
       id: 3,
       name: "Nuevos Leads",
-      tags: ["8 incricajes no leídos"],
+      tags: ["8 mensajes no leídos"],
       unread: 8,
     },
     {
