@@ -50,13 +50,7 @@ export default [
       "prettier/prettier": "warn",
 
       // File Naming
-      "unicorn/filename-case": [
-        "error",
-        {
-          case: "kebabCase",
-          ignore: ["^.*\\.config\\.(js|ts|mjs)$", "^.*\\.d\\.ts$"],
-        },
-      ],
+      "unicorn/filename-case": "off",
 
       // Custom Rules (Not covered by plugins)
       "spaced-comment": ["error", "always", { exceptions: ["-", "+"] }],
@@ -120,7 +114,7 @@ export default [
       "no-underscore-dangle": ["error", { allow: ["_id", "__dirname"] }],
 
       // Complexity
-      "complexity": ["error", { max: 10 }],
+      complexity: ["error", { max: 10 }],
       "max-lines": ["error", { max: 300, skipBlankLines: true, skipComments: true }],
       "max-depth": ["error", 4],
 
