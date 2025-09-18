@@ -120,7 +120,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
         return decoded.sub;
       }
     } catch (error) {
-      console.error("Error obteniendo ID del usuario actual:", error);
+      
     }
     return null;
   }, []);
@@ -135,14 +135,14 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
     // No mostrar toast para errores de autenticación (son esperados)
     if (errorMessage === "Unauthorized") {
-      console.log("Error de autenticación (esperado durante inicialización)");
+     
       setError(null); // Limpiar error
       return;
     }
 
     setError(errorMessage);
     toast.error(errorMessage);
-    console.error(defaultMessage, error);
+   
   }, []);
 
   /**
@@ -168,21 +168,18 @@ export function ChatProvider({ children }: ChatProviderProps) {
         setLoading(true);
         clearError();
 
-        console.log(
-          `🔄 ChatContext: Iniciando carga de conversaciones (intento ${retryCount + 1}/${maxRetries + 1})...`,
-        );
+       
         const data = await ChatService.getConversations();
 
         setConversations(data);
         setIsConnected(true);
         initializationAttempts.current = 0; // Reset attempts on success
 
-        console.log(`✅ ChatContext: Cargadas ${data.length} conversaciones en el estado`);
+     
       } catch (err) {
-        console.error(`❌ ChatContext: Error cargando conversaciones (intento ${retryCount + 1}):`, err);
-
+       
         if (retryCount < maxRetries) {
-          console.log(`⏳ ChatContext: Reintentando en ${retryDelay}ms...`);
+        
           setTimeout(() => {
             refreshConversations(retryCount + 1);
           }, retryDelay);
@@ -204,13 +201,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const loadConversations = useCallback(async () => {
     // PROTECCIÓN ROBUSTA: Evitar llamadas simultáneas y duplicadas
     if (isLoadingConversations.current) {
-      console.log("⏭️ ChatContext: Ya se están cargando conversaciones, saltando...");
+      
       return;
     }
 
     // Si ya hay conversaciones cargadas, no volver a cargar
     if (conversations.length > 0) {
-      console.log("⏭️ ChatContext: Ya hay conversaciones cargadas, saltando...");
+      
       return;
     }
 
@@ -219,7 +216,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
       setLoading(true);
       clearError();
 
-      console.log("🔄 ChatContext: Cargando conversaciones...");
+    
       const data = await ChatService.getConversations();
 
       setConversations(data);
@@ -227,7 +224,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
       console.log(`✅ ChatContext: Cargadas ${data.length} conversaciones`);
     } catch (err) {
-      console.error("❌ ChatContext: Error cargando conversaciones:", err);
+      
       handleError(err, "Error cargando conversaciones");
       setIsConnected(false);
     } finally {
@@ -250,24 +247,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
       setMessages(data);
 
-      console.log(`✅ Cargados ${data.length} mensajes para ${selectedConversation.name}`);
+     
 
-      // 🔍 DEBUG: Mostrar todos los mensajes de la conversación
-      console.log("🔍 DEBUG: Todos los mensajes de la conversación:", {
-        conversationId: selectedConversation.id,
-        conversationName: selectedConversation.name,
-        totalMessages: data.length,
-        messages: data.map((msg, index) => ({
-          index: index + 1,
-          id: msg.id,
-          content: msg.content,
-          sender_id: (msg as any).sender_id,
-          created_at: msg.created_at,
-          isRead: msg.isRead,
-          messageType: msg.messageType,
-          chatId: msg.chatId,
-        })),
-      });
+   
     } catch (err) {
       handleError(err, "Error cargando mensajes");
     } finally {
@@ -332,7 +314,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
     let currentCachedMessages = messagesCache.current.get(chatId) ?? [];
     
     if (currentCachedMessages.length === 0) {
-      console.log(`🔍 ChatContext: No hay cache para chatId ${chatId}, buscando por userId ${userId}`);
       for (const [cachedChatId, cachedMessages] of messagesCache.current.entries()) {
         const conversation = conversations.find(conv => conv.id === cachedChatId);
         if (conversation && conversation.user_id === userId) {
@@ -354,9 +335,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
     if (!messageExistsInCache) {
       const updatedCachedMessages = [...currentCachedMessages, newMessage];
       messagesCache.current.set(targetChatId, updatedCachedMessages);
-      console.log(`📦 ChatContext: Cache actualizado para chat ${targetChatId} con ${updatedCachedMessages.length} mensajes`);
     } else {
-      console.log(`📦 ChatContext: Mensaje ya existe en cache para chat ${targetChatId}`);
     }
   };
 
@@ -369,7 +348,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
     const isCurrentChat = isCurrentChatById || isCurrentChatByUserId;
     
     if (isCurrentChat) {
-      console.log(`✅ ChatContext: Es el chat actual, agregando mensaje: ${newMessage.content}`);
       setMessages((prev) => {
         const messageExists = prev.some(
           (msg) => msg.content === newMessage.content && Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 2000,
@@ -379,7 +357,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
           return prev;
         }
         const newMessages = [...prev, newMessage];
-        console.log(`💬 ChatContext: Mensaje agregado al chat actual: ${newMessage.content}`);
         return newMessages;
       });
     } else {
@@ -417,26 +394,26 @@ export function ChatProvider({ children }: ChatProviderProps) {
    */
   useEffect(() => {
     const handleWebSocketMessage = (event: any) => {
-      console.log("🎯 ChatContext: Evento websocket-message recibido:", event.detail);
+    
       const notification = event.detail;
 
       if (notification.type === "new_message") {
         const { chatId, message, userId, timestamp } = notification.data;
         const notificationId = `${chatId}-${message}-${userId}`;
 
-        console.log("🎯 ChatContext: Procesando mensaje nuevo:", { chatId, message, userId, timestamp });
+      
 
         // Verificaciones de duplicados
         if (isNotificationProcessed(notificationId)) {
-          console.log("⚠️ ChatContext: Notificación ya procesada, ignorando");
+         
           return;
         }
         if (isMessageDuplicate(chatId, message, userId)) {
-          console.log("⚠️ ChatContext: Mensaje duplicado en cache, ignorando");
+         
           return;
         }
         if (isCurrentMessageDuplicate(message, userId, chatId)) {
-          console.log("⚠️ ChatContext: Mensaje duplicado en estado actual, ignorando");
+          
           return;
         }
 
@@ -445,7 +422,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
         // Crear el mensaje y actualizar cache para cualquier chat
         const newMessage = createNewMessage(chatId, message, userId, timestamp);
-        console.log("🎯 ChatContext: Mensaje creado:", newMessage);
         addMessageToCurrentChat(newMessage, chatId, userId);
 
         // Actualizar contador de no leídos
@@ -455,13 +431,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
     // Agregar listener para eventos personalizados
     window.addEventListener("websocket-message", handleWebSocketMessage);
-    console.log("🎯 ChatContext: Listener de eventos personalizados agregado");
-    console.log("🎯 ChatContext: selectedConversation al agregar listener:", selectedConversation);
 
     // Cleanup
     return () => {
       window.removeEventListener("websocket-message", handleWebSocketMessage);
-      console.log("🎯 ChatContext: Listener de eventos personalizados removido");
     };
   }, [selectedConversation, generateUniqueMessageId]);
 
@@ -497,7 +470,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
     
     // Si no hay mensajes para este chatId, buscar por user_id de la conversación
     if (!cachedMessages || cachedMessages.length === 0) {
-      console.log(`🔍 ChatContext: No hay cache para chatId ${chatId}, buscando por user_id`);
       
       const conversation = conversations.find(conv => conv.id === chatId);
       if (conversation && conversation.user_id) {
@@ -517,39 +489,35 @@ export function ChatProvider({ children }: ChatProviderProps) {
     if (cachedMessages && cachedMessages.length > 0) {
       setMessages(cachedMessages);
       setIsSelectingConversation(false);
-      console.log(`📦 ChatContext: Mensajes cargados desde cache para chat ${foundChatId}: ${cachedMessages.length} mensajes`);
-      console.log(`📦 ChatContext: Último mensaje en cache:`, cachedMessages[cachedMessages.length - 1]);
-      console.log(`📦 ChatContext: Todos los mensajes en cache:`, cachedMessages.map(m => ({ content: m.content, created_at: m.created_at })));
+      
       return true;
     }
-    console.log(`📦 ChatContext: No hay mensajes en cache para chat ${chatId}`);
-    console.log(`📦 ChatContext: Cache disponible para chats:`, Array.from(messagesCache.current.keys()));
+   
     return false;
   };
 
   const loadMessagesFromAPI = async (chatId: string, conversation: any) => {
     try {
       isLoadingMessages.current = true;
-      console.log(`🔄 ChatContext: Cargando mensajes para conversación: ${conversation.name}`);
+      
       
       const data = await ChatService.getMessages(chatId);
       messagesCache.current.set(chatId, data);
       setMessages(data);
-      console.log(`✅ ChatContext: Seleccionada conversación: ${conversation.name} con ${data.length} mensajes`);
+    
     } catch (err) {
-      console.error("❌ ChatContext: Error cargando mensajes:", err);
+    
       
       // Si es un error de throttling, intentar usar cache si está disponible
       if (err instanceof Error && err.message.includes("ThrottlerException")) {
-        console.log("⚠️ ChatContext: Error de throttling detectado, intentando usar cache...");
+      
         const cachedMessages = messagesCache.current.get(chatId);
         if (cachedMessages && cachedMessages.length > 0) {
           setMessages(cachedMessages);
-          console.log(`📦 ChatContext: Usando mensajes en cache después de throttling: ${cachedMessages.length} mensajes`);
-          console.log(`📦 ChatContext: Último mensaje en cache:`, cachedMessages[cachedMessages.length - 1]);
+        
           return;
         } else {
-          console.log("⚠️ ChatContext: No hay cache disponible, mostrando mensaje de error");
+        
         }
       }
       
@@ -573,7 +541,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
       return false;
     }
     if (isLoadingMessages.current) {
-      console.log("⚠️ ChatContext: Ya hay una carga de mensajes en progreso, ignorando selección...");
+    
       return false;
     }
     return true;
@@ -593,7 +561,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
   const selectConversation = useCallback(
     async (chatId: string) => {
-      console.log("🔍 ChatContext: Solicitud de selección de conversación:", chatId);
+    
 
       if (!validateSelectionRequest(chatId)) return;
       cleanupSelectionState();
@@ -621,7 +589,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
           await loadMessagesFromAPI(chatId, conversation);
         }, 1000);
       } catch (err) {
-        console.error("❌ ChatContext: Error seleccionando conversación:", err);
+      
         handleError(err, "Error seleccionando conversación");
         setIsSelectingConversation(false);
       }
@@ -667,16 +635,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
         clearError();
 
         // Debug: Verificar el contenido antes de crear messageData
-        console.log("🔍 ChatContext: Contenido recibido:", `"${content}"`);
-        console.log("🔍 ChatContext: Contenido trimmeado:", `"${content.trim()}"`);
-        console.log("🔍 ChatContext: Longitud del contenido:", content.trim().length);
-
+       
         const messageData: SendMessageData = {
           content: content.trim(),
           messageType,
         };
 
-        console.log("🔍 ChatContext: messageData creado:", messageData);
 
         const newMessage = await ChatService.sendMessage(selectedConversation.id, messageData);
 
@@ -685,14 +649,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
           throw new Error("No se pudo enviar el mensaje");
         }
 
-        console.log("✅ ChatContext: Mensaje enviado exitosamente:", newMessage);
-        console.log("🔍 ChatContext: Estructura del mensaje:", {
-          id: newMessage.id,
-          content: newMessage.content,
-          sender_id: (newMessage as any).sender_id,
-          created_at: newMessage.created_at,
-          isRead: newMessage.isRead,
-        });
+      
 
         // Asegurar que el sender_id sea el ID del usuario actual
         const token = getAuthToken();
@@ -714,16 +671,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
             content: newMessage.content ?? content, // Asegurar que siempre tenga contenido
           };
 
-          console.log("🔍 ChatContext: Mensaje a agregar:", {
-            id: messageToAdd.id,
-            content: messageToAdd.content,
-            originalContent: content,
-            hasContent: !!messageToAdd.content,
-            contentLength: messageToAdd.content?.length ?? 0,
-          });
-
+        
           const updatedMessages = [...prev, messageToAdd];
-          console.log("🔍 ChatContext: Mensajes actualizados:", updatedMessages.length);
+        
 
           // Actualizar cache
           if (selectedConversation) {
@@ -752,7 +702,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
               if (cachedMessages) {
                 const updatedMessages = [...cachedMessages, newMessage];
                 messagesCache.current.set(conv.id, updatedMessages);
-                console.log("🔄 ChatContext: Cache actualizado con mensaje enviado para conversación:", conv.id);
               }
 
               return updatedConv;
@@ -767,9 +716,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
         // await refreshStats();
 
         toast.success("Mensaje enviado");
-        console.log(`✅ Mensaje enviado a ${selectedConversation.name}:`, newMessage.content);
+      
       } catch (err) {
-        console.error("❌ ChatContext: Error enviando mensaje:", err);
+      
         handleError(err, "Error enviando mensaje");
       } finally {
         setLoading(false);
@@ -787,7 +736,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
     // Evitar llamadas innecesarias si no hay mensajes no leídos
     if (selectedConversation.unread === 0) {
-      console.log("⏭️ ChatContext: No hay mensajes no leídos, saltando markAsRead");
+     
       return;
     }
 
@@ -801,7 +750,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
         prev.map((conv) => (conv.id === selectedConversation.id ? { ...conv, unread: 0 } : conv)),
       );
 
-      console.log(`✅ Mensajes marcados como leídos en ${selectedConversation.name}`);
+  
     } catch (err) {
       console.error("Error marcando mensajes como leídos:", err);
       // No mostramos toast para esta operación ya que no es crítica
@@ -844,8 +793,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
    * Cargar datos iniciales al montar el componente
    */
   useEffect(() => {
-    console.log("🔍 ChatContext: useEffect de inicialización ejecutado");
-
+    
     const initializeChat = async () => {
       // PROTECCIÓN ROBUSTA: Evitar múltiples inicializaciones
       if (hasInitialized.current || isLoadingConversations.current) {
@@ -853,7 +801,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
         return;
       }
 
-      console.log("🚀 Inicializando sistema de chat...");
+     
 
       // Verificar si hay token disponible antes de hacer peticiones
       const token = getAuthToken();
@@ -867,14 +815,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
         // MARCAR INMEDIATAMENTE para evitar llamadas concurrentes
         hasInitialized.current = true;
 
-        console.log("🔄 ChatContext: Cargando conversaciones iniciales...");
 
         // Usar loadConversations (versión simple sin retry) para evitar throttling
         await loadConversations();
 
         console.log("✅ ChatContext: Inicialización completada exitosamente");
       } catch (error) {
-        console.error("❌ ChatContext: Error inicializando chat:", error);
+       
         setIsConnected(false);
         hasInitialized.current = false; // Permitir reintento en caso de error
       }
@@ -883,7 +830,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
     // Ejecutar inmediatamente
     initializeChat();
 
-    console.log("🔍 ChatContext: useEffect de inicialización configurado");
   }, []); // Sin dependencias para evitar re-ejecuciones
 
   /**
@@ -915,7 +861,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
       }
 
       // TEMPORALMENTE DESHABILITADO para evitar "Too Many Requests"
-      console.log("⚠️ ChatContext: Health check deshabilitado temporalmente");
       setIsConnected(true); // Asumir conectado
     };
 

@@ -20,7 +20,6 @@ export const useWebSocketSimple = () => {
 
   // Callback para notificaciones
   const handleNotification = useCallback((notification: any) => {
-    console.log("🔔 useWebSocketSimple: Notificación recibida:", notification);
 
     setNotifications((prev) => [notification, ...prev]);
     setNotificationsReceived((prev) => prev + 1);
@@ -58,10 +57,7 @@ export const useWebSocketSimple = () => {
         detail: notification,
       });
       window.dispatchEvent(customEvent);
-      console.log("🚀 Evento personalizado disparado:", notification);
-      console.log("🚀 Evento personalizado disparado - chatId:", chatId);
-      console.log("🚀 Evento personalizado disparado - message:", message);
-      console.log("🚀 Evento personalizado disparado - userId:", userId);
+    
     } else {
       toast.info("🔔 Nueva notificación", {
         description: notification.data?.message ?? "Notificación recibida",
@@ -133,17 +129,16 @@ export const useWebSocketSimple = () => {
 
   // Conexión automática con delay para asegurar que el token esté disponible
   useEffect(() => {
-    console.log("🔍 DEBUG: useWebSocketSimple - useEffect ejecutado");
+  
 
     // Delay reducido para conexión más rápida
     const timer = setTimeout(() => {
-      console.log("🔍 DEBUG: useWebSocketSimple - Iniciando conexión automática...");
+      
       connect();
     }, 500); // 500ms de delay (reducido de 2000ms)
 
     return () => {
       clearTimeout(timer);
-      console.log("🔍 DEBUG: useWebSocketSimple - Cleanup ejecutado");
       disconnect();
     };
   }, [connect, disconnect]);

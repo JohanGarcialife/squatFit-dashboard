@@ -10,28 +10,13 @@ import { useChat } from "@/contexts/chat-context";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 import { formatMessageTime, getInitials } from "@/lib/services/chat-service";
 
-/**
- * Componente Chat - Lista de conversaciones
- *
- * Este componente muestra la lista de conversaciones disponibles y permite
- * seleccionar una conversación para ver sus mensajes.
- *
- * Características:
- * - Lista de conversaciones desde el backend
- * - Indicadores de mensajes no leídos
- * - Estado de conexión
- * - Búsqueda y filtrado
- * - Estados de carga y error
- */
+
+
 export default function Chat() {
   const { conversations, selectedConversation, selectConversation, loading, error, isConnected, getTotalUnreadCount } =
     useChat();
 
-  // Debug: Log de conversaciones recibidas (solo cuando cambian)
-  // console.log('🔍 Chat Component: Conversaciones recibidas:', conversations);
-  // console.log('🔍 Chat Component: Longitud de conversaciones:', conversations?.length);
-  // console.log('🔍 Chat Component: Loading:', loading);
-  // console.log('🔍 Chat Component: Error:', error);
+
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -93,12 +78,9 @@ export default function Chat() {
 
   // Manejar selección de conversación con debounce
   const handleSelectConversation = (chatId: string) => {
-    console.log("🔍 Chat: Intentando seleccionar conversación con ID:", chatId);
-    console.log("🔍 Chat: Tipo de ID:", typeof chatId);
-    console.log("🔍 Chat: ID válido:", !!chatId && chatId.trim() !== "");
+  
 
     if (!chatId || typeof chatId !== "string" || chatId.trim() === "") {
-      console.error("❌ Chat: ID de conversación inválido:", chatId);
       return;
     }
 
@@ -227,7 +209,6 @@ export default function Chat() {
   const renderConversationItem = (chat: any) => {
     // Validar que el chat tenga un ID válido
     if (!chat.id || typeof chat.id !== "string" || chat.id.trim() === "") {
-      console.error("❌ Chat: Conversación sin ID válido:", chat);
       return null;
     }
 

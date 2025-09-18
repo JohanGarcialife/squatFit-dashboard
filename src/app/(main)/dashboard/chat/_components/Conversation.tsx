@@ -26,7 +26,7 @@ const MessageInput = React.memo(
     inputRef: React.RefObject<HTMLInputElement>;
   }) => {
     const [messageText, setMessageText] = useState("");
-    const [isTyping, setIsTyping] = useState(false);
+    const [, setIsTyping] = useState(false);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleSendMessage = useCallback(
