@@ -23,3 +23,4 @@ export const removeAuthTokenFromCookies = async (): Promise<void> => {
   const cookieStore = await cookies();
   cookieStore.delete("authToken");
 };
+

@@ -14,3 +14,4 @@ export default function WebSocketSimple() {
   // Los logs se muestran en la consola del navegador
   return null;
 }
+
