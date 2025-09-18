@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 
 import clsx from "clsx";
 import { jwtDecode } from "jwt-decode";
@@ -57,7 +57,7 @@ export default function Chat() {
     return conversations.filter(
       (conv) =>
         conv.name.toLowerCase().includes(query) ||
-        conv.tags.some((tag) => tag.toLowerCase().includes(query)) ||
+        conv.tags.some((tag: string) => tag.toLowerCase().includes(query)) ||
         conv.lastMessage?.content.toLowerCase().includes(query),
     );
   }, [conversations, searchQuery]);
@@ -79,7 +79,19 @@ export default function Chat() {
     return sorted;
   }, [filteredConversations]);
 
-  // Manejar selección de conversación
+  // Ref para debounce de selección de conversación
+  const selectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup del timeout al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (selectTimeoutRef.current) {
+        clearTimeout(selectTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Manejar selección de conversación con debounce
   const handleSelectConversation = (chatId: string) => {
     console.log("🔍 Chat: Intentando seleccionar conversación con ID:", chatId);
     console.log("🔍 Chat: Tipo de ID:", typeof chatId);
@@ -90,7 +102,15 @@ export default function Chat() {
       return;
     }
 
-    selectConversation(chatId);
+    // Limpiar timeout anterior si existe
+    if (selectTimeoutRef.current) {
+      clearTimeout(selectTimeoutRef.current);
+    }
+
+    // Debounce de 300ms para evitar múltiples clics rápidos y throttling
+    selectTimeoutRef.current = setTimeout(() => {
+      selectConversation(chatId);
+    }, 300);
   };
 
   // Renderizar estado de carga

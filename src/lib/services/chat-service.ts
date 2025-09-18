@@ -1,103 +1,17 @@
 import { getAuthToken } from "@/lib/auth/auth-utils";
 
-// ============================================================================
-// TIPOS DE DATOS PARA EL SISTEMA DE CHAT
-// ============================================================================
-
-/**
- * Interfaz para representar una conversación de chat
- */
-export interface Conversation {
-  id: string;
-  name: string;
-  tags: string[];
-  unread: number;
-  user_id?: string; // ID del usuario para comparaciones
-  lastMessage?: {
-    content: string;
-    created_at: string;
-    sender_id: string;
-  };
-  updatedAt: string;
-  createdAt: string;
-  isActive: boolean;
-}
-
-/**
- * Interfaz para representar un mensaje individual
- */
-export interface Message {
-  id: string;
-  chatId: string;
-  content: string;
-  sender_id: string;
-  created_at: string;
-  isRead: boolean;
-  messageType: "text" | "image" | "audio" | "file";
-  metadata?: {
-    fileName?: string;
-    fileSize?: number;
-    fileType?: string;
-  };
-}
-
-/**
- * Interfaz para estadísticas del chat
- */
-export interface ChatStats {
-  totalConversations: number;
-  unreadMessages: number;
-  activeConversations: number;
-  messagesToday: number;
-  messagesThisWeek: number;
-  averageResponseTime: number; // en minutos
-}
-
-/**
- * Interfaz para datos de envío de mensaje
- */
-export interface SendMessageData {
-  content: string;
-  messageType?: "text" | "image" | "audio" | "file";
-  metadata?: {
-    fileName?: string;
-    fileSize?: number;
-    fileType?: string;
-  };
-}
-
-/**
- * Interfaz para respuesta de API
- */
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  error?: string;
-}
+// Importar tipos desde archivo separado
+import { Conversation, Message, ChatStats, SendMessageData, ApiResponse } from "./chat-types";
 
 // ============================================================================
 // CONFIGURACIÓN DEL SERVICIO
 // ============================================================================
 
-/**
- * URL base del backend para el servicio de chat
- * Utiliza la misma configuración que el sistema de autenticación
- */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cyrc2g3zra-no.a.run.app";
-
-/**
- * Timeout para las peticiones HTTP (en milisegundos)
- */
 const REQUEST_TIMEOUT = 10000;
-
-// ============================================================================
-// CLASE PRINCIPAL DEL SERVICIO DE CHAT
-// ============================================================================
 
 /**
  * Servicio para manejar todas las operaciones relacionadas con el chat
- * Implementa el patrón de servicio para centralizar la lógica de comunicación con el backend
  */
 export class ChatService {
   /**
@@ -203,9 +117,6 @@ export class ChatService {
     return {
       id: conv.id ?? conv.chat_id ?? `temp-id-${index}`,
       name: conv.name ?? conv.user_email ?? "Conversación sin nombre",
-      userFirstName: conv.user_firstName ?? conv.userFirstName,
-      userLastName: conv.user_lastName ?? conv.userLastName,
-      userEmail: conv.user_email ?? conv.userEmail,
       user_id: conv.user_id ?? conv.userId,
     };
   }
@@ -222,7 +133,6 @@ export class ChatService {
             created_at: conv.last_message.created_at ?? conv.last_message.timestamp ?? conv.last_message_time,
           }
         : conv.lastMessage,
-      lastMessageTime: conv.last_message_time ?? conv.lastMessageTime,
     };
   }
 
@@ -419,79 +329,5 @@ export class ChatService {
   }
 }
 
-// ============================================================================
-// EXPORTACIONES ADICIONALES
-// ============================================================================
-
-/**
- * Función de utilidad para formatear timestamps
- * @param created_at - Timestamp a formatear
- * @returns String formateado
- */
-export const formatMessageTime = (created_at: string): string => {
-  if (!created_at) {
-    return "Fecha no disponible";
-  }
-
-  const date = new Date(created_at);
-
-  // Verificar si la fecha es válida
-  if (isNaN(date.getTime())) {
-    console.warn("Timestamp inválido:", created_at);
-    return "Fecha inválida";
-  }
-
-  const now = new Date();
-  const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-
-  if (diffInHours < 24) {
-    return date.toLocaleTimeString("es-ES", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } else if (diffInHours < 168) {
-    // 7 días
-    return date.toLocaleDateString("es-ES", {
-      weekday: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } else {
-    return date.toLocaleDateString("es-ES", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    });
-  }
-};
-
-/**
- * Función de utilidad para obtener iniciales de un nombre
- * @param name - Nombre del que obtener iniciales
- * @returns String con las iniciales
- */
-export const getInitials = (name: string | undefined | null): string => {
-  if (!name || typeof name !== "string") {
-    return "??";
-  }
-
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-};
-
-/**
- * Función de utilidad para validar si un mensaje es reciente
- * @param created_at - Timestamp del mensaje
- * @param minutes - Número de minutos para considerar "reciente"
- * @returns Boolean indicando si es reciente
- */
-export const isRecentMessage = (created_at: string, minutes: number = 5): boolean => {
-  const messageTime = new Date(created_at);
-  const now = new Date();
-  const diffInMinutes = (now.getTime() - messageTime.getTime()) / (1000 * 60);
-  return diffInMinutes <= minutes;
-};
+// Re-exportar funciones utilitarias desde archivo separado
+export { formatMessageTime, isRecentMessage, getInitials } from "./chat-utils";

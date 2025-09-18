@@ -1,29 +1,13 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
-
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
-import { 
-  ChatService, 
-  Conversation, 
-  Message, 
-  ChatStats, 
-  SendMessageData,
-  formatMessageTime,
-  getInitials,
-  isRecentMessage
-} from "@/lib/services/chat-service";
-import { getAuthToken } from "@/lib/auth/auth-utils";
 import { useWebSocketSimple } from "@/hooks/use-websocket-simple";
+import { getAuthToken } from "@/lib/auth/auth-utils";
+import { ChatService, getInitials } from "@/lib/services/chat-service";
+import { Conversation, Message, ChatStats, SendMessageData } from "@/lib/services/chat-types";
 
-// ============================================================================
-// INTERFACES Y TIPOS DEL CONTEXTO
-// ============================================================================
-
-/**
- * Interfaz para notificaciones WebSocket
- */
 interface WebSocketNotification {
   type: string;
   data: {
@@ -35,148 +19,43 @@ interface WebSocketNotification {
   };
 }
 
-/**
- * Interfaz principal del contexto de chat
- * Define todas las propiedades y métodos disponibles para los componentes
- */
 interface ChatContextType {
-  // ========================================================================
-  // ESTADO PRINCIPAL
-  // ========================================================================
-
-  /** Lista de todas las conversaciones */
   conversations: Conversation[];
-
-  /** Conversación actualmente seleccionada */
   selectedConversation: Conversation | null;
-
-  /** Mensajes de la conversación seleccionada */
   messages: Message[];
-
-  /** Estadísticas del chat */
   stats: ChatStats | null;
-
-  /** Estado de carga general */
   loading: boolean;
-
-  /** Mensaje de error actual */
   error: string | null;
-
-  /** Estado de conexión con el backend */
   isConnected: boolean;
-
-  /** Estado para evitar múltiples llamadas simultáneas */
   isMarkingAsRead: boolean;
-
-  // ========================================================================
-  // ESTADO DE WEBSOCKET
-  // ========================================================================
-
-  /** Estado de conexión WebSocket */
   websocketConnected: boolean;
-
-  /** Notificaciones WebSocket recibidas */
   websocketNotifications: WebSocketNotification[];
-
-  /** Total de notificaciones WebSocket */
   totalWebSocketNotifications: number;
-
-  /** Notificaciones WebSocket no leídas */
   unreadWebSocketNotifications: number;
-
-  /** Número de notificaciones recibidas en tiempo real */
   notificationsReceived: number;
-
-  // ========================================================================
-  // ACCIONES PRINCIPALES
-  // ========================================================================
-
-  /** Selecciona una conversación y carga sus mensajes */
   selectConversation: (chatId: string) => Promise<void>;
-
-  /** Envía un mensaje a la conversación seleccionada */
   sendMessage: (content: string, messageType?: SendMessageData["messageType"]) => Promise<void>;
-
-  /** Marca los mensajes de la conversación actual como leídos */
   markAsRead: () => Promise<void>;
-
-  // ========================================================================
-  // ACCIONES DE REFRESH
-  // ========================================================================
-
-  /** Recarga la lista de conversaciones */
   refreshConversations: () => Promise<void>;
-
-  /** Carga conversaciones manualmente (para uso en botones) */
   loadConversations: () => Promise<void>;
-
-  /** Recarga los mensajes de la conversación actual */
   refreshMessages: () => Promise<void>;
-
-  /** Recarga las estadísticas del chat */
   refreshStats: () => Promise<void>;
-
-  // ========================================================================
-  // UTILIDADES
-  // ========================================================================
-
-  /** Obtiene las iniciales de la conversación seleccionada */
   getSelectedConversationInitials: () => string;
-
-  /** Verifica si hay mensajes no leídos */
   hasUnreadMessages: () => boolean;
-
-  /** Obtiene el total de mensajes no leídos */
   getTotalUnreadCount: () => number;
-
-  // ========================================================================
-  // ACCIONES DE WEBSOCKET
-  // ========================================================================
-
-  /** Conecta al WebSocket */
   connectWebSocket: () => Promise<void>;
-
-  /** Desconecta del WebSocket */
   disconnectWebSocket: () => void;
-
-  /** Actualiza los chats asignados en WebSocket */
   updateWebSocketAssignedChats: (chats: string[]) => void;
-
-  /** Limpia las notificaciones WebSocket */
   clearWebSocketNotifications: () => void;
 }
 
-// ============================================================================
-// CONFIGURACIÓN DEL CONTEXTO
-// ============================================================================
-
-/**
- * Contexto de React para el sistema de chat
- * Proporciona estado global y métodos para todos los componentes de chat
- */
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-// ============================================================================
-// PROVIDER DEL CONTEXTO
-// ============================================================================
-
-/**
- * Props del ChatProvider
- */
 interface ChatProviderProps {
   children: React.ReactNode;
 }
 
-/**
- * Provider del contexto de chat
- * Maneja todo el estado global del sistema de chat y proporciona métodos
- * para interactuar con el backend
- */
 export function ChatProvider({ children }: ChatProviderProps) {
-  // ========================================================================
-  // ESTADO LOCAL
-  // ========================================================================
-
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -187,35 +66,31 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
   const [isSelectingConversation, setIsSelectingConversation] = useState(false);
   const selectConversationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isLoadingMessages = useRef(false);
   const messagesCache = useRef<Map<string, Message[]>>(new Map());
   const [isInitializing, setIsInitializing] = useState(false);
   const initializationAttempts = useRef(0);
   const messageIdCounter = useRef(0);
-
-  // Función para generar IDs únicos para mensajes de WebSocket
+  const isLoadingConversations = useRef(false);
+  const hasInitialized = useRef(false);
+  const processedNotifications = useRef<Set<string>>(new Set());
+  const isSendingMessage = useRef(false);
   const generateUniqueMessageId = useCallback(() => {
     messageIdCounter.current += 1;
     return `ws-${Date.now()}-${messageIdCounter.current}`;
   }, []);
 
-  // ========================================================================
-  // WEBSOCKET HOOK SIMPLE
-  // ========================================================================
-
   const {
     isConnected: websocketConnected,
-    isConnecting: websocketConnecting,
     notifications: websocketNotifications,
     notificationsReceived,
-    error: websocketError,
     connect: connectWebSocket,
     disconnect: disconnectWebSocket,
     clearNotifications: clearWebSocketNotifications,
   } = useWebSocketSimple();
 
-  // Propiedades calculadas para el contexto
   const totalWebSocketNotifications = websocketNotifications.length;
-  const unreadWebSocketNotifications = websocketNotifications.length; // Por simplicidad, todas son no leídas
+  const unreadWebSocketNotifications = websocketNotifications.length;
 
   const updateWebSocketAssignedChats = () => {
     // No hacer nada, como en el script de Hamlet
@@ -228,10 +103,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
   /**
    * Actualizar las funciones de callback cuando las funciones de refresh estén disponibles
    */
-  useEffect(() => {
-    // Por ahora solo logueamos que el efecto se ejecutó
-    console.log("🔄 ChatContext: Efecto de WebSocket ejecutado");
-  }, [selectedConversation]);
+  useEffect(() => {}, [selectedConversation]);
 
   // ========================================================================
   // FUNCIONES DE UTILIDAD
@@ -292,22 +164,24 @@ export function ChatProvider({ children }: ChatProviderProps) {
       const maxRetries = 3;
       const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 5000); // Exponential backoff, max 5s
 
-    try {
+      try {
         setLoading(true);
         clearError();
 
-      console.log(`🔄 ChatContext: Iniciando carga de conversaciones (intento ${retryCount + 1}/${maxRetries + 1})...`);
+        console.log(
+          `🔄 ChatContext: Iniciando carga de conversaciones (intento ${retryCount + 1}/${maxRetries + 1})...`,
+        );
         const data = await ChatService.getConversations();
 
-      setConversations(data);
+        setConversations(data);
         setIsConnected(true);
         initializationAttempts.current = 0; // Reset attempts on success
 
-      console.log(`✅ ChatContext: Cargadas ${data.length} conversaciones en el estado`);
+        console.log(`✅ ChatContext: Cargadas ${data.length} conversaciones en el estado`);
       } catch (err) {
         console.error(`❌ ChatContext: Error cargando conversaciones (intento ${retryCount + 1}):`, err);
 
-      if (retryCount < maxRetries) {
+        if (retryCount < maxRetries) {
           console.log(`⏳ ChatContext: Reintentando en ${retryDelay}ms...`);
           setTimeout(() => {
             refreshConversations(retryCount + 1);
@@ -315,7 +189,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
           return;
         }
 
-      handleError(err, "Error cargando conversaciones");
+        handleError(err, "Error cargando conversaciones");
         setIsConnected(false);
       } finally {
         setLoading(false);
@@ -328,7 +202,20 @@ export function ChatProvider({ children }: ChatProviderProps) {
    * Carga conversaciones - una sola consulta simple
    */
   const loadConversations = useCallback(async () => {
+    // PROTECCIÓN ROBUSTA: Evitar llamadas simultáneas y duplicadas
+    if (isLoadingConversations.current) {
+      console.log("⏭️ ChatContext: Ya se están cargando conversaciones, saltando...");
+      return;
+    }
+
+    // Si ya hay conversaciones cargadas, no volver a cargar
+    if (conversations.length > 0) {
+      console.log("⏭️ ChatContext: Ya hay conversaciones cargadas, saltando...");
+      return;
+    }
+
     try {
+      isLoadingConversations.current = true;
       setLoading(true);
       clearError();
 
@@ -345,8 +232,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
       setIsConnected(false);
     } finally {
       setLoading(false);
+      isLoadingConversations.current = false;
     }
-  }, [handleError, clearError]);
+  }, [handleError, clearError, conversations.length]);
 
   /**
    * Recarga los mensajes de la conversación actual
@@ -359,6 +247,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
       clearError();
 
       const data = await ChatService.getMessages(selectedConversation.id);
+
       setMessages(data);
 
       console.log(`✅ Cargados ${data.length} mensajes para ${selectedConversation.name}`);
@@ -372,14 +261,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
           index: index + 1,
           id: msg.id,
           content: msg.content,
-          sender: msg.sender,
+          sender_id: (msg as any).sender_id,
           created_at: msg.created_at,
           isRead: msg.isRead,
           messageType: msg.messageType,
           chatId: msg.chatId,
         })),
       });
-
     } catch (err) {
       handleError(err, "Error cargando mensajes");
     } finally {
@@ -402,325 +290,166 @@ export function ChatProvider({ children }: ChatProviderProps) {
     }
   }, []);
 
-  /**
-   * Actualiza una conversación específica cuando llega una notificación
-   * TEMPORALMENTE DESHABILITADO para evitar "Too Many Requests"
-   */
-  const updateConversationFromNotification = useCallback(async (chatId: string) => {
-    // TEMPORALMENTE DESHABILITADO para evitar "Too Many Requests"
-    console.log("⚠️ ChatContext: updateConversationFromNotification deshabilitado temporalmente");
-    return;
+  // ELIMINADO: Este useEffect causaba duplicación de mensajes
+  // El manejo de notificaciones se hace solo en el useEffect de eventos personalizados
 
-    // Código comentado para evitar llamadas a la API
-    /*
-    try {
-      console.log('🔄 ChatContext: Actualizando conversación específica:', chatId);
+  // Funciones auxiliares para reducir complejidad
+  const isNotificationProcessed = (notificationId: string): boolean => {
+    return processedNotifications.current.has(notificationId);
+  };
 
-      // Obtener conversaciones actualizadas
-      const updatedConversations = await ChatService.getConversations();
+  const isMessageDuplicate = (chatId: string, message: string, userId: string): boolean => {
+    const cachedMessages = messagesCache.current.get(chatId) ?? [];
+    const messageExists = cachedMessages.some(
+      (msg) => msg.content === message && (msg as any).sender_id === userId && msg.chatId === chatId,
+    );
+    return messageExists;
+  };
 
-      // Encontrar la conversación específica
-      const updatedConv = updatedConversations.find(conv => conv.id === chatId);
+  const isCurrentMessageDuplicate = (message: string, userId: string, chatId: string): boolean => {
+    return messages.some(
+      (msg) => msg.content === message && (msg as any).sender_id === userId && msg.chatId === chatId,
+    );
+  };
 
-      if (updatedConv) {
-        // Actualizar solo esa conversación en el estado
-        setConversations(prev => {
-          return prev.map(conv => {
-            if (conv.id === chatId) {
-              return {
-                ...conv,
-                ...updatedConv,
-                // Mantener el estado local si es necesario
-                unread: updatedConv.unread || conv.unread + 1
-              };
-            }
-            return conv;
-          });
-        });
+  const createNewMessage = (chatId: string, message: string, userId: string, timestamp: string) => {
+    const currentUserId = getCurrentUserId();
+    const isFromCurrentUser = userId === currentUserId;
 
-        console.log('✅ ChatContext: Conversación actualizada:', chatId);
+    return {
+      id: generateUniqueMessageId(),
+      chatId: chatId,
+      content: message ?? "Nuevo mensaje",
+      sender_id: isFromCurrentUser ? currentUserId : userId,
+      created_at: timestamp ?? new Date().toISOString(),
+      isRead: false,
+      messageType: "text" as const,
+    };
+  };
+
+  const findChatInCache = (chatId: string, userId: string) => {
+    let targetChatId = chatId;
+    let currentCachedMessages = messagesCache.current.get(chatId) ?? [];
+    
+    if (currentCachedMessages.length === 0) {
+      console.log(`🔍 ChatContext: No hay cache para chatId ${chatId}, buscando por userId ${userId}`);
+      for (const [cachedChatId, cachedMessages] of messagesCache.current.entries()) {
+        const conversation = conversations.find(conv => conv.id === cachedChatId);
+        if (conversation && conversation.user_id === userId) {
+          targetChatId = cachedChatId;
+          currentCachedMessages = cachedMessages;
+          console.log(`🔍 ChatContext: Encontrado chat por userId: ${cachedChatId}`);
+          break;
+        }
       }
-    } catch (error) {
-      console.error('❌ ChatContext: Error actualizando conversación específica:', error);
     }
-    */
-  }, []);
+    return { targetChatId, currentCachedMessages };
+  };
 
-  /**
-   * Función para manejar notificaciones del WebSocket (DIRECTA)
-   */
-  const handleWebSocketNotification = useCallback(
-    async (notification: any) => {
-      console.log("🔔 ChatContext: Procesando notificación WebSocket:", notification);
+  const updateCacheWithMessage = (targetChatId: string, currentCachedMessages: any[], newMessage: any) => {
+    const messageExistsInCache = currentCachedMessages.some(
+      (msg) => msg.content === newMessage.content && Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 2000,
+    );
 
-    if (notification.type === 'new_message') {
-        const { chatId, message, userId, timestamp, coachId } = notification.data;
+    if (!messageExistsInCache) {
+      const updatedCachedMessages = [...currentCachedMessages, newMessage];
+      messagesCache.current.set(targetChatId, updatedCachedMessages);
+      console.log(`📦 ChatContext: Cache actualizado para chat ${targetChatId} con ${updatedCachedMessages.length} mensajes`);
+    } else {
+      console.log(`📦 ChatContext: Mensaje ya existe en cache para chat ${targetChatId}`);
+    }
+  };
 
-      console.log('📨 ChatContext: Nuevo mensaje recibido:', {
-          chatId,
-          message: message?.substring(0, 50) + "...",
-          userId,
-          coachId,
-          timestamp,
-        });
+  const addMessageToCurrentChat = (newMessage: any, chatId: string, userId: string) => {
+    const { targetChatId, currentCachedMessages } = findChatInCache(chatId, userId);
+    updateCacheWithMessage(targetChatId, currentCachedMessages, newMessage);
 
-      // Obtener el ID del usuario actual para determinar si el mensaje es del usuario actual
-        const currentUserId = getCurrentUserId();
-        const isFromCurrentUser = userId === currentUserId;
+    const isCurrentChatById = selectedConversation?.id === chatId;
+    const isCurrentChatByUserId = selectedConversation?.user_id === userId;
+    const isCurrentChat = isCurrentChatById || isCurrentChatByUserId;
+    
+    if (isCurrentChat) {
+      console.log(`✅ ChatContext: Es el chat actual, agregando mensaje: ${newMessage.content}`);
+      setMessages((prev) => {
+        const messageExists = prev.some(
+          (msg) => msg.content === newMessage.content && Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 2000,
+        );
+        if (messageExists) {
+          console.log(`⚠️ ChatContext: Mensaje duplicado detectado, no agregando: ${newMessage.content}`);
+          return prev;
+        }
+        const newMessages = [...prev, newMessage];
+        console.log(`💬 ChatContext: Mensaje agregado al chat actual: ${newMessage.content}`);
+        return newMessages;
+      });
+    } else {
+      console.log(`📱 ChatContext: Mensaje recibido para chat diferente (${chatId}), no actualizando estado actual`);
+    }
+  };
 
-      console.log('🔍 ChatContext: Identificación del emisor:', {
-          messageUserId: userId,
-          currentUserId: currentUserId,
-          isFromCurrentUser: isFromCurrentUser,
-        });
+  const updateConversationUnreadCount = (chatId: string, userId: string, message: string, timestamp: string) => {
+    setConversations((prev) => {
+      return prev.map((conv) => {
+        if (conv.id === chatId || conv.user_id === userId) {
+          const currentUserId = getCurrentUserId();
+          const isFromCurrentUser = userId === currentUserId;
 
-      // 1. Actualizar contador de no leídos y último mensaje en la conversación
-        setConversations((prev) => {
-          return prev.map((conv) => {
-            if (conv.id === chatId) {
-              return {
-                ...conv,
-                unread: conv.unread + 1,
-                lastMessage: {
-                  content: message || "Nuevo mensaje",
-                  created_at: timestamp || new Date().toISOString(),
-                  sender: isFromCurrentUser ? "me" : userId,
-                },
-                updatedAt: timestamp || new Date().toISOString(),
-              };
-            }
-            return conv;
-          });
-
-
-        // 2. Si es la conversación actual, agregar mensaje directamente usando datos de la notificación
-        if (selectedConversation && chatId === selectedConversation.id) {
-          const newMessage = {
-            id: `ws-${Date.now()}`, // ID único basado en timestamp
-            chatId: chatId,
-            content: message || "Nuevo mensaje",
-            sender: isFromCurrentUser ? "me" : userId,
-            created_at: timestamp || new Date().toISOString(),
-            isRead: false,
-            messageType: "text" as const,
+          const updatedConv = {
+            ...conv,
+            unread: conv.unread + 1,
+            lastMessage: {
+              content: message ?? "Nuevo mensaje",
+              created_at: timestamp ?? new Date().toISOString(),
+              sender_id: isFromCurrentUser ? currentUserId : userId,
+            },
+            updatedAt: timestamp ?? new Date().toISOString(),
           };
 
-        setMessages(prev => {
-            // Verificar si el mensaje ya existe para evitar duplicados
-            const messageExists = prev.some(
-              (msg) =>
-                msg.content === newMessage.content &&
-                Math.abs(new Date(msg.created_at).getTime() - new Date(newMessage.created_at).getTime()) < 1000,
-            );
-
-
-          if (messageExists) {
-              console.log("⚠️ ChatContext: Mensaje ya existe, evitando duplicado");
-              return prev;
-            }
-
-
-            console.log('✅ ChatContext: Agregando mensaje directamente desde notificación:', {
-              content: newMessage.content,
-              sender: newMessage.sender,
-              timestamp: newMessage.created_at,
-              isFromCurrentUser: isFromCurrentUser,
-            });
-
-            return [...prev, newMessage];
-          });
-
-        console.log('✅ ChatContext: Mensaje agregado directamente al chat actual');
-        } else {
-          console.log("ℹ️ ChatContext: Notificación para otra conversación:", {
-            notificationChatId: chatId,
-            currentChatId: selectedConversation?.id,
-          });
+          return updatedConv;
         }
-
-        console.log('✅ ChatContext: Notificación procesada directamente (sin API)');
-      }
-    },
-    [selectedConversation, getCurrentUserId],
-  );
-
-  /**
-   * Efecto para manejar notificaciones WebSocket (SIMPLE)
-   */
-  useEffect(() => {
-    console.log("🔍 ChatContext: useEffect ejecutado, notificaciones:", websocketNotifications.length);
-
-    if (websocketNotifications.length > 0) {
-      const latestNotification = websocketNotifications[0];
-      console.log("🔍 ChatContext: Notificación recibida:", latestNotification);
-
-      // Solo procesar si es un mensaje nuevo
-      if (latestNotification.type === "new_message") {
-        const { chatId, message, userId, timestamp } = latestNotification.data;
-
-        console.log("🔔 ChatContext: Procesando notificación simple:", {
-          chatId,
-          message: message?.substring(0, 30) + "...",
-          userId,
-          currentChatId: selectedConversation?.id,
-          isCurrentChat: selectedConversation && chatId === selectedConversation.id,
-        });
-
-        // Solo si es la conversación actual, agregar mensaje directamente
-        if (selectedConversation && chatId === selectedConversation.id) {
-          const newMessage = {
-            id: `ws-${Date.now()}`,
-            chatId: chatId,
-            content: message || "Nuevo mensaje",
-            sender: userId,
-            created_at: timestamp || new Date().toISOString(),
-            isRead: false,
-            messageType: "text" as const,
-          };
-
-          console.log("✅ ChatContext: Agregando mensaje al chat actual:", newMessage);
-          setMessages((prev) => {
-            console.log("🔍 ChatContext: Mensajes actuales:", prev.length);
-            const newMessages = [...prev, newMessage];
-            console.log("🔍 ChatContext: Nuevos mensajes:", newMessages.length);
-            return newMessages;
-          });
-          console.log("✅ ChatContext: Mensaje agregado directamente al chat");
-        } else {
-          console.log("ℹ️ ChatContext: Notificación para otra conversación o no hay conversación seleccionada");
-        }
-
-        // Actualizar contador de no leídos
-        setConversations((prev) => {
-          return prev.map((conv) => {
-            if (conv.id === chatId) {
-              return {
-                ...conv,
-                unread: conv.unread + 1,
-                lastMessage: {
-                  content: message || "Nuevo mensaje",
-                  created_at: timestamp || new Date().toISOString(),
-                  sender: userId,
-                },
-                updatedAt: timestamp || new Date().toISOString(),
-              };
-            }
-            return conv;
-          });
-        });
-      }
-
-      // Limpiar notificación procesada
-      clearWebSocketNotifications();
-    }
-  }, [websocketNotifications, selectedConversation, clearWebSocketNotifications]);
+        return conv;
+      });
+    });
+  };
 
   /**
    * Efecto para manejar eventos personalizados de WebSocket
    */
   useEffect(() => {
     const handleWebSocketMessage = (event: any) => {
+      console.log("🎯 ChatContext: Evento websocket-message recibido:", event.detail);
       const notification = event.detail;
-      console.log("🎯 ChatContext: Evento personalizado capturado:", notification);
-      console.log("🎯 ChatContext: selectedConversation actual:", selectedConversation);
 
       if (notification.type === "new_message") {
         const { chatId, message, userId, timestamp } = notification.data;
+        const notificationId = `${chatId}-${message}-${userId}`;
 
-        console.log("🔔 ChatContext: Procesando evento personalizado:", {
-          chatId,
-          message: message?.substring(0, 30) + "...",
-          userId,
-          currentChatId: selectedConversation?.id,
-          isCurrentChat: selectedConversation && chatId === selectedConversation.id,
-        });
+        console.log("🎯 ChatContext: Procesando mensaje nuevo:", { chatId, message, userId, timestamp });
 
-        console.log("🔍 ChatContext: Comparación de IDs:", {
-          notificationChatId: chatId,
-          selectedChatId: selectedConversation?.id,
-          areEqual: chatId === selectedConversation?.id,
-          selectedConversationExists: !!selectedConversation,
-        });
-
-        // Comparar por chatId o por userId si el chatId no coincide
-        const isCurrentChat =
-          selectedConversation && (chatId === selectedConversation.id || userId === selectedConversation.user_id);
-
-        console.log("🔍 ChatContext: Comparación mejorada:", {
-          notificationChatId: chatId,
-          selectedChatId: selectedConversation?.id,
-          notificationUserId: userId,
-          selectedUserId: selectedConversation?.user_id,
-          isCurrentChat: isCurrentChat,
-        });
-
-        // Solo si es la conversación actual, agregar mensaje directamente
-        if (isCurrentChat) {
-          const newMessage = {
-            id: generateUniqueMessageId(),
-            chatId: chatId,
-            content: message || "Nuevo mensaje",
-            sender: userId,
-            created_at: timestamp || new Date().toISOString(),
-            isRead: false,
-            messageType: "text" as const,
-          };
-
-          console.log("✅ ChatContext: Agregando mensaje desde evento personalizado:", newMessage);
-          setMessages((prev) => {
-            console.log("🔍 ChatContext: Mensajes antes de agregar:", prev.length);
-            const newMessages = [...prev, newMessage];
-            console.log("🔍 ChatContext: Mensajes después de agregar:", newMessages.length);
-            // Actualizar cache
-            messagesCache.current.set(chatId, newMessages);
-            return newMessages;
-          });
-          console.log("✅ ChatContext: Mensaje agregado desde evento personalizado");
-        } else {
-          console.log("❌ ChatContext: NO es la conversación actual o no hay conversación seleccionada");
-          console.log("❌ ChatContext: selectedConversation:", selectedConversation);
-          console.log("❌ ChatContext: chatId de notificación:", chatId);
+        // Verificaciones de duplicados
+        if (isNotificationProcessed(notificationId)) {
+          console.log("⚠️ ChatContext: Notificación ya procesada, ignorando");
+          return;
+        }
+        if (isMessageDuplicate(chatId, message, userId)) {
+          console.log("⚠️ ChatContext: Mensaje duplicado en cache, ignorando");
+          return;
+        }
+        if (isCurrentMessageDuplicate(message, userId, chatId)) {
+          console.log("⚠️ ChatContext: Mensaje duplicado en estado actual, ignorando");
+          return;
         }
 
-        // Actualizar contador de no leídos (por chatId o por userId)
-        setConversations((prev) => {
-          return prev.map((conv) => {
-            if (conv.id === chatId || conv.user_id === userId) {
-              const updatedConv = {
-                ...conv,
-                unread: conv.unread + 1,
-                lastMessage: {
-                  content: message || "Nuevo mensaje",
-                  created_at: timestamp || new Date().toISOString(),
-                  sender: userId,
-                },
-                updatedAt: timestamp || new Date().toISOString(),
-              };
+        // Marcar como procesada
+        processedNotifications.current.add(notificationId);
 
-              // Actualizar cache si es la conversación actual
-              if (selectedConversation && (conv.id === chatId || conv.user_id === userId)) {
-                const cachedMessages = messagesCache.current.get(conv.id);
-                if (cachedMessages) {
-                  const newMessage = {
-                    id: generateUniqueMessageId(),
-                    chatId: chatId,
-                    content: message || "Nuevo mensaje",
-                    sender: userId,
-                    created_at: timestamp || new Date().toISOString(),
-                    isRead: false,
-                    messageType: "text" as const,
-                  };
-                  const updatedMessages = [...cachedMessages, newMessage];
-                  messagesCache.current.set(conv.id, updatedMessages);
-                  console.log("🔄 ChatContext: Cache actualizado con nuevo mensaje para conversación:", conv.id);
-                }
-              }
+        // Crear el mensaje y actualizar cache para cualquier chat
+        const newMessage = createNewMessage(chatId, message, userId, timestamp);
+        console.log("🎯 ChatContext: Mensaje creado:", newMessage);
+        addMessageToCurrentChat(newMessage, chatId, userId);
 
-              return updatedConv;
-            }
-            return conv;
-          });
-        });
+        // Actualizar contador de no leídos
+        updateConversationUnreadCount(chatId, userId, message, timestamp);
       }
     };
 
@@ -740,89 +469,158 @@ export function ChatProvider({ children }: ChatProviderProps) {
   // FUNCIONES PRINCIPALES
   // ========================================================================
 
+  // Funciones auxiliares para selectConversation
+  const validateChatId = (chatId: string): boolean => {
+    if (!chatId || typeof chatId !== "string" || chatId.trim() === "") {
+      handleError(new Error("ID de conversación inválido"), "ID de conversación inválido");
+      return false;
+    }
+    return true;
+  };
+
+  const isSameConversation = (chatId: string): boolean => {
+    return selectedConversation?.id === chatId;
+  };
+
+  const cleanupPreviousSelection = () => {
+    if (selectConversationTimeoutRef.current) {
+      clearTimeout(selectConversationTimeoutRef.current);
+    }
+    if (isLoadingMessages.current) {
+      isLoadingMessages.current = false;
+    }
+  };
+
+  const loadMessagesFromCache = (chatId: string): boolean => {
+    let cachedMessages = messagesCache.current.get(chatId);
+    let foundChatId = chatId;
+    
+    // Si no hay mensajes para este chatId, buscar por user_id de la conversación
+    if (!cachedMessages || cachedMessages.length === 0) {
+      console.log(`🔍 ChatContext: No hay cache para chatId ${chatId}, buscando por user_id`);
+      
+      const conversation = conversations.find(conv => conv.id === chatId);
+      if (conversation && conversation.user_id) {
+        // Buscar en todas las conversaciones para encontrar la que corresponde a este userId
+        for (const [cachedChatId, messages] of messagesCache.current.entries()) {
+          const cachedConversation = conversations.find(conv => conv.id === cachedChatId);
+          if (cachedConversation && cachedConversation.user_id === conversation.user_id) {
+            cachedMessages = messages;
+            foundChatId = cachedChatId;
+            console.log(`🔍 ChatContext: Encontrado cache por userId: ${cachedChatId}`);
+            break;
+          }
+        }
+      }
+    }
+    
+    if (cachedMessages && cachedMessages.length > 0) {
+      setMessages(cachedMessages);
+      setIsSelectingConversation(false);
+      console.log(`📦 ChatContext: Mensajes cargados desde cache para chat ${foundChatId}: ${cachedMessages.length} mensajes`);
+      console.log(`📦 ChatContext: Último mensaje en cache:`, cachedMessages[cachedMessages.length - 1]);
+      console.log(`📦 ChatContext: Todos los mensajes en cache:`, cachedMessages.map(m => ({ content: m.content, created_at: m.created_at })));
+      return true;
+    }
+    console.log(`📦 ChatContext: No hay mensajes en cache para chat ${chatId}`);
+    console.log(`📦 ChatContext: Cache disponible para chats:`, Array.from(messagesCache.current.keys()));
+    return false;
+  };
+
+  const loadMessagesFromAPI = async (chatId: string, conversation: any) => {
+    try {
+      isLoadingMessages.current = true;
+      console.log(`🔄 ChatContext: Cargando mensajes para conversación: ${conversation.name}`);
+      
+      const data = await ChatService.getMessages(chatId);
+      messagesCache.current.set(chatId, data);
+      setMessages(data);
+      console.log(`✅ ChatContext: Seleccionada conversación: ${conversation.name} con ${data.length} mensajes`);
+    } catch (err) {
+      console.error("❌ ChatContext: Error cargando mensajes:", err);
+      
+      // Si es un error de throttling, intentar usar cache si está disponible
+      if (err instanceof Error && err.message.includes("ThrottlerException")) {
+        console.log("⚠️ ChatContext: Error de throttling detectado, intentando usar cache...");
+        const cachedMessages = messagesCache.current.get(chatId);
+        if (cachedMessages && cachedMessages.length > 0) {
+          setMessages(cachedMessages);
+          console.log(`📦 ChatContext: Usando mensajes en cache después de throttling: ${cachedMessages.length} mensajes`);
+          console.log(`📦 ChatContext: Último mensaje en cache:`, cachedMessages[cachedMessages.length - 1]);
+          return;
+        } else {
+          console.log("⚠️ ChatContext: No hay cache disponible, mostrando mensaje de error");
+        }
+      }
+      
+      setMessages([]);
+      handleError(err, "Error cargando mensajes");
+    } finally {
+      setIsSelectingConversation(false);
+      isLoadingMessages.current = false;
+    }
+  };
+
   /**
    * Selecciona una conversación y carga sus mensajes
    * @param chatId - ID de la conversación a seleccionar
    */
+  const validateSelectionRequest = (chatId: string): boolean => {
+    if (!validateChatId(chatId)) return false;
+    if (isSameConversation(chatId)) return false;
+    if (isSelectingConversation) {
+      console.log("⚠️ ChatContext: Ya hay una selección en progreso, ignorando...");
+      return false;
+    }
+    if (isLoadingMessages.current) {
+      console.log("⚠️ ChatContext: Ya hay una carga de mensajes en progreso, ignorando selección...");
+      return false;
+    }
+    return true;
+  };
+
+  const cleanupSelectionState = () => {
+    if (selectConversationTimeoutRef.current) {
+      clearTimeout(selectConversationTimeoutRef.current);
+      selectConversationTimeoutRef.current = null;
+    }
+    if (processedNotifications.current.size > 100) {
+      processedNotifications.current.clear();
+    }
+    cleanupPreviousSelection();
+    setIsSelectingConversation(true);
+  };
+
   const selectConversation = useCallback(
     async (chatId: string) => {
       console.log("🔍 ChatContext: Solicitud de selección de conversación:", chatId);
 
-    // Validar que chatId no esté vacío
-      if (!chatId || typeof chatId !== "string" || chatId.trim() === "") {
-        handleError(new Error("ID de conversación inválido"), "ID de conversación inválido");
-        return;
-      }
-
-      // Evitar seleccionar la misma conversación
-      if (selectedConversation && selectedConversation.id === chatId) {
-        console.log("⏭️ ChatContext: Ya está seleccionada esta conversación, saltando...");
-        return;
-      }
-
-      // Cancelar timeout anterior si existe
-      if (selectConversationTimeoutRef.current) {
-        clearTimeout(selectConversationTimeoutRef.current);
-        console.log("⏭️ ChatContext: Cancelando selección anterior");
-      }
-
-      // Evitar múltiples llamadas simultáneas
-      if (isSelectingConversation) {
-        console.log("⏭️ ChatContext: Ya se está seleccionando una conversación, saltando...");
-        return;
-      }
+      if (!validateSelectionRequest(chatId)) return;
+      cleanupSelectionState();
 
       const conversation = conversations.find((c) => c.id === chatId);
-
-    if (!conversation) {
-        console.error("❌ ChatContext: Conversación no encontrada con ID:", chatId);
-        console.log(
-          "🔍 ChatContext: IDs disponibles:",
-          conversations.map((c) => c.id),
-        );
+      if (!conversation) {
         handleError(new Error("Conversación no encontrada"), "Conversación no encontrada");
+        setIsSelectingConversation(false);
         return;
       }
 
       try {
-        setIsSelectingConversation(true);
-        console.log("✅ ChatContext: Seleccionando conversación:", conversation.name);
-
-      // Actualizar la conversación seleccionada inmediatamente
         setSelectedConversation(conversation);
-
-      // Verificar si ya tenemos los mensajes en cache
-        const cachedMessages = messagesCache.current.get(chatId);
-        if (cachedMessages) {
-          console.log("📨 ChatContext: Usando mensajes del cache para:", chatId);
-          setMessages(cachedMessages);
+        if (loadMessagesFromCache(chatId)) {
           setIsSelectingConversation(false);
           return;
         }
 
-
-      // Si no hay cache, cargar mensajes con delay
         selectConversationTimeoutRef.current = setTimeout(async () => {
-          try {
-            console.log("📨 ChatContext: Cargando mensajes desde API para:", chatId);
-            const data = await ChatService.getMessages(chatId);
-
-          // Guardar en cache
-            messagesCache.current.set(chatId, data);
-            setMessages(data);
-
-          console.log(`✅ ChatContext: Seleccionada conversación: ${conversation.name} con ${data.length} mensajes`);
-          } catch (err) {
-            console.error("❌ ChatContext: Error cargando mensajes:", err);
-            // Si hay error, mostrar mensajes vacíos
-            setMessages([]);
-            handleError(err, "Error cargando mensajes");
-          } finally {
+          if (isLoadingMessages.current) {
+            console.log("⚠️ ChatContext: Ya hay una carga de mensajes en progreso, cancelando...");
             setIsSelectingConversation(false);
+            return;
           }
-        }, 500); // Delay de 500ms para evitar llamadas excesivas
-
-    } catch (err) {
+          await loadMessagesFromAPI(chatId, conversation);
+        }, 1000);
+      } catch (err) {
         console.error("❌ ChatContext: Error seleccionando conversación:", err);
         handleError(err, "Error seleccionando conversación");
         setIsSelectingConversation(false);
@@ -847,6 +645,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
    */
   const sendMessage = useCallback(
     async (content: string, messageType: SendMessageData["messageType"] = "text") => {
+      // PROTECCIÓN: Evitar envíos simultáneos
+      if (isSendingMessage.current) {
+        console.log("⏭️ ChatContext: Ya se está enviando un mensaje, saltando...");
+        return;
+      }
+
       if (!selectedConversation) {
         handleError(new Error("No hay conversación seleccionada"), "Selecciona una conversación primero");
         return;
@@ -858,6 +662,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
       }
 
       try {
+        isSendingMessage.current = true;
         setLoading(true);
         clearError();
 
@@ -871,12 +676,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
           messageType,
         };
 
-
-      console.log('🔍 ChatContext: messageData creado:', messageData);
+        console.log("🔍 ChatContext: messageData creado:", messageData);
 
         const newMessage = await ChatService.sendMessage(selectedConversation.id, messageData);
 
-      // Validar que el mensaje se haya creado correctamente
+        // Validar que el mensaje se haya creado correctamente
         if (!newMessage) {
           throw new Error("No se pudo enviar el mensaje");
         }
@@ -885,66 +689,65 @@ export function ChatProvider({ children }: ChatProviderProps) {
         console.log("🔍 ChatContext: Estructura del mensaje:", {
           id: newMessage.id,
           content: newMessage.content,
-          sender: newMessage.sender,
+          sender_id: (newMessage as any).sender_id,
           created_at: newMessage.created_at,
           isRead: newMessage.isRead,
         });
 
-      // Asegurar que el sender sea el ID del usuario actual
+        // Asegurar que el sender_id sea el ID del usuario actual
         const token = getAuthToken();
         if (token) {
           try {
             const decoded = jwtDecode(token);
             const currentUserId = decoded.sub;
-            newMessage.sender = currentUserId || newMessage.sender;
-            console.log("🔍 ChatContext: Estableciendo sender a:", currentUserId);
+            newMessage.sender_id = currentUserId ?? newMessage.sender_id;
           } catch (error) {
             console.error("Error decodificando token:", error);
           }
-
+        }
 
         // Agregar mensaje a la lista local inmediatamente
         setMessages((prev) => {
           // Validar que el mensaje tenga contenido antes de agregarlo
           const messageToAdd = {
             ...newMessage,
-            content: newMessage.content || content, // Asegurar que siempre tenga contenido
+            content: newMessage.content ?? content, // Asegurar que siempre tenga contenido
           };
 
-        console.log('🔍 ChatContext: Mensaje a agregar:', {
+          console.log("🔍 ChatContext: Mensaje a agregar:", {
             id: messageToAdd.id,
             content: messageToAdd.content,
             originalContent: content,
             hasContent: !!messageToAdd.content,
-            contentLength: messageToAdd.content?.length || 0,
+            contentLength: messageToAdd.content?.length ?? 0,
           });
 
-        const updatedMessages = [...prev, messageToAdd];
+          const updatedMessages = [...prev, messageToAdd];
           console.log("🔍 ChatContext: Mensajes actualizados:", updatedMessages.length);
 
-        // Actualizar cache
+          // Actualizar cache
           if (selectedConversation) {
             messagesCache.current.set(selectedConversation.id, updatedMessages);
           }
 
-        return updatedMessages;
+          return updatedMessages;
         });
 
-      // Actualizar la conversación con el último mensaje
+        // Actualizar la conversación con el último mensaje
         setConversations((prev) => {
           const updatedConversations = prev.map((conv) => {
             if (conv.id === selectedConversation.id) {
               const updatedConv = {
                 ...conv,
                 lastMessage: {
-                  content: newMessage.content || content,
-                  created_at: newMessage.created_at || new Date().toISOString(),
-                  sender: newMessage.sender || "me",
+                  content: newMessage.content ?? content,
+                  created_at: newMessage.created_at ?? new Date().toISOString(),
+                  sender_id: newMessage.sender_id ?? getCurrentUserId() ?? "unknown",
                 },
-                updatedAt: newMessage.created_at || new Date().toISOString(),
+                updatedAt: newMessage.created_at ?? new Date().toISOString(),
               };
 
-            // Actualizar cache con el mensaje enviado
+              // Actualizar cache con el mensaje enviado
               const cachedMessages = messagesCache.current.get(conv.id);
               if (cachedMessages) {
                 const updatedMessages = [...cachedMessages, newMessage];
@@ -957,34 +760,20 @@ export function ChatProvider({ children }: ChatProviderProps) {
             return conv;
           });
 
-
-        return updatedConversations;
+          return updatedConversations;
         });
 
-
-      // Actualizar estadísticas - Comentado temporalmente para evitar "Too Many Requests"
+        // Actualizar estadísticas - Comentado temporalmente para evitar "Too Many Requests"
         // await refreshStats();
-
-      // TEMPORALMENTE DESHABILITADO para evitar "Too Many Requests"
-        // Refrescar solo las conversaciones para actualizar la lista (NO los mensajes para evitar sobrescribir)
-        /*
-      setTimeout(async () => {
-        try {
-          await refreshConversations(); // Solo refrescar la lista de conversaciones
-        } catch (error) {
-          console.error('Error refrescando conversaciones después de envío:', error);
-        }
-      }, 1000);
-      */
 
         toast.success("Mensaje enviado");
         console.log(`✅ Mensaje enviado a ${selectedConversation.name}:`, newMessage.content);
-
       } catch (err) {
         console.error("❌ ChatContext: Error enviando mensaje:", err);
         handleError(err, "Error enviando mensaje");
       } finally {
         setLoading(false);
+        isSendingMessage.current = false; // Limpiar flag de envío
       }
     },
     [selectedConversation, handleError, clearError],
@@ -1055,10 +844,12 @@ export function ChatProvider({ children }: ChatProviderProps) {
    * Cargar datos iniciales al montar el componente
    */
   useEffect(() => {
+    console.log("🔍 ChatContext: useEffect de inicialización ejecutado");
+
     const initializeChat = async () => {
-      // Evitar múltiples inicializaciones
-      if (isInitializing) {
-        console.log("⏭️ ChatContext: Ya se está inicializando, saltando...");
+      // PROTECCIÓN ROBUSTA: Evitar múltiples inicializaciones
+      if (hasInitialized.current || isLoadingConversations.current) {
+        console.log("⏭️ ChatContext: Ya se inicializó o está cargando, saltando...");
         return;
       }
 
@@ -1073,7 +864,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
       }
 
       try {
-        setIsInitializing(true);
+        // MARCAR INMEDIATAMENTE para evitar llamadas concurrentes
+        hasInitialized.current = true;
 
         console.log("🔄 ChatContext: Cargando conversaciones iniciales...");
 
@@ -1084,13 +876,14 @@ export function ChatProvider({ children }: ChatProviderProps) {
       } catch (error) {
         console.error("❌ ChatContext: Error inicializando chat:", error);
         setIsConnected(false);
-      } finally {
-        setIsInitializing(false);
+        hasInitialized.current = false; // Permitir reintento en caso de error
       }
     };
 
     // Ejecutar inmediatamente
     initializeChat();
+
+    console.log("🔍 ChatContext: useEffect de inicialización configurado");
   }, []); // Sin dependencias para evitar re-ejecuciones
 
   /**
@@ -1124,24 +917,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
       // TEMPORALMENTE DESHABILITADO para evitar "Too Many Requests"
       console.log("⚠️ ChatContext: Health check deshabilitado temporalmente");
       setIsConnected(true); // Asumir conectado
-
-      /*
-      try {
-        const connected = await ChatService.healthCheck();
-        setIsConnected(connected);
-      } catch (error) {
-        console.warn('Health check falló:', error);
-        setIsConnected(false);
-      }
-      */
     };
 
     // Solo verificar una vez al cargar, no periódicamente
     checkConnection();
-
-    // Comentado temporalmente para evitar "Too Many Requests"
-    // const interval = setInterval(checkConnection, 30000);
-    // return () => clearInterval(interval);
   }, []);
 
   // ========================================================================
@@ -1163,30 +942,30 @@ export function ChatProvider({ children }: ChatProviderProps) {
       isConnected,
       isMarkingAsRead,
 
-    // Estado WebSocket
+      // Estado WebSocket
       websocketConnected,
       websocketNotifications,
       totalWebSocketNotifications,
       unreadWebSocketNotifications,
       notificationsReceived,
 
-    // Acciones principales
+      // Acciones principales
       selectConversation,
       sendMessage,
       markAsRead,
 
-    // Acciones de refresh
+      // Acciones de refresh
       refreshConversations,
       loadConversations,
       refreshMessages,
       refreshStats,
 
-    // Utilidades
+      // Utilidades
       getSelectedConversationInitials,
       hasUnreadMessages,
       getTotalUnreadCount,
 
-    // Acciones WebSocket
+      // Acciones WebSocket
       connectWebSocket,
       disconnectWebSocket,
       updateWebSocketAssignedChats,

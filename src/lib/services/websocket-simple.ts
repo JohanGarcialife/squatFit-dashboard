@@ -35,7 +35,7 @@ class WebSocketSimple {
    * Verificar si ya está conectado o conectando
    */
   private isAlreadyConnecting(): boolean {
-    return this.isConnecting || (this.socket && this.socket.connected);
+    return this.isConnecting || (this.socket?.connected ?? false);
   }
 
   /**
