@@ -2,6 +2,25 @@ import { io, Socket } from "socket.io-client";
 
 import { getAuthToken } from "@/lib/auth/auth-utils";
 
+interface NotificationData {
+  message: string;
+  userId: string;
+  chatId: string;
+  timestamp: string;
+}
+
+interface Notification {
+  type: string;
+  data: NotificationData;
+}
+
+interface Callbacks {
+  onNotification?: (notification: Notification) => void;
+  onConnected?: (data: unknown) => void;
+  onError?: (error: Error) => void;
+  onDisconnect?: (reason: string) => void;
+}
+
 /**
  * Servicio WebSocket SIMPLE basado EXACTAMENTE en test-hamlet-quick.js
  * Sin complicaciones, sin múltiples implementaciones, sin conflictos
@@ -20,12 +39,7 @@ class WebSocketSimple {
   private notificationsReceived = 0;
   private keepAliveInterval: NodeJS.Timeout | null = null;
   private isConnecting = false;
-  private callbacks: {
-    onNotification?: (notification: any) => void;
-    onConnected?: (data: any) => void;
-    onError?: (error: any) => void;
-    onDisconnect?: (reason: string) => void;
-  } = {};
+  private callbacks: Callbacks = {};
 
   constructor() {
     console.log("🔧 WebSocketSimple: Inicializado");
@@ -116,7 +130,7 @@ class WebSocketSimple {
   /**
    * Conectar EXACTAMENTE como en el script funcional
    */
-  async connect(callbacks?: any): Promise<void> {
+  async connect(callbacks?: Callbacks): Promise<void> {
     // Evitar múltiples conexiones simultáneas
     if (this.isAlreadyConnecting()) {
       console.log("⚠️ WebSocketSimple: Ya conectado o conectando...");
@@ -137,7 +151,13 @@ class WebSocketSimple {
     } catch (error) {
       console.error("❌ Error conectando:", error);
       this.isConnecting = false;
-      this.callbacks.onError?.(error);
+      if (this.callbacks.onError) {
+        if (error instanceof Error) {
+          this.callbacks.onError(error);
+        } else {
+          this.callbacks.onError(new Error(String(error)));
+        }
+      }
       throw error;
     }
   }
