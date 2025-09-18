@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { removeAuthTokenFromCookies } from "@/lib/auth/cookie-utils";
+import { removeAuthTokenFromCookies } from "@/lib/auth/server-utils";
 import { AuthService } from "@/lib/services/auth-service";
 
 export async function POST() {

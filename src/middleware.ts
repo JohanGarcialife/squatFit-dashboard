@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { isAuthenticated } from "@/lib/auth/auth-utils";
+import { isAuthenticatedServer } from "@/lib/auth/server-auth";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Verificar autenticación para rutas protegidas
-  const authenticated = await isAuthenticated();
+  const authenticated = await isAuthenticatedServer();
 
   if (!authenticated) {
     // Redirigir a login si no hay token válido

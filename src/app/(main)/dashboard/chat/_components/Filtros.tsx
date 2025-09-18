@@ -1,45 +1,89 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 
+import { useChat } from "@/contexts/chat-context";
+
+/**
+ * Componente Filtros - Filtros para las conversaciones
+ *
+ * Este componente permite filtrar las conversaciones por diferentes
+ * criterios como etiquetas, estado de lectura, etc.
+ *
+ * Características:
+ * - Filtros por etiquetas
+ * - Filtro de mensajes no leídos
+ * - Filtro de conversaciones activas
+ * - Contadores dinámicos
+ */
 export default function Filtros() {
+  const { conversations } = useChat();
   const [activeFilter, setActiveFilter] = useState("Todos");
+
+  // Calcular contadores para cada filtro
+  const filterCounts = useMemo(() => {
+    const counts = {
+      Todos: conversations.length,
+      "No leídos": conversations.filter((conv) => conv.unread > 0).length,
+      Activos: conversations.filter((conv) => conv.isActive).length,
+    };
+
+    // Contar por etiquetas únicas
+    const allTags = conversations.flatMap((conv) => conv.tags ?? []);
+    const uniqueTags = [...new Set(allTags)];
+
+    uniqueTags.forEach((tag) => {
+      (counts as any)[tag] = conversations.filter((conv) => conv.tags && conv.tags.includes(tag)).length;
+    });
+
+    return counts;
+  }, [conversations]);
+
+  // Obtener todas las etiquetas únicas
+  const allTags = useMemo(() => {
+    const tags = conversations.flatMap((conv) => conv.tags ?? []);
+    return [...new Set(tags)].sort();
+  }, [conversations]);
+
+  // Filtros disponibles
+  const filters = [
+    { id: "Todos", label: "Todos", count: filterCounts.Todos },
+    { id: "No leídos", label: "No leídos", count: filterCounts["No leídos"] },
+    { id: "Activos", label: "Activos", count: filterCounts["Activos"] },
+    ...allTags.map((tag) => ({
+      id: tag,
+      label: tag,
+      count: (filterCounts as any)[tag] ?? 0,
+    })),
+  ];
+
   return (
     <div>
       <div className="flex w-full flex-row gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {/* botones */}
-        <button
-          className={`rounded-full px-4 py-2 whitespace-nowrap ${
-            activeFilter === "Todos" ? "bg-primary text-white" : "bg-gray-200 text-gray-700"
-          }`}
-          onClick={() => setActiveFilter("Todos")}
-        >
-          Todos
-        </button>
-        <button
-          className={`rounded-full px-4 py-2 whitespace-nowrap ${
-            activeFilter === "Miembros" ? "bg-primary text-white" : "bg-gray-200 text-gray-700"
-          }`}
-          onClick={() => setActiveFilter("Miembros")}
-        >
-          Miembros
-        </button>
-        <button
-          className={`rounded-full px-4 py-2 whitespace-nowrap ${
-            activeFilter === "Soporte" ? "bg-primary text-white" : "bg-gray-200 text-gray-700"
-          }`}
-          onClick={() => setActiveFilter("Soporte")}
-        >
-          Soporte
-        </button>
-        <button
-          className={`rounded-full px-4 py-2 whitespace-nowrap ${
-            activeFilter === "Ventas" ? "bg-primary text-white" : "bg-gray-200 text-gray-700"
-          }`}
-          onClick={() => setActiveFilter("Ventas")}
-        >
-          Ventas
-        </button>
+        {filters.map((filter) => (
+          <button
+            key={filter.id}
+            className={`flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-all duration-150 ${
+              activeFilter === filter.id
+                ? "bg-primary text-white shadow-sm"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+            }`}
+            onClick={() => setActiveFilter(filter.id)}
+          >
+            <span>{filter.label}</span>
+            {filter.count > 0 && (
+              <span
+                className={`rounded-full px-1.5 py-0.5 text-xs ${
+                  activeFilter === filter.id
+                    ? "bg-white/20 text-white"
+                    : "bg-gray-300 text-gray-600 dark:bg-gray-600 dark:text-gray-300"
+                }`}
+              >
+                {filter.count > 99 ? "99+" : filter.count}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
     </div>
   );

@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
 
-import { getCurrentUser } from "@/lib/auth/auth-utils";
+import { isTokenValid, decodeToken } from "@/lib/auth/jwt-utils";
+import { getAuthTokenFromCookies } from "@/lib/auth/server-utils";
 
 export async function GET() {
   try {
-    const user = await getCurrentUser();
+    const token = await getAuthTokenFromCookies();
+
+    if (!token || !isTokenValid(token)) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    const user = decodeToken(token);
 
     if (!user) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json({ error: "Token inválido" }, { status: 401 });
     }
 
     // Devolver información segura del usuario

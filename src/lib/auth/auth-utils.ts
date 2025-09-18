@@ -1,15 +1,15 @@
-import { getAuthTokenFromCookies, getAuthTokenFromClient } from "./cookie-utils";
+import { getAuthTokenFromClient, getAuthTokenFromStorage } from "./cookie-utils";
 import { isTokenValid, decodeToken } from "./jwt-utils";
 import { AuthToken } from "./types";
 
-// Utilidades principales de autenticación
-export const isAuthenticated = async (): Promise<boolean> => {
-  const token = await getAuthTokenFromCookies();
+// Utilidades principales de autenticación (CLIENTE)
+export const isAuthenticated = (): boolean => {
+  const token = getAuthToken();
   return token ? isTokenValid(token) : false;
 };
 
-export const getCurrentUser = async (): Promise<AuthToken | null> => {
-  const token = await getAuthTokenFromCookies();
+export const getCurrentUser = (): AuthToken | null => {
+  const token = getAuthToken();
   if (!token || !isTokenValid(token)) return null;
 
   return decodeToken(token);
@@ -17,7 +17,11 @@ export const getCurrentUser = async (): Promise<AuthToken | null> => {
 
 // Utilidades para el cliente
 export const getAuthToken = (): string | null => {
-  return getAuthTokenFromClient();
+  // Intentar obtener de cookies primero, luego de localStorage
+  const cookieToken = getAuthTokenFromClient();
+  if (cookieToken) return cookieToken;
+
+  return getAuthTokenFromStorage();
 };
 
 // Re-exportar tipos y utilidades principales

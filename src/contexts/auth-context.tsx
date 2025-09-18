@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 
 import { toast } from "sonner";
 
+import { setAuthTokenInStorage, removeAuthTokenFromStorage, getAuthTokenFromStorage } from "@/lib/auth/cookie-utils";
 import { User } from "@/lib/auth/types";
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -20,26 +22,43 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const login = async (email: string, password: string) => {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      setLoading(true);
 
-    const data = await response.json();
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!response.ok) {
-      throw new Error(data.error ?? "Error de autenticación");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Error de autenticación");
+      }
+
+      // Guardar token en localStorage y contexto
+      if (data.token) {
+        setAuthTokenInStorage(data.token);
+        setToken(data.token);
+        console.log("✅ Token guardado en localStorage y contexto");
+      }
+
+      // El token se guarda automáticamente en cookies HttpOnly
+      await refreshUser();
+      toast.success("Inicio de sesión exitoso");
+
+      // Redirección inmediata sin delays innecesarios
+      router.push("/dashboard");
+    } catch (error) {
+      setLoading(false);
+      throw error;
     }
-
-    // El token se guarda automáticamente en cookies HttpOnly
-    await refreshUser();
-    toast.success("Inicio de sesión exitoso");
-    router.push("/dashboard");
   };
 
   const logout = async () => {
@@ -53,6 +72,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error en logout:", error);
     } finally {
+      // Limpiar token de localStorage y contexto
+      removeAuthTokenFromStorage();
+      setToken(null);
       setUser(null);
       router.push("/auth/v1/login");
     }
@@ -77,10 +99,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // Cargar token desde localStorage al inicializar
+    const storedToken = getAuthTokenFromStorage();
+    if (storedToken) {
+      setToken(storedToken);
+    }
     refreshUser();
   }, []);
 
-  const contextValue = useMemo(() => ({ user, loading, login, logout, refreshUser }), [user, loading]);
+  const contextValue = useMemo(() => ({ user, token, loading, login, logout, refreshUser }), [user, token, loading]);
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }

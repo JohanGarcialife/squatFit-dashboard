@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Configuración del cliente HTTP
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cyrc2g3zra-no.a.run.app",
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app",
   timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT ?? "10000"),
   headers: {
     "Content-Type": "application/json",

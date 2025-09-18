@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { setAuthTokenInCookies } from "@/lib/auth/cookie-utils";
+import { setAuthTokenInCookies } from "@/lib/auth/server-utils";
 import { LoginRequest } from "@/lib/auth/types";
 import { AuthService } from "@/lib/services/auth-service";
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     // Guardar token en cookie HttpOnly
     await setAuthTokenInCookies(result.token);
 
-    // Devolver respuesta sin el token (por seguridad)
+    // Devolver respuesta con el token para que el cliente lo guarde en localStorage
     return NextResponse.json({
       success: true,
       message: "Login exitoso",
@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
         email,
         // No incluir información sensible
       },
+      token: result.token, // Incluir token para localStorage
     });
   } catch (error) {
     console.error("Error en login:", error);
