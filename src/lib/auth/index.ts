@@ -5,3 +5,4 @@ export * from "./auth-utils";
 
 // Solo exportar funciones del cliente de cookie-utils
 export { getAuthTokenFromClient } from "./cookie-utils";
+export * from "./server-auth";

@@ -1,10 +1,18 @@
 import Image from "next/image";
-
-import { Command } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/auth";
+import { isAuthenticatedServer } from "@/lib/auth";
 
-export default function LoginV1() {
+export const dynamic = "force-dynamic";
+
+export default async function LoginV1() {
+  const isAuthenticated = await isAuthenticatedServer();
+
+  if (isAuthenticated) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="flex h-dvh">
       <div className="bg-primary hidden lg:block lg:w-1/3">
