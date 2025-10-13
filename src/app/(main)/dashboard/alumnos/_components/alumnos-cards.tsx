@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, UserCheck, Activity, Smartphone } from "lucide-react";
+import { Users, UserCheck, Activity } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,10 +23,10 @@ export function AlumnosCards() {
     }
 
     const total = alumnosData.length;
-    const activos = alumnosData.filter(a => a.status?.toLowerCase() === 'active').length;
-    const usuarios = alumnosData.filter(a => a.role?.toLowerCase() === 'user').length;
-    const coaches = alumnosData.filter(a => a.role?.toLowerCase() === 'coach').length;
-    const admins = alumnosData.filter(a => a.role?.toLowerCase() === 'admin').length;
+    const activos = alumnosData.filter((a) => a.status.toLowerCase() === "active").length;
+    const usuarios = alumnosData.filter((a) => a.role.toLowerCase() === "user").length;
+    const coaches = alumnosData.filter((a) => a.role.toLowerCase() === "coach").length;
+    const admins = alumnosData.filter((a) => a.role.toLowerCase() === "admin").length;
 
     return { total, activos, usuarios, coaches, admins };
   }, [alumnosData]);
@@ -36,9 +36,7 @@ export function AlumnosCards() {
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Alumnos Totales</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.total}
-          </CardTitle>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">{stats.total}</CardTitle>
           <CardAction>
             <Badge variant="outline">
               <Users className="size-4" />
@@ -47,9 +45,7 @@ export function AlumnosCards() {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Base de alumnos registrados
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Base de alumnos registrados</div>
           <div className="text-muted-foreground">
             {stats.activos} activos, {stats.total - stats.activos} inactivos
           </div>
@@ -59,20 +55,16 @@ export function AlumnosCards() {
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Alumnos Activos</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.activos}
-          </CardTitle>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">{stats.activos}</CardTitle>
           <CardAction>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
               <UserCheck className="size-4" />
               {stats.total > 0 ? Math.round((stats.activos / stats.total) * 100) : 0}% activos
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Usuarios con sesión activa
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Usuarios con sesión activa</div>
           <div className="text-muted-foreground">Iniciaron sesión recientemente</div>
         </CardFooter>
       </Card>
@@ -80,20 +72,16 @@ export function AlumnosCards() {
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Usuarios</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.usuarios}
-          </CardTitle>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">{stats.usuarios}</CardTitle>
           <CardAction>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
               <Users className="size-4" />
               Alumnos
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Rol: Usuario
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Rol: Usuario</div>
           <div className="text-muted-foreground">
             {stats.total > 0 ? Math.round((stats.usuarios / stats.total) * 100) : 0}% del total
           </div>
@@ -107,16 +95,14 @@ export function AlumnosCards() {
             {stats.coaches + stats.admins}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+            <Badge variant="outline" className="border-purple-200 bg-purple-50 text-purple-700">
               <Activity className="size-4" />
               Staff
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Coaches y Administradores
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Coaches y Administradores</div>
           <div className="text-muted-foreground">
             {stats.coaches} coaches, {stats.admins} admins
           </div>
@@ -125,4 +111,3 @@ export function AlumnosCards() {
     </div>
   );
 }
-

@@ -46,11 +46,13 @@ http://localhost:3000/dashboard/cursos
 ### 3. **Verificar el funcionamiento:**
 
 #### ✅ Al cargar la página:
+
 - Se deberían ver las cards con estadísticas dinámicas
 - La tabla debería mostrar los cursos desde la API
 - Si no hay cursos, debería mostrar "No hay cursos disponibles"
 
 #### ✅ Crear un curso:
+
 1. Click en botón "Nuevo Curso"
 2. Llenar el formulario
 3. Click en "Crear Curso"
@@ -59,6 +61,7 @@ http://localhost:3000/dashboard/cursos
 6. Las estadísticas deberían actualizarse
 
 #### ✅ Editar un curso:
+
 1. Click en menú (⋮) de un curso
 2. Click en "Editar curso"
 3. Modificar campos
@@ -67,6 +70,7 @@ http://localhost:3000/dashboard/cursos
 6. Cambios reflejados en la tabla
 
 #### ✅ Eliminar un curso:
+
 1. Click en menú (⋮) de un curso
 2. Click en "Eliminar curso"
 3. Confirmar en el dialog
@@ -75,6 +79,7 @@ http://localhost:3000/dashboard/cursos
 6. Estadísticas actualizadas
 
 #### ✅ Cambiar estado:
+
 1. Click en menú (⋮) de un curso
 2. Click en "Activar" o "Desactivar"
 3. Toast de éxito
@@ -105,22 +110,28 @@ http://localhost:3000/dashboard/cursos
 ### Errores comunes:
 
 #### ❌ Error: "Network Error" o "Failed to fetch"
+
 **Causa:** La API no está disponible o la URL es incorrecta  
 **Solución:**
+
 1. Verificar que `NEXT_PUBLIC_API_URL` esté configurada correctamente
 2. Verificar que la API esté corriendo
 3. Verificar CORS en el backend
 
 #### ❌ Error: "Unauthorized" o 401
+
 **Causa:** Token de autenticación no válido  
 **Solución:**
+
 1. Verificar que estés autenticado (login)
 2. Verificar que el token se esté enviando correctamente
 3. Ver `src/lib/services/cursos-service.ts` → `getDefaultHeaders`
 
 #### ❌ Error: "La petición tardó demasiado tiempo"
+
 **Causa:** Timeout de 10 segundos excedido  
 **Solución:**
+
 1. Verificar la velocidad de la conexión
 2. Aumentar `REQUEST_TIMEOUT` en `cursos-service.ts`
 3. Verificar que el backend no esté lento
@@ -195,25 +206,30 @@ http://localhost:3000/dashboard/cursos
 ## 🚀 OPTIMIZACIONES IMPLEMENTADAS
 
 ### 1. **React Query Cache**
+
 - Los datos se guardan en caché por 1 minuto
 - Refetch automático cada 5 minutos
 - Refetch al volver a la ventana
 
 ### 2. **Optimistic Updates**
+
 - Al crear/editar/eliminar, la UI se actualiza inmediatamente
 - Si falla, se revierte automáticamente (rollback)
 
 ### 3. **Loading States**
+
 - Skeleton loaders en las cards
 - Spinner en la tabla
 - Botones deshabilitados durante peticiones
 
 ### 4. **Error Handling**
+
 - Toast notifications para errores
 - Mensajes de error descriptivos
 - Retry automático en algunos casos
 
 ### 5. **TypeScript**
+
 - 100% tipado
 - Validación con Zod
 - Autocompletado completo
@@ -222,13 +238,13 @@ http://localhost:3000/dashboard/cursos
 
 ## 📦 ARCHIVOS INVOLUCRADOS
 
-| Archivo | Propósito |
-|---------|-----------|
-| `src/lib/services/cursos-service.ts` | Cliente de API |
-| `src/hooks/use-cursos.ts` | React Query hooks |
-| `src/app/(main)/dashboard/cursos/_components/` | Componentes UI |
-| `.env.local` | Variables de entorno |
-| `src/lib/auth/auth-utils.ts` | Utilidades de autenticación |
+| Archivo                                        | Propósito                   |
+| ---------------------------------------------- | --------------------------- |
+| `src/lib/services/cursos-service.ts`           | Cliente de API              |
+| `src/hooks/use-cursos.ts`                      | React Query hooks           |
+| `src/app/(main)/dashboard/cursos/_components/` | Componentes UI              |
+| `.env.local`                                   | Variables de entorno        |
+| `src/lib/auth/auth-utils.ts`                   | Utilidades de autenticación |
 
 ---
 
@@ -262,4 +278,3 @@ http://localhost:3000/dashboard/cursos
 
 **¡La integración está completa! 🎉**  
 **Ahora puedes empezar a probar el CRUD de cursos conectado a la API real.**
-

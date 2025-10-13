@@ -5,14 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -50,13 +43,7 @@ export interface EditUserFormProps {
 // COMPONENTE
 // ============================================================================
 
-export function EditUserForm({
-  userId,
-  defaultValues,
-  onSubmit,
-  onCancel,
-  isLoading = false,
-}: EditUserFormProps) {
+export function EditUserForm({ userId, defaultValues, onSubmit, onCancel, isLoading = false }: EditUserFormProps) {
   const form = useForm<EditUserFormData>({
     resolver: zodResolver(editUserFormSchema),
     defaultValues: {
@@ -75,7 +62,7 @@ export function EditUserForm({
   const handleSubmit = (data: EditUserFormData) => {
     // Filtrar campos vacíos para enviar solo lo que cambió
     const filteredData = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== "" && value !== undefined)
+      Object.entries(data).filter(([_, value]) => value !== "" && value !== undefined),
     ) as EditUserFormData;
 
     onSubmit(filteredData);
@@ -124,12 +111,7 @@ export function EditUserForm({
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="email" 
-                    placeholder="usuario@example.com" 
-                    {...field} 
-                    disabled={isLoading} 
-                  />
+                  <Input type="email" placeholder="usuario@example.com" {...field} disabled={isLoading} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -211,12 +193,7 @@ export function EditUserForm({
             <FormItem>
               <FormLabel>URL de Foto de Perfil</FormLabel>
               <FormControl>
-                <Input
-                  type="url"
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  {...field}
-                  disabled={isLoading}
-                />
+                <Input type="url" placeholder="https://ejemplo.com/imagen.jpg" {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -225,12 +202,7 @@ export function EditUserForm({
 
         {/* Botones de Acción */}
         <div className="flex justify-end gap-3 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isLoading}
-          >
+          <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
             Cancelar
           </Button>
           <Button type="submit" disabled={isLoading}>
@@ -241,4 +213,3 @@ export function EditUserForm({
     </Form>
   );
 }
-

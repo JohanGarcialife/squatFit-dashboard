@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { 
-  EntrenadoresService, 
-  CreateEntrenadorDto, 
+import {
+  EntrenadoresService,
+  CreateEntrenadorDto,
   GetEntrenadoresParams,
-  UpdateEntrenadorDto
+  UpdateEntrenadorDto,
 } from "@/lib/services/entrenadores-service";
 import { Entrenador } from "@/app/(main)/dashboard/entrenadores/_components/schema";
 
@@ -72,10 +72,10 @@ export function useCreateEntrenador() {
     onSuccess: (newEntrenador) => {
       // Invalidar queries para refrescar la lista
       queryClient.invalidateQueries({ queryKey: entrenadoresKeys.lists() });
-      
+
       // Opcional: Agregar el nuevo entrenador al cache
       queryClient.setQueryData(entrenadoresKeys.detail(newEntrenador.id), newEntrenador);
-      
+
       toast.success("Entrenador creado exitosamente", { id: "create-entrenador" });
     },
     onError: (error: Error) => {
@@ -96,22 +96,22 @@ export function useUpdateEntrenador() {
       EntrenadoresService.updateEntrenador(id, data),
     onMutate: async ({ id }) => {
       toast.loading("Actualizando entrenador...", { id: `update-entrenador-${id}` });
-      
+
       // Cancelar queries en curso para evitar conflictos
       await queryClient.cancelQueries({ queryKey: entrenadoresKeys.detail(id) });
-      
+
       // Guardar snapshot del estado anterior (para rollback)
       const previousEntrenador = queryClient.getQueryData<Entrenador>(entrenadoresKeys.detail(id));
-      
+
       return { previousEntrenador, id };
     },
     onSuccess: (updatedEntrenador, { id }) => {
       // Actualizar cache del entrenador específico
       queryClient.setQueryData(entrenadoresKeys.detail(id), updatedEntrenador);
-      
+
       // Invalidar lista para refrescar
       queryClient.invalidateQueries({ queryKey: entrenadoresKeys.lists() });
-      
+
       toast.success("Entrenador actualizado exitosamente", { id: `update-entrenador-${id}` });
     },
     onError: (error: Error, { id }, context) => {
@@ -119,7 +119,7 @@ export function useUpdateEntrenador() {
       if (context?.previousEntrenador) {
         queryClient.setQueryData(entrenadoresKeys.detail(id), context.previousEntrenador);
       }
-      
+
       console.error("Error actualizando entrenador:", error);
       toast.error(error.message || "Error al actualizar el entrenador", { id: `update-entrenador-${id}` });
     },
@@ -136,31 +136,31 @@ export function useDeleteEntrenador() {
     mutationFn: (id: string) => EntrenadoresService.deleteEntrenador(id),
     onMutate: async (id) => {
       toast.loading("Eliminando entrenador...", { id: `delete-entrenador-${id}` });
-      
+
       // Cancelar queries relacionadas
       await queryClient.cancelQueries({ queryKey: entrenadoresKeys.detail(id) });
       await queryClient.cancelQueries({ queryKey: entrenadoresKeys.lists() });
-      
+
       // Guardar snapshot para rollback
       const previousEntrenadores = queryClient.getQueryData<Entrenador[]>(entrenadoresKeys.lists());
-      
+
       // Optimistic update: remover de la lista
       if (previousEntrenadores) {
         queryClient.setQueryData(
           entrenadoresKeys.lists(),
-          previousEntrenadores.filter((entrenador) => entrenador.id !== id)
+          previousEntrenadores.filter((entrenador) => entrenador.id !== id),
         );
       }
-      
+
       return { previousEntrenadores };
     },
     onSuccess: (_, id) => {
       // Remover del cache individual
       queryClient.removeQueries({ queryKey: entrenadoresKeys.detail(id) });
-      
+
       // Invalidar lista
       queryClient.invalidateQueries({ queryKey: entrenadoresKeys.lists() });
-      
+
       toast.success("Entrenador eliminado exitosamente", { id: `delete-entrenador-${id}` });
     },
     onError: (error: Error, id, context) => {
@@ -168,7 +168,7 @@ export function useDeleteEntrenador() {
       if (context?.previousEntrenadores) {
         queryClient.setQueryData(entrenadoresKeys.lists(), context.previousEntrenadores);
       }
-      
+
       console.error("Error eliminando entrenador:", error);
       toast.error(error.message || "Error al eliminar el entrenador", { id: `delete-entrenador-${id}` });
     },
@@ -187,23 +187,23 @@ export function useToggleEntrenadorStatus() {
     onMutate: async ({ id, status }) => {
       const action = status === "Activo" ? "Activando" : "Desactivando";
       toast.loading(`${action} entrenador...`, { id: `toggle-entrenador-${id}` });
-      
+
       // Cancelar queries para evitar conflictos
       await queryClient.cancelQueries({ queryKey: entrenadoresKeys.lists() });
       await queryClient.cancelQueries({ queryKey: entrenadoresKeys.detail(id) });
-      
+
       // Guardar snapshot de la lista
       const previousEntrenadores = queryClient.getQueryData<Entrenador[]>(entrenadoresKeys.lists());
-      
+
       return { previousEntrenadores, id };
     },
     onSuccess: (response, { id, status }) => {
       // Invalidar lista para refrescar con datos del servidor
       queryClient.invalidateQueries({ queryKey: entrenadoresKeys.lists() });
-      
+
       const action = status === "Activo" ? "activado" : "desactivado";
       toast.success(`Entrenador ${action} exitosamente`, { id: `toggle-entrenador-${id}` });
-      
+
       console.log("📨 Respuesta del servidor:", response);
     },
     onError: (error: Error, { id }, context) => {
@@ -211,7 +211,7 @@ export function useToggleEntrenadorStatus() {
       if (context?.previousEntrenadores) {
         queryClient.setQueryData(entrenadoresKeys.lists(), context.previousEntrenadores);
       }
-      
+
       console.error("Error cambiando estado del entrenador:", error);
       toast.error(error.message || "Error al cambiar el estado", { id: `toggle-entrenador-${id}` });
     },
@@ -247,4 +247,3 @@ export function useInvalidateEntrenadores() {
     queryClient.invalidateQueries({ queryKey: entrenadoresKeys.all });
   };
 }
-

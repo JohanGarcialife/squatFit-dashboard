@@ -9,9 +9,10 @@ Este documento detalla la integración completa del API de entrenadores en el da
 ## 🔌 Endpoint Implementado
 
 ### GET - Obtener todos los entrenadores
+
 - **URL**: `/api/v1/admin-panel/coaches`
 - **Método**: GET
-- **Headers**: 
+- **Headers**:
   - `Authorization: Bearer {token}`
   - `Content-Type: application/json`
 
@@ -34,6 +35,7 @@ interface EntrenadorAPI {
 ```
 
 ### Ejemplo de respuesta:
+
 ```json
 {
   "id": "fb4cd61c-06ed-403d-a7f8-3fa9a5b5b68d",
@@ -53,8 +55,9 @@ interface EntrenadorAPI {
 ## 🏗️ Archivos Modificados
 
 ### 1. Schema (`schema.ts`)
+
 - **Ubicación**: `src/app/(main)/dashboard/entrenadores/_components/schema.ts`
-- **Cambios**: 
+- **Cambios**:
   - Actualizado para coincidir con la estructura del API
   - Agregado tipo `EntrenadorUI` para la interfaz de usuario
   - Mapeo de `user_status` a `status` ("Activo" | "Inactivo")
@@ -80,6 +83,7 @@ export type EntrenadorUI = Entrenador & {
 ```
 
 ### 2. Servicio (`entrenadores-service.ts`)
+
 - **Ubicación**: `src/lib/services/entrenadores-service.ts`
 - **Cambios**:
   - Actualizado endpoint a `/api/v1/admin-panel/coaches`
@@ -94,6 +98,7 @@ static async getEntrenadores(params?: GetEntrenadoresParams): Promise<Entrenador
 ```
 
 ### 3. Hook (`use-entrenadores.ts`)
+
 - **Ubicación**: `src/hooks/use-entrenadores.ts`
 - **Nuevo archivo creado**
 - **Funcionalidad**:
@@ -105,6 +110,7 @@ static async getEntrenadores(params?: GetEntrenadoresParams): Promise<Entrenador
   - `useToggleEntrenadorStatus()`: Cambiar estado del entrenador
 
 ### 4. Tabla (`entrenadores-table.tsx`)
+
 - **Ubicación**: `src/app/(main)/dashboard/entrenadores/_components/entrenadores-table.tsx`
 - **Cambios**:
   - Implementado `useEntrenadores()` para obtener datos del API
@@ -117,7 +123,7 @@ const { data: entrenadoresData, isLoading, error } = useEntrenadores();
 
 const entrenadores = useMemo<EntrenadorUI[]>(() => {
   if (!entrenadoresData) return [];
-  
+
   return entrenadoresData.map((entrenador) => ({
     ...entrenador,
     status: entrenador.user_status === 1 ? "Activo" : "Inactivo",
@@ -128,6 +134,7 @@ const entrenadores = useMemo<EntrenadorUI[]>(() => {
 ```
 
 ### 5. Columnas (`columns.entrenadores.tsx`)
+
 - **Ubicación**: `src/app/(main)/dashboard/entrenadores/_components/columns.entrenadores.tsx`
 - **Cambios**:
   - Actualizado tipo a `EntrenadorUI`
@@ -141,12 +148,14 @@ const entrenadores = useMemo<EntrenadorUI[]>(() => {
 ## 🎯 Características Implementadas
 
 ### ✅ Integración Completa del API
+
 - [x] Conexión con endpoint `/api/v1/admin-panel/coaches`
 - [x] Autenticación con token Bearer
 - [x] Manejo de errores y estados de carga
 - [x] Transformación de datos del API a formato UI
 
 ### ✅ Funcionalidades de UI
+
 - [x] Visualización de entrenadores en tabla
 - [x] Búsqueda global
 - [x] Avatar con fallback a iniciales
@@ -154,6 +163,7 @@ const entrenadores = useMemo<EntrenadorUI[]>(() => {
 - [x] Acciones: Ver perfil, enviar email, llamar, editar, activar/desactivar, eliminar
 
 ### ✅ React Query Integration
+
 - [x] Caché de datos (5 minutos)
 - [x] Refetch automático
 - [x] Optimistic updates
@@ -165,6 +175,7 @@ const entrenadores = useMemo<EntrenadorUI[]>(() => {
 ## 🔄 Mapeo de Datos
 
 ### Del API a la UI:
+
 ```typescript
 API Response          →  UI Display
 -------------------------------------------
@@ -182,6 +193,7 @@ user_status (0|1)    →  status ("Activo" | "Inactivo")
 ## 📝 Próximos Pasos (Pendientes)
 
 ### Funcionalidades por implementar:
+
 1. **Crear Entrenador**: Formulario y modal para crear nuevo entrenador
 2. **Editar Entrenador**: Formulario y modal para editar información
 3. **Eliminar Entrenador**: Confirmación y eliminación
@@ -205,6 +217,7 @@ user_status (0|1)    →  status ("Activo" | "Inactivo")
 4. **Verificar en consola**: Logs de EntrenadoresService
 
 ### Logs esperados:
+
 ```
 🔍 EntrenadoresService: Obteniendo entrenadores...
 ✅ EntrenadoresService: X entrenadores obtenidos
@@ -244,4 +257,3 @@ npm run lint
 - **Schema**: `src/app/(main)/dashboard/entrenadores/_components/schema.ts`
 - **Tabla**: `src/app/(main)/dashboard/entrenadores/_components/entrenadores-table.tsx`
 - **Columnas**: `src/app/(main)/dashboard/entrenadores/_components/columns.entrenadores.tsx`
-

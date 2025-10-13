@@ -10,13 +10,9 @@ import { useChat } from "@/contexts/chat-context";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 import { formatMessageTime, getInitials } from "@/lib/services/chat-service";
 
-
-
 export default function Chat() {
   const { conversations, selectedConversation, selectConversation, loading, error, isConnected, getTotalUnreadCount } =
     useChat();
-
-
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -78,8 +74,6 @@ export default function Chat() {
 
   // Manejar selección de conversación con debounce
   const handleSelectConversation = (chatId: string) => {
-  
-
     if (!chatId || typeof chatId !== "string" || chatId.trim() === "") {
       return;
     }

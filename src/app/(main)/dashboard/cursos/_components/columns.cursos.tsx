@@ -34,11 +34,23 @@ const getStatusBadge = (status: string) => {
 const getLevelBadge = (level: string) => {
   switch (level) {
     case "Principiante":
-      return <Badge variant="outline" className="border-blue-300 text-blue-700">{level}</Badge>;
+      return (
+        <Badge variant="outline" className="border-blue-300 text-blue-700">
+          {level}
+        </Badge>
+      );
     case "Intermedio":
-      return <Badge variant="outline" className="border-orange-300 text-orange-700">{level}</Badge>;
+      return (
+        <Badge variant="outline" className="border-orange-300 text-orange-700">
+          {level}
+        </Badge>
+      );
     case "Avanzado":
-      return <Badge variant="outline" className="border-red-300 text-red-700">{level}</Badge>;
+      return (
+        <Badge variant="outline" className="border-red-300 text-red-700">
+          {level}
+        </Badge>
+      );
     default:
       return <Badge variant="outline">{level}</Badge>;
   }
@@ -74,7 +86,7 @@ export const cursosColumns: ColumnDef<Curso>[] = [
     cell: ({ row }) => (
       <div className="flex flex-col">
         <span className="font-medium">{row.original.name}</span>
-        <span className="text-xs text-muted-foreground line-clamp-1">{row.original.description}</span>
+        <span className="text-muted-foreground line-clamp-1 text-xs">{row.original.description}</span>
       </div>
     ),
     enableHiding: false,
@@ -122,14 +134,15 @@ export const cursosColumns: ColumnDef<Curso>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title="Precio" />,
     cell: ({ row }) => (
       <span className="font-medium tabular-nums">
-        {row.original.currency}{row.original.price.toFixed(2)}
+        {row.original.currency}
+        {row.original.price.toFixed(2)}
       </span>
     ),
   },
   {
     accessorKey: "duration",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Duración" />,
-    cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.duration}</span>,
+    cell: ({ row }) => <span className="text-muted-foreground text-sm">{row.original.duration}</span>,
   },
   {
     id: "actions",
@@ -146,9 +159,7 @@ export const cursosColumns: ColumnDef<Curso>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(curso.id)}
-            >
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(curso.id)}>
               Copiar ID del curso
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -175,4 +186,3 @@ export const cursosColumns: ColumnDef<Curso>[] = [
     },
   },
 ];
-

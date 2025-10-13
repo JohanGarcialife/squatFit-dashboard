@@ -55,16 +55,22 @@ const MessageInput = React.memo(
       typingTimeoutRef.current = setTimeout(() => setIsTyping(hasContent), 300);
     }, []);
 
-    const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSendMessage(e);
-      }
-    }, [handleSendMessage]);
+    const handleKeyPress = useCallback(
+      (e: React.KeyboardEvent) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          handleSendMessage(e);
+        }
+      },
+      [handleSendMessage],
+    );
 
-    useEffect(() => () => {
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    }, []);
+    useEffect(
+      () => () => {
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      },
+      [],
+    );
 
     return (
       <form onSubmit={handleSendMessage} className="flex items-center gap-2 border-t p-4">
@@ -182,9 +188,13 @@ export default function Conversation() {
     return (
       <div className="flex h-full items-center justify-center rounded-lg bg-white dark:bg-gray-900/50">
         <div className="text-center">
-          <div className="mb-4 text-gray-400"><MoreHorizontal size={48} /></div>
+          <div className="mb-4 text-gray-400">
+            <MoreHorizontal size={48} />
+          </div>
           <p className="mb-2 text-lg font-semibold text-gray-500 dark:text-gray-400">Selecciona una conversación</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500">Elige un chat de la lista para comenzar a conversar</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            Elige un chat de la lista para comenzar a conversar
+          </p>
         </div>
       </div>
     );
@@ -207,18 +217,32 @@ export default function Conversation() {
         <div className="flex items-center gap-2">
           {!isConnected && (
             <div className="flex items-center gap-1 text-xs text-red-500">
-              <div className="h-2 w-2 rounded-full bg-red-500" />Sin conexión
+              <div className="h-2 w-2 rounded-full bg-red-500" />
+              Sin conexión
             </div>
           )}
           <Button variant="ghost" size="sm" onClick={() => {}} className="text-xs">
             Probar Límites
           </Button>
-          <Button variant="ghost" size="sm" onClick={async () => {
-            if (selectedConversation) {
-              try { await ChatService.getMessages(selectedConversation.id); } catch (error) { console.error("Error obteniendo todos los mensajes:", error); }
-            }
-          }} className="text-xs">Obtener Todos</Button>
-          <Button variant="ghost" size="icon"><MoreHorizontal className="text-gray-500 dark:text-gray-400" /></Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={async () => {
+              if (selectedConversation) {
+                try {
+                  await ChatService.getMessages(selectedConversation.id);
+                } catch (error) {
+                  console.error("Error obteniendo todos los mensajes:", error);
+                }
+              }
+            }}
+            className="text-xs"
+          >
+            Obtener Todos
+          </Button>
+          <Button variant="ghost" size="icon">
+            <MoreHorizontal className="text-gray-500 dark:text-gray-400" />
+          </Button>
         </div>
       </header>
 
@@ -245,16 +269,25 @@ export default function Conversation() {
                 <React.Fragment key={message.stableKey}>
                   {showDateSeparator && (
                     <div className="my-2 flex justify-center">
-                      <span className="rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-300">{formatDate(message.created_at)}</span>
+                      <span className="rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-300">
+                        {formatDate(message.created_at)}
+                      </span>
                     </div>
                   )}
-                  <div className={clsx("flex items-end gap-2", { "justify-end": message.isFromMe, "justify-start": !message.isFromMe })}>
-                    <div className={clsx("max-w-2xl rounded-lg p-3 transition-all duration-200", {
-                      "bg-primary text-primary-foreground rounded-br-none": message.isFromMe,
-                      "bg-muted text-foreground rounded-bl-none": !message.isFromMe,
-                      "ring-2 ring-blue-300 dark:ring-blue-600": message.isRecent && !message.isFromMe,
-                      "opacity-90": !message.isRead && !message.isFromMe,
-                    })}>
+                  <div
+                    className={clsx("flex items-end gap-2", {
+                      "justify-end": message.isFromMe,
+                      "justify-start": !message.isFromMe,
+                    })}
+                  >
+                    <div
+                      className={clsx("max-w-2xl rounded-lg p-3 transition-all duration-200", {
+                        "bg-primary text-primary-foreground rounded-br-none": message.isFromMe,
+                        "bg-muted text-foreground rounded-bl-none": !message.isFromMe,
+                        "ring-2 ring-blue-300 dark:ring-blue-600": message.isRecent && !message.isFromMe,
+                        "opacity-90": !message.isRead && !message.isFromMe,
+                      })}
+                    >
                       <div className="text-sm break-words whitespace-pre-wrap">
                         {(() => {
                           const isExpanded = expandedMessages.has(message.id);
@@ -289,7 +322,10 @@ export default function Conversation() {
                               {preview}
                               {hasMore && (
                                 <div className="mt-2">
-                                  <button onClick={() => toggleMessageExpansion(message.id)} className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
+                                  <button
+                                    onClick={() => toggleMessageExpansion(message.id)}
+                                    className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                  >
                                     Ver más <ChevronDown className="h-3 w-3" />
                                   </button>
                                 </div>
@@ -318,13 +354,23 @@ export default function Conversation() {
           </div>
         )}
         {showScrollButton && (
-          <button onClick={scrollToBottom} className="bg-primary hover:bg-primary/90 fixed right-8 bottom-20 z-10 flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200" title="Ir al final">
+          <button
+            onClick={scrollToBottom}
+            className="bg-primary hover:bg-primary/90 fixed right-8 bottom-20 z-10 flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200"
+            title="Ir al final"
+          >
             <ChevronDown className="h-5 w-5" />
           </button>
         )}
       </main>
 
-      <MessageInput selectedConversation={selectedConversation} sendMessage={sendMessage} loading={loading} isConnected={isConnected} inputRef={inputRef} />
+      <MessageInput
+        selectedConversation={selectedConversation}
+        sendMessage={sendMessage}
+        loading={loading}
+        isConnected={isConnected}
+        inputRef={inputRef}
+      />
     </div>
   );
 }

@@ -25,6 +25,7 @@ React NO permite que un input cambie de un estado a otro durante su ciclo de vid
 ### **1. Valores por defecto en formularios** ✅
 
 **ANTES:**
+
 ```typescript
 export const createCursoDefaultValues: Partial<CreateCursoFormValues> = {
   currency: "€",
@@ -35,15 +36,16 @@ export const createCursoDefaultValues: Partial<CreateCursoFormValues> = {
 ```
 
 **AHORA:**
+
 ```typescript
 export const createCursoDefaultValues: CreateCursoFormValues = {
-  name: "",              // ✅ String vacío, NO undefined
-  description: "",       // ✅ String vacío, NO undefined
-  instructor: "",        // ✅ String vacío, NO undefined
-  category: "",          // ✅ String vacío, NO undefined
+  name: "", // ✅ String vacío, NO undefined
+  description: "", // ✅ String vacío, NO undefined
+  instructor: "", // ✅ String vacío, NO undefined
+  category: "", // ✅ String vacío, NO undefined
   level: "Principiante", // ✅ Valor por defecto
-  price: 0,              // ✅ Número, NO undefined
-  duration: "",          // ✅ String vacío, NO undefined
+  price: 0, // ✅ Número, NO undefined
+  duration: "", // ✅ String vacío, NO undefined
   status: "En Desarrollo",
   currency: "€",
 };
@@ -56,6 +58,7 @@ export const createCursoDefaultValues: CreateCursoFormValues = {
 ### **2. Formulario de edición con valores iniciales** ✅
 
 **ANTES:**
+
 ```typescript
 const form = useForm<CreateCursoFormValues>({
   resolver: zodResolver(createCursoFormSchema),
@@ -64,6 +67,7 @@ const form = useForm<CreateCursoFormValues>({
 ```
 
 **AHORA:**
+
 ```typescript
 const form = useForm<CreateCursoFormValues>({
   resolver: zodResolver(createCursoFormSchema),
@@ -80,6 +84,7 @@ const form = useForm<CreateCursoFormValues>({
 Para evitar re-renders innecesarios que podrían causar el error:
 
 **ANTES:**
+
 ```typescript
 const handleEdit = (curso: Curso) => { ... };
 const handleDelete = (curso: Curso) => { ... };
@@ -91,6 +96,7 @@ const columns = useMemo<ColumnDef<Curso>[]>(() => {
 ```
 
 **AHORA:**
+
 ```typescript
 const handleEdit = useCallback((curso: Curso) => { ... }, []);
 const handleDelete = useCallback((curso: Curso) => { ... }, []);
@@ -108,15 +114,19 @@ const columns = useMemo<ColumnDef<Curso>[]>(() => {
 ## 🎯 POR QUÉ ESTAS CORRECCIONES FUNCIONAN
 
 ### **1. Todos los inputs siempre controlados**
+
 Los formularios ahora siempre tienen valores definidos desde el inicio:
+
 - Strings vacíos `""` en lugar de `undefined`
 - Números `0` en lugar de `undefined`
 - Valores por defecto para selects
 
 ### **2. Sin cambios de estado durante el ciclo de vida**
+
 Con `defaultValues` definidos, React Hook Form nunca intenta cambiar de uncontrolled → controlled.
 
 ### **3. Re-renders optimizados**
+
 `useCallback` asegura que las funciones no se recreen en cada render, evitando que los componentes hijos se re-rendericen innecesariamente.
 
 ---
@@ -124,21 +134,25 @@ Con `defaultValues` definidos, React Hook Form nunca intenta cambiar de uncontro
 ## 🧪 CÓMO VERIFICAR LA SOLUCIÓN
 
 ### **Paso 1: Refresca el navegador**
+
 ```
 F5 o Ctrl + R
 ```
 
 ### **Paso 2: Abre la consola**
+
 ```
 F12 → Console
 ```
 
 ### **Paso 3: Ve a la página de cursos**
+
 ```
 http://localhost:3000/dashboard/cursos
 ```
 
 ### **Paso 4: Verifica que NO hay errores**
+
 ```
 ✅ NO debería aparecer el warning "changing uncontrolled input"
 ```
@@ -220,6 +234,7 @@ Después de estas correcciones:
 > **"En React, un input debe ser SIEMPRE controlado o SIEMPRE no controlado, nunca cambiar entre ambos estados."**
 
 Para lograrlo:
+
 - ✅ Define valores iniciales para TODOS los campos
 - ✅ Usa string vacío `""` en lugar de `undefined`
 - ✅ Usa `?? ""` o `|| ""` como fallback
@@ -228,4 +243,3 @@ Para lograrlo:
 ---
 
 **¡El error ahora está completamente corregido!** 🎉
-

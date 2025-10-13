@@ -20,7 +20,6 @@ export const useWebSocketSimple = () => {
 
   // Callback para notificaciones
   const handleNotification = useCallback((notification: any) => {
-
     setNotifications((prev) => [notification, ...prev]);
     setNotificationsReceived((prev) => prev + 1);
 
@@ -57,7 +56,6 @@ export const useWebSocketSimple = () => {
         detail: notification,
       });
       window.dispatchEvent(customEvent);
-    
     } else {
       toast.info("🔔 Nueva notificación", {
         description: notification.data?.message ?? "Notificación recibida",
@@ -129,11 +127,8 @@ export const useWebSocketSimple = () => {
 
   // Conexión automática con delay para asegurar que el token esté disponible
   useEffect(() => {
-  
-
     // Delay reducido para conexión más rápida
     const timer = setTimeout(() => {
-      
       connect();
     }, 500); // 500ms de delay (reducido de 2000ms)
 

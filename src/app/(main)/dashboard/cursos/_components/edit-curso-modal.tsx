@@ -4,13 +4,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useUpdateCurso } from "@/hooks/use-cursos";
 import { Curso } from "./schema";
 
@@ -56,7 +50,7 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
         id: curso.id,
         data: values,
       });
-      
+
       // Cerrar modal
       onOpenChange(false);
     } catch (error) {
@@ -92,4 +86,3 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
     </Dialog>
   );
 }
-

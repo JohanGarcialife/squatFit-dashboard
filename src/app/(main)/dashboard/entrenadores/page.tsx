@@ -6,10 +6,9 @@ export default function Page() {
     <div className="@container/main flex flex-col gap-4 md:gap-6">
       {/* Tarjetas de resumen */}
       <EntrenadoresCards />
-      
+
       {/* Tabla de entrenadores */}
       <EntrenadoresTable />
     </div>
   );
 }
-

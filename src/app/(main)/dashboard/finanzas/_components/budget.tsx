@@ -174,4 +174,3 @@ const Budget: React.FC = () => {
 };
 
 export default Budget;
-

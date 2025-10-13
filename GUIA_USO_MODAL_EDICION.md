@@ -3,17 +3,20 @@
 ## 🚀 Inicio Rápido
 
 ### Paso 1: Importar el Modal
+
 ```tsx
 import { EditUserModal } from "@/components/modals/edit-user-modal";
 ```
 
 ### Paso 2: Agregar Estado
+
 ```tsx
 const [editingUser, setEditingUser] = useState<YourUserType | null>(null);
 const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 ```
 
 ### Paso 3: Crear Handlers
+
 ```tsx
 const handleEditUser = (user: YourUserType) => {
   setEditingUser(user);
@@ -27,30 +30,32 @@ const handleCloseEditModal = () => {
 ```
 
 ### Paso 4: Renderizar el Modal
+
 ```tsx
-{editingUser && (
-  <EditUserModal
-    open={isEditModalOpen}
-    onOpenChange={handleCloseEditModal}
-    userId={editingUser.user_id}
-    userType="coach" // o "alumno" o "usuario"
-    defaultValues={{
-      firstName: editingUser.firstName,
-      lastName: editingUser.lastName,
-      email: editingUser.email,
-      phone_number: editingUser.phone,
-      description: editingUser.description,
-      profile_picture: editingUser.profile_picture,
-    }}
-  />
-)}
+{
+  editingUser && (
+    <EditUserModal
+      open={isEditModalOpen}
+      onOpenChange={handleCloseEditModal}
+      userId={editingUser.user_id}
+      userType="coach" // o "alumno" o "usuario"
+      defaultValues={{
+        firstName: editingUser.firstName,
+        lastName: editingUser.lastName,
+        email: editingUser.email,
+        phone_number: editingUser.phone,
+        description: editingUser.description,
+        profile_picture: editingUser.profile_picture,
+      }}
+    />
+  );
+}
 ```
 
 ### Paso 5: Conectar con Botón/Acción
+
 ```tsx
-<Button onClick={() => handleEditUser(usuario)}>
-  Editar Usuario
-</Button>
+<Button onClick={() => handleEditUser(usuario)}>Editar Usuario</Button>
 ```
 
 ---
@@ -86,10 +91,10 @@ export function CoachesPage() {
       {/* Lista de coaches */}
       {coaches?.map((coach) => (
         <div key={coach.id}>
-          <span>{coach.firstName} {coach.lastName}</span>
-          <Button onClick={() => handleEditCoach(coach)}>
-            Editar
-          </Button>
+          <span>
+            {coach.firstName} {coach.lastName}
+          </span>
+          <Button onClick={() => handleEditCoach(coach)}>Editar</Button>
         </div>
       ))}
 
@@ -139,7 +144,7 @@ export function AlumnosPage() {
   return (
     <div>
       {/* Tu tabla o lista de alumnos */}
-      
+
       {/* Modal de edición */}
       {editingAlumno && (
         <EditUserModal
@@ -177,16 +182,14 @@ export const getColumns = (handlers) => [
     id: "actions",
     cell: ({ row }) => {
       const user = row.original;
-      
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost">Acciones</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => handlers.onEdit?.(user)}>
-              Editar
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handlers.onEdit?.(user)}>Editar</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -205,15 +208,12 @@ export function UserTable() {
     setIsEditModalOpen(true);
   };
 
-  const columns = useMemo(
-    () => getColumns({ onEdit: handleEditUser }),
-    [handleEditUser]
-  );
+  const columns = useMemo(() => getColumns({ onEdit: handleEditUser }), [handleEditUser]);
 
   return (
     <>
       <DataTable columns={columns} data={users} />
-      
+
       {editingUser && (
         <EditUserModal
           open={isEditModalOpen}
@@ -241,19 +241,20 @@ export function UserTable() {
 
 ```typescript
 interface EditUserModalProps {
-  open: boolean;                    // Estado del modal
-  onOpenChange: (open: boolean) => void;  // Callback para cerrar
-  userId: string;                   // ID del usuario a editar (REQUERIDO)
-  userType?: "coach" | "alumno" | "usuario";  // Tipo (afecta título)
-  defaultValues?: {                 // Valores iniciales del formulario
+  open: boolean; // Estado del modal
+  onOpenChange: (open: boolean) => void; // Callback para cerrar
+  userId: string; // ID del usuario a editar (REQUERIDO)
+  userType?: "coach" | "alumno" | "usuario"; // Tipo (afecta título)
+  defaultValues?: {
+    // Valores iniciales del formulario
     firstName?: string;
     lastName?: string;
     email?: string;
     username?: string;
     phone_number?: string;
-    birth?: string;                 // Formato: YYYY-MM-DD
+    birth?: string; // Formato: YYYY-MM-DD
     description?: string;
-    profile_picture?: string;       // URL
+    profile_picture?: string; // URL
   };
 }
 ```
@@ -263,6 +264,7 @@ interface EditUserModalProps {
 ## 🔄 Actualización Automática
 
 El modal automáticamente:
+
 1. ✅ Invalida las queries de entrenadores
 2. ✅ Invalida las queries de alumnos
 3. ✅ Invalida las queries de usuarios
@@ -276,6 +278,7 @@ El modal automáticamente:
 ## 📝 Valores por Defecto
 
 ### Solo campos que quieras editar:
+
 ```tsx
 defaultValues={{
   firstName: user.firstName,
@@ -285,6 +288,7 @@ defaultValues={{
 ```
 
 ### Todos los campos:
+
 ```tsx
 defaultValues={{
   firstName: user.firstName,
@@ -313,20 +317,23 @@ defaultValues={{
 ## 🎯 Tipos de Usuario
 
 ### Coach:
+
 ```tsx
-userType="coach"
+userType = "coach";
 // Título: "Editar Entrenador"
 ```
 
 ### Alumno:
+
 ```tsx
-userType="alumno"
+userType = "alumno";
 // Título: "Editar Alumno"
 ```
 
 ### Usuario Genérico:
+
 ```tsx
-userType="usuario"
+userType = "usuario";
 // Título: "Editar Usuario"
 ```
 
@@ -335,18 +342,22 @@ userType="usuario"
 ## 🐛 Troubleshooting
 
 ### El modal no se abre:
+
 - Verifica que `open={isEditModalOpen}` esté en `true`
 - Verifica que `editingUser` no sea `null`
 
 ### La tabla no se actualiza:
+
 - El modal invalida automáticamente las queries
 - Verifica que uses React Query para obtener los datos
 
 ### Los valores no se cargan:
+
 - Verifica que `defaultValues` tenga los campos correctos
 - Verifica que `userId` sea el correcto
 
 ### Error de validación:
+
 - Email debe ser formato válido
 - URL de foto debe ser formato válido
 - Username debe tener mínimo 3 caracteres
@@ -374,7 +385,7 @@ export function MyComponent() {
   return (
     <>
       <Button onClick={() => setOpen(true)}>Editar</Button>
-      
+
       <EditUserModal
         open={open}
         onOpenChange={setOpen}
@@ -391,4 +402,3 @@ export function MyComponent() {
 ```
 
 ¡Eso es todo! El modal se encarga del resto. 🎉
-

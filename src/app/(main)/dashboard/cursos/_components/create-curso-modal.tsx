@@ -3,13 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCreateCurso } from "@/hooks/use-cursos";
 
 import { CreateCursoForm } from "./create-curso-form";
@@ -31,7 +25,7 @@ export function CreateCursoModal({ open, onOpenChange }: CreateCursoModalProps) 
   const handleSubmit = async (values: CreateCursoFormValues) => {
     try {
       await createCursoMutation.mutateAsync(values);
-      
+
       // Cerrar modal y resetear formulario
       onOpenChange(false);
       form.reset();
@@ -66,4 +60,3 @@ export function CreateCursoModal({ open, onOpenChange }: CreateCursoModalProps) 
     </Dialog>
   );
 }
-

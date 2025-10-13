@@ -11,4 +11,3 @@ export const isAuthenticatedServer = async (): Promise<boolean> => {
     return false;
   }
 };
-

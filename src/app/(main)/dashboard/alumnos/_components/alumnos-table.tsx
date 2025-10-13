@@ -19,7 +19,7 @@ export function AlumnosTable() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [editingUser, setEditingUser] = useState<AlumnoUI | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+
   // Obtener alumnos del API
   const { data: alumnosData, isLoading, error } = useAlumnos({ page: 1, limit: 1000 });
 
@@ -38,32 +38,33 @@ export function AlumnosTable() {
   const alumnos = useMemo<AlumnoUI[]>(() => {
     // Validar que alumnosData exista y sea un array
     if (!alumnosData || !Array.isArray(alumnosData)) return [];
-    
+
     return alumnosData.map((alumno) => ({
       ...alumno,
-      fullName: `${alumno.firstName || ''} ${alumno.lastName || ''}`.trim() || 'Sin nombre',
-      statusDisplay: alumno.status?.toLowerCase() === 'active' ? "Activo" as const : "Inactivo" as const,
+      fullName: `${alumno.firstName} ${alumno.lastName || ""}`.trim() || "Sin nombre",
+      statusDisplay: alumno.status.toLowerCase() === "active" ? ("Activo" as const) : ("Inactivo" as const),
     }));
   }, [alumnosData]);
 
   // Generar columnas con handlers
   const columns = useMemo(
-    () => getAlumnosColumns({ 
-      onEdit: handleEditUser,
-      onViewProfile: (alumno) => {
-        console.log("Ver perfil de:", alumno);
-        // Aquí puedes implementar la navegación al perfil
-      },
-      onDelete: (alumno) => {
-        console.log("Eliminar alumno:", alumno);
-        // Aquí puedes implementar la confirmación de eliminación
-      }
-    }),
-    []
+    () =>
+      getAlumnosColumns({
+        onEdit: handleEditUser,
+        onViewProfile: (alumno) => {
+          console.log("Ver perfil de:", alumno);
+          // Aquí puedes implementar la navegación al perfil
+        },
+        onDelete: (alumno) => {
+          console.log("Eliminar alumno:", alumno);
+          // Aquí puedes implementar la confirmación de eliminación
+        },
+      }),
+    [],
   );
-  
-  const table = useDataTableInstance({ 
-    data: alumnos, 
+
+  const table = useDataTableInstance({
+    data: alumnos,
     columns,
     getRowId: (row) => row.id,
     state: {
@@ -76,15 +77,13 @@ export function AlumnosTable() {
     <Card>
       <CardHeader>
         <CardTitle>Gestión de Alumnos</CardTitle>
-        <CardDescription>
-          Administra la base de alumnos registrados en la plataforma
-        </CardDescription>
+        <CardDescription>Administra la base de alumnos registrados en la plataforma</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Barra de búsqueda y controles */}
         <div className="flex items-center justify-between gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
             <Input
               placeholder="Buscar alumnos por nombre, email, usuario..."
               value={globalFilter ?? ""}
@@ -139,4 +138,3 @@ export function AlumnosTable() {
     </Card>
   );
 }
-

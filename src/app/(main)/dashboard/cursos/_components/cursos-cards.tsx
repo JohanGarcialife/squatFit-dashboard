@@ -58,9 +58,7 @@ export function CursosCards() {
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Cursos Totales</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.total}
-          </CardTitle>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">{stats.total}</CardTitle>
           <CardAction>
             <Badge variant="outline">
               <GraduationCap className="size-4" />
@@ -69,11 +67,10 @@ export function CursosCards() {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Catálogo completo de cursos
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Catálogo completo de cursos</div>
           <div className="text-muted-foreground">
-            {stats.activos} activos, {stats.inactivos} inactivo{stats.inactivos !== 1 ? "s" : ""}, {stats.enDesarrollo} en desarrollo
+            {stats.activos} activos, {stats.inactivos} inactivo{stats.inactivos !== 1 ? "s" : ""}, {stats.enDesarrollo}{" "}
+            en desarrollo
           </div>
         </CardFooter>
       </Card>
@@ -81,23 +78,20 @@ export function CursosCards() {
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Cursos Activos</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.activos}
-          </CardTitle>
+          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">{stats.activos}</CardTitle>
           <CardAction>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-400">
+            <Badge
+              variant="outline"
+              className="border-green-200 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400"
+            >
               <TrendingUp className="size-4" />
               Disponibles
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Disponibles para inscripción
-          </div>
-          <div className="text-muted-foreground">
-            {stats.totalEstudiantes.toLocaleString()} estudiantes activos
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Disponibles para inscripción</div>
+          <div className="text-muted-foreground">{stats.totalEstudiantes.toLocaleString()} estudiantes activos</div>
         </CardFooter>
       </Card>
 
@@ -108,19 +102,18 @@ export function CursosCards() {
             {stats.totalEstudiantes.toLocaleString()}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-400">
+            <Badge
+              variant="outline"
+              className="border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-400"
+            >
               <Users className="size-4" />
               Activos
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Estudiantes inscritos totales
-          </div>
-          <div className="text-muted-foreground">
-            Promedio {stats.promedioEstudiantes} estudiantes por curso
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Estudiantes inscritos totales</div>
+          <div className="text-muted-foreground">Promedio {stats.promedioEstudiantes} estudiantes por curso</div>
         </CardFooter>
       </Card>
 
@@ -131,22 +124,20 @@ export function CursosCards() {
             €{stats.ingresosPotenciales.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-400">
+            <Badge
+              variant="outline"
+              className="border-orange-200 bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-400"
+            >
               <DollarSign className="size-4" />
               Total
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Basado en inscripciones actuales
-          </div>
-          <div className="text-muted-foreground">
-            Precio promedio: €{stats.precioPromedio.toFixed(2)} por curso
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Basado en inscripciones actuales</div>
+          <div className="text-muted-foreground">Precio promedio: €{stats.precioPromedio.toFixed(2)} por curso</div>
         </CardFooter>
       </Card>
     </div>
   );
 }
-

@@ -171,7 +171,7 @@ export class CursosService {
     const instructorName = apiCurso.tutor
       ? `${apiCurso.tutor.firstName} ${apiCurso.tutor.lastName}`.trim()
       : "Sin instructor";
-    
+
     const priceNumber = parseFloat(apiCurso.price) || 0;
 
     return {
@@ -225,7 +225,7 @@ export class CursosService {
 
       // Manejar diferentes estructuras de respuesta
       let cursosApi: CursoApi[] = [];
-      
+
       if (Array.isArray(response)) {
         // La API devuelve directamente el array
         cursosApi = response;
@@ -298,7 +298,7 @@ export class CursosService {
 
       // Transformar datos del formulario al formato de la API
       const apiData = this.transformToApiFormat(data);
-      
+
       console.log("📤 CursosService: Datos enviados a la API:", apiData);
 
       const response = await this.makeRequest<any>("/api/v1/admin-panel/courses", {
@@ -311,7 +311,7 @@ export class CursosService {
 
       // Si la respuesta es un array, tomar el primer elemento
       const cursoData = Array.isArray(response) ? response[0] : response.data || response;
-      
+
       // Transformar la respuesta al formato de la UI
       return this.transformCursoFromApi(cursoData);
     } catch (error) {
@@ -334,21 +334,18 @@ export class CursosService {
 
       // Transformar datos al formato de la API (solo los campos proporcionados)
       const apiData: Partial<CreateCursoApiDto> = {};
-      
+
       if (data.name) apiData.title = data.name;
       if (data.description) apiData.subtitle = data.description;
       if (data.price !== undefined) apiData.price = data.price.toString();
       if (data.instructor) apiData.tutor_id = data.instructor;
-      
+
       console.log("📤 CursosService: Datos enviados a la API:", apiData);
 
-      const response = await this.makeRequest<any>(
-        `/api/v1/admin-panel/courses?course_id=${id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify(apiData),
-        }
-      );
+      const response = await this.makeRequest<any>(`/api/v1/admin-panel/courses?course_id=${id}`, {
+        method: "PUT",
+        body: JSON.stringify(apiData),
+      });
 
       console.log("✅ CursosService: Curso actualizado exitosamente");
       console.log("📦 CursosService: Respuesta de la API:", response);
@@ -388,14 +385,11 @@ export class CursosService {
   /**
    * Activa o desactiva un curso
    * Endpoint: PUT /api/v1/admin-panel/courses/status
-   * 
+   *
    * NOTA: La API solo devuelve un mensaje de confirmación, no el curso actualizado
    * Ejemplo respuesta: { "message": "Curso activado exitosamente" }
    */
-  static async toggleCursoStatus(
-    id: string,
-    status: "Activo" | "Inactivo"
-  ): Promise<{ message: string }> {
+  static async toggleCursoStatus(id: string, status: "Activo" | "Inactivo"): Promise<{ message: string }> {
     if (!id) {
       throw new Error("ID de curso requerido");
     }
@@ -405,21 +399,18 @@ export class CursosService {
 
       // Convertir status a boolean para la API
       const active = status === "Activo";
-      
+
       const requestBody = {
         course_id: id,
-        active: active
+        active: active,
       };
 
       console.log("📤 CursosService: Datos enviados a la API:", requestBody);
 
-      const response = await this.makeRequest<{ message: string }>(
-        `/api/v1/admin-panel/courses/status`,
-        {
-          method: "PUT",
-          body: JSON.stringify(requestBody),
-        }
-      );
+      const response = await this.makeRequest<{ message: string }>(`/api/v1/admin-panel/courses/status`, {
+        method: "PUT",
+        body: JSON.stringify(requestBody),
+      });
 
       console.log("✅ CursosService: Estado del curso actualizado");
       console.log("📦 CursosService: Respuesta de la API:", response);
@@ -451,4 +442,3 @@ export class CursosService {
     }
   }
 }
-

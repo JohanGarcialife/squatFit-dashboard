@@ -18,9 +18,7 @@ export function EntrenadoresCards() {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Equipo completo de profesionales
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Equipo completo de profesionales</div>
           <div className="text-muted-foreground">9 activos, 1 inactivo, 1 vacaciones, 1 pendiente</div>
         </CardFooter>
       </Card>
@@ -30,16 +28,14 @@ export function EntrenadoresCards() {
           <CardDescription>Entrenadores Activos</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">9</CardTitle>
           <CardAction>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
               <TrendingUp className="size-4" />
               75% disponibles
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Disponibles para asignación
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Disponibles para asignación</div>
           <div className="text-muted-foreground">514 clientes activos</div>
         </CardFooter>
       </Card>
@@ -49,16 +45,14 @@ export function EntrenadoresCards() {
           <CardDescription>Rating Promedio</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">4.76</CardTitle>
           <CardAction>
-            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+            <Badge variant="outline" className="border-yellow-200 bg-yellow-50 text-yellow-700">
               <Star className="size-4 fill-yellow-500" />
               Excelente
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Calificación de clientes
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Calificación de clientes</div>
           <div className="text-muted-foreground">Basado en 1,245 reseñas</div>
         </CardFooter>
       </Card>
@@ -68,20 +62,17 @@ export function EntrenadoresCards() {
           <CardDescription>Tarifa Promedio</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">€46.67</CardTitle>
           <CardAction>
-            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+            <Badge variant="outline" className="border-orange-200 bg-orange-50 text-orange-700">
               <DollarSign className="size-4" />
               /hora
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Tarifa promedio por hora
-          </div>
+          <div className="line-clamp-1 flex gap-2 font-medium">Tarifa promedio por hora</div>
           <div className="text-muted-foreground">Rango: €35 - €60 por hora</div>
         </CardFooter>
       </Card>
     </div>
   );
 }
-

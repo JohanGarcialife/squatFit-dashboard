@@ -3,11 +3,13 @@
 ## 🔄 CAMBIO REALIZADO
 
 ### **ANTES:**
+
 ```
 GET /api/v1/course/all
 ```
 
 ### **AHORA:**
+
 ```
 GET /api/v1/admin-panel/courses
 ```
@@ -17,16 +19,20 @@ GET /api/v1/admin-panel/courses
 ## 📋 ARCHIVOS MODIFICADOS
 
 ### **1. Servicio de API** ✅
+
 **Archivo:** `src/lib/services/cursos-service.ts`
 
 **Cambios:**
+
 - ✅ Comentario actualizado: `Endpoint: GET /api/v1/admin-panel/courses`
 - ✅ URL actualizada: `/api/v1/admin-panel/courses`
 
 ### **2. Documentación** ✅
+
 **Archivo:** `ENDPOINTS_CURSOS_COMPLETOS.md`
 
 **Cambios:**
+
 - ✅ Endpoint actualizado en la tabla principal
 - ✅ URL completa actualizada
 - ✅ Ejemplo de testing actualizado
@@ -45,22 +51,27 @@ https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/admin-panel/courses
 ## 🧪 CÓMO PROBAR EL CAMBIO
 
 ### **Paso 1: Refresca el navegador**
+
 ```
 F5 o Ctrl + R
 ```
 
 ### **Paso 2: Abre la consola**
+
 ```
 F12 → Console
 ```
 
 ### **Paso 3: Ve a la página de cursos**
+
 ```
 http://localhost:3000/dashboard/cursos
 ```
 
 ### **Paso 4: Verifica en la consola**
+
 Deberías ver:
+
 ```
 🔍 CursosService: Obteniendo cursos...
 🌐 CursosService: Haciendo petición a: https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/admin-panel/courses
@@ -73,6 +84,7 @@ Deberías ver:
 ## 📊 IMPACTO DEL CAMBIO
 
 ### **✅ Lo que funciona igual:**
+
 - Todos los componentes de la UI
 - Transformación de datos
 - React Query hooks
@@ -80,6 +92,7 @@ Deberías ver:
 - Optimistic updates
 
 ### **🔄 Lo que cambió:**
+
 - Solo la URL del endpoint
 - Logs en la consola mostrarán la nueva URL
 
@@ -88,14 +101,17 @@ Deberías ver:
 ## 🎯 VENTAJAS DEL NUEVO ENDPOINT
 
 ### **1. Claridad de propósito:**
+
 - `/admin-panel/` indica que es específico para el dashboard administrativo
 - Separa endpoints públicos de endpoints administrativos
 
 ### **2. Mejor organización:**
+
 - Endpoints administrativos agrupados bajo `/admin-panel/`
 - Más fácil de mantener y documentar
 
 ### **3. Seguridad:**
+
 - Permite aplicar diferentes niveles de autenticación/autorización
 - Separación clara entre API pública y administrativa
 
@@ -104,12 +120,15 @@ Deberías ver:
 ## 🔍 VERIFICACIÓN
 
 ### **En la consola del navegador:**
+
 Busca esta línea para confirmar que el cambio se aplicó:
+
 ```
 🌐 CursosService: Haciendo petición a: https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/admin-panel/courses
 ```
 
 ### **En Thunder Client / Postman:**
+
 ```bash
 GET https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/admin-panel/courses
 Headers:
@@ -122,16 +141,19 @@ Headers:
 ## 📝 NOTAS IMPORTANTES
 
 ### **1. Compatibilidad:**
+
 - ✅ No hay cambios en la estructura de datos
 - ✅ No hay cambios en los componentes
 - ✅ No hay cambios en los hooks de React Query
 
 ### **2. Autenticación:**
+
 - ✅ Mismo token JWT
 - ✅ Mismos headers
 - ✅ Mismo manejo de errores
 
 ### **3. Query Parameters:**
+
 - ✅ Todos los parámetros siguen funcionando igual:
   - `page`
   - `limit`
@@ -172,13 +194,13 @@ Si el endpoint funciona correctamente, podrías considerar:
 
 ## ✅ ESTADO ACTUAL
 
-| Endpoint | Estado | URL |
-|----------|--------|-----|
-| Obtener cursos | ✅ **ACTUALIZADO** | `/api/v1/admin-panel/courses` |
-| Crear curso | ⚠️ Pendiente | `/api/v1/courses` |
-| Actualizar curso | ⚠️ Pendiente | `/api/v1/courses/{id}` |
-| Eliminar curso | ⚠️ Pendiente | `/api/v1/courses/{id}` |
-| Cambiar estado | ⚠️ Pendiente | `/api/v1/courses/{id}/toggle-status` |
+| Endpoint         | Estado             | URL                                  |
+| ---------------- | ------------------ | ------------------------------------ |
+| Obtener cursos   | ✅ **ACTUALIZADO** | `/api/v1/admin-panel/courses`        |
+| Crear curso      | ⚠️ Pendiente       | `/api/v1/courses`                    |
+| Actualizar curso | ⚠️ Pendiente       | `/api/v1/courses/{id}`               |
+| Eliminar curso   | ⚠️ Pendiente       | `/api/v1/courses/{id}`               |
+| Cambiar estado   | ⚠️ Pendiente       | `/api/v1/courses/{id}/toggle-status` |
 
 ---
 

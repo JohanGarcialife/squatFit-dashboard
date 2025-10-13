@@ -1,11 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { 
-  CursosService, 
-  CreateCursoDto, 
-  GetCursosParams 
-} from "@/lib/services/cursos-service";
+import { CursosService, CreateCursoDto, GetCursosParams } from "@/lib/services/cursos-service";
 import { Curso } from "@/app/(main)/dashboard/cursos/_components/schema";
 
 // ============================================================================
@@ -72,10 +68,10 @@ export function useCreateCurso() {
     onSuccess: (newCurso) => {
       // Invalidar queries para refrescar la lista
       queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
-      
+
       // Opcional: Agregar el nuevo curso al cache
       queryClient.setQueryData(cursosKeys.detail(newCurso.id), newCurso);
-      
+
       toast.success("Curso creado exitosamente", { id: "create-curso" });
     },
     onError: (error: Error) => {
@@ -92,26 +88,25 @@ export function useUpdateCurso() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<CreateCursoDto> }) =>
-      CursosService.updateCurso(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<CreateCursoDto> }) => CursosService.updateCurso(id, data),
     onMutate: async ({ id }) => {
       toast.loading("Actualizando curso...", { id: `update-curso-${id}` });
-      
+
       // Cancelar queries en curso para evitar conflictos
       await queryClient.cancelQueries({ queryKey: cursosKeys.detail(id) });
-      
+
       // Guardar snapshot del estado anterior (para rollback)
       const previousCurso = queryClient.getQueryData<Curso>(cursosKeys.detail(id));
-      
+
       return { previousCurso, id };
     },
     onSuccess: (updatedCurso, { id }) => {
       // Actualizar cache del curso específico
       queryClient.setQueryData(cursosKeys.detail(id), updatedCurso);
-      
+
       // Invalidar lista para refrescar
       queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
-      
+
       toast.success("Curso actualizado exitosamente", { id: `update-curso-${id}` });
     },
     onError: (error: Error, { id }, context) => {
@@ -119,7 +114,7 @@ export function useUpdateCurso() {
       if (context?.previousCurso) {
         queryClient.setQueryData(cursosKeys.detail(id), context.previousCurso);
       }
-      
+
       console.error("Error actualizando curso:", error);
       toast.error(error.message || "Error al actualizar el curso", { id: `update-curso-${id}` });
     },
@@ -136,31 +131,31 @@ export function useDeleteCurso() {
     mutationFn: (id: string) => CursosService.deleteCurso(id),
     onMutate: async (id) => {
       toast.loading("Eliminando curso...", { id: `delete-curso-${id}` });
-      
+
       // Cancelar queries relacionadas
       await queryClient.cancelQueries({ queryKey: cursosKeys.detail(id) });
       await queryClient.cancelQueries({ queryKey: cursosKeys.lists() });
-      
+
       // Guardar snapshot para rollback
       const previousCursos = queryClient.getQueryData<Curso[]>(cursosKeys.lists());
-      
+
       // Optimistic update: remover de la lista
       if (previousCursos) {
         queryClient.setQueryData(
           cursosKeys.lists(),
-          previousCursos.filter((curso) => curso.id !== id)
+          previousCursos.filter((curso) => curso.id !== id),
         );
       }
-      
+
       return { previousCursos };
     },
     onSuccess: (_, id) => {
       // Remover del cache individual
       queryClient.removeQueries({ queryKey: cursosKeys.detail(id) });
-      
+
       // Invalidar lista
       queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
-      
+
       toast.success("Curso eliminado exitosamente", { id: `delete-curso-${id}` });
     },
     onError: (error: Error, id, context) => {
@@ -168,7 +163,7 @@ export function useDeleteCurso() {
       if (context?.previousCursos) {
         queryClient.setQueryData(cursosKeys.lists(), context.previousCursos);
       }
-      
+
       console.error("Error eliminando curso:", error);
       toast.error(error.message || "Error al eliminar el curso", { id: `delete-curso-${id}` });
     },
@@ -177,7 +172,7 @@ export function useDeleteCurso() {
 
 /**
  * Hook para activar/desactivar un curso
- * 
+ *
  * NOTA: La API solo devuelve un mensaje, no el curso actualizado.
  * Usamos optimistic updates para actualizar la UI inmediatamente.
  */
@@ -190,31 +185,29 @@ export function useToggleCursoStatus() {
     onMutate: async ({ id, status }) => {
       const action = status === "Activo" ? "Activando" : "Desactivando";
       toast.loading(`${action} curso...`, { id: `toggle-curso-${id}` });
-      
+
       // Cancelar queries para evitar conflictos
       await queryClient.cancelQueries({ queryKey: cursosKeys.lists() });
       await queryClient.cancelQueries({ queryKey: cursosKeys.detail(id) });
-      
+
       // Guardar snapshot de la lista
       const previousCursos = queryClient.getQueryData<Curso[]>(cursosKeys.lists());
-      
+
       // Optimistic update en la lista
       if (previousCursos) {
-        const updatedCursos = previousCursos.map((curso) =>
-          curso.id === id ? { ...curso, status } : curso
-        );
+        const updatedCursos = previousCursos.map((curso) => (curso.id === id ? { ...curso, status } : curso));
         queryClient.setQueryData(cursosKeys.lists(), updatedCursos);
       }
-      
+
       return { previousCursos, id };
     },
     onSuccess: (response, { id, status }) => {
       // Invalidar lista para refrescar con datos del servidor
       queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
-      
+
       const action = status === "Activo" ? "activado" : "desactivado";
       toast.success(`Curso ${action} exitosamente`, { id: `toggle-curso-${id}` });
-      
+
       console.log("📨 Respuesta del servidor:", response.message);
     },
     onError: (error: Error, { id }, context) => {
@@ -222,7 +215,7 @@ export function useToggleCursoStatus() {
       if (context?.previousCursos) {
         queryClient.setQueryData(cursosKeys.lists(), context.previousCursos);
       }
-      
+
       console.error("Error cambiando estado del curso:", error);
       toast.error(error.message || "Error al cambiar el estado", { id: `toggle-curso-${id}` });
     },
@@ -258,4 +251,3 @@ export function useInvalidateCursos() {
     queryClient.invalidateQueries({ queryKey: cursosKeys.all });
   };
 }
-

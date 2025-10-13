@@ -23,7 +23,7 @@ const getStatusBadge = (status: string | null | undefined) => {
   if (!status) {
     return <Badge variant="secondary">Sin estado</Badge>;
   }
-  
+
   switch (status.toLowerCase()) {
     case "active":
     case "activo":
@@ -40,23 +40,35 @@ const getRoleBadge = (role: string | null | undefined) => {
   if (!role) {
     return <Badge variant="outline">Sin rol</Badge>;
   }
-  
+
   switch (role.toLowerCase()) {
     case "user":
-      return <Badge className="bg-blue-50 text-blue-700 border-blue-200" variant="outline">Usuario</Badge>;
+      return (
+        <Badge className="border-blue-200 bg-blue-50 text-blue-700" variant="outline">
+          Usuario
+        </Badge>
+      );
     case "admin":
-      return <Badge className="bg-purple-50 text-purple-700 border-purple-200" variant="outline">Admin</Badge>;
+      return (
+        <Badge className="border-purple-200 bg-purple-50 text-purple-700" variant="outline">
+          Admin
+        </Badge>
+      );
     case "coach":
-      return <Badge className="bg-orange-50 text-orange-700 border-orange-200" variant="outline">Coach</Badge>;
+      return (
+        <Badge className="border-orange-200 bg-orange-50 text-orange-700" variant="outline">
+          Coach
+        </Badge>
+      );
     default:
       return <Badge variant="outline">{role}</Badge>;
   }
 };
 
 const getInitials = (firstName: string | null, lastName: string | null) => {
-  const first = firstName?.charAt(0) || '';
-  const last = lastName?.charAt(0) || '';
-  return `${first}${last}`.toUpperCase() || '??';
+  const first = firstName?.charAt(0) || "";
+  const last = lastName?.charAt(0) || "";
+  return `${first}${last}`.toUpperCase() || "??";
 };
 
 // ============================================================================
@@ -73,9 +85,7 @@ interface ColumnHandlers {
 // FUNCIÓN PARA GENERAR COLUMNAS CON HANDLERS
 // ============================================================================
 
-export const getAlumnosColumns = (
-  handlers: ColumnHandlers = {}
-): ColumnDef<AlumnoUI>[] => [
+export const getAlumnosColumns = (handlers: ColumnHandlers = {}): ColumnDef<AlumnoUI>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -107,13 +117,11 @@ export const getAlumnosColumns = (
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold">
-              {initials}
-            </AvatarFallback>
+            <AvatarFallback className="bg-blue-100 font-semibold text-blue-700">{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <span className="font-medium">{row.original.fullName}</span>
-            <span className="text-xs text-muted-foreground">{row.original.email}</span>
+            <span className="text-muted-foreground text-xs">{row.original.email}</span>
           </div>
         </div>
       );
@@ -123,30 +131,28 @@ export const getAlumnosColumns = (
   {
     accessorKey: "username",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Usuario" />,
-    cell: ({ row }) => (
-      <span className="text-sm font-mono">@{row.original.username}</span>
-    ),
+    cell: ({ row }) => <span className="font-mono text-sm">@{row.original.username}</span>,
   },
   {
     accessorKey: "birth",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Fecha de Nacimiento" />,
     cell: ({ row }) => {
       if (!row.original.birth) {
-        return <span className="text-sm text-muted-foreground">No especificado</span>;
+        return <span className="text-muted-foreground text-sm">No especificado</span>;
       }
       try {
         const date = new Date(row.original.birth);
         return (
           <span className="text-sm">
-            {date.toLocaleDateString('es-ES', { 
-              day: '2-digit', 
-              month: '2-digit', 
-              year: 'numeric' 
+            {date.toLocaleDateString("es-ES", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
             })}
           </span>
         );
       } catch {
-        return <span className="text-sm text-muted-foreground">Fecha inválida</span>;
+        return <span className="text-muted-foreground text-sm">Fecha inválida</span>;
       }
     },
   },
@@ -181,9 +187,7 @@ export const getAlumnosColumns = (
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(alumno.id)}
-            >
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(alumno.id)}>
               Copiar ID del alumno
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -196,24 +200,17 @@ export const getAlumnosColumns = (
               Ver actividad
             </DropdownMenuItem>
             {alumno.email && (
-              <DropdownMenuItem
-                onClick={() => window.open(`mailto:${alumno.email}`, '_blank')}
-              >
+              <DropdownMenuItem onClick={() => window.open(`mailto:${alumno.email}`, "_blank")}>
                 <Mail className="mr-2 h-4 w-4" />
                 Enviar email
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem
-              onClick={() => handlers.onEdit?.(alumno)}
-            >
+            <DropdownMenuItem onClick={() => handlers.onEdit?.(alumno)}>
               <Pencil className="mr-2 h-4 w-4" />
               Editar información
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              className="text-red-600"
-              onClick={() => handlers.onDelete?.(alumno)}
-            >
+            <DropdownMenuItem className="text-red-600" onClick={() => handlers.onDelete?.(alumno)}>
               <Trash2 className="mr-2 h-4 w-4" />
               Eliminar alumno
             </DropdownMenuItem>
@@ -223,4 +220,3 @@ export const getAlumnosColumns = (
     },
   },
 ];
-

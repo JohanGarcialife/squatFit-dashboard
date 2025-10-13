@@ -3,15 +3,19 @@
 ## 🔄 CAMBIO REALIZADO
 
 ### **ANTES:**
+
 ```
 PATCH /api/v1/courses/{id}/toggle-status
 ```
+
 Path parameter: `id` en la URL
 
 ### **AHORA:**
+
 ```
 PUT /api/v1/admin-panel/courses/status
 ```
+
 Body parameter: `course_id` en el body
 
 ---
@@ -21,11 +25,13 @@ Body parameter: `course_id` en el body
 ### **1. Método HTTP:**
 
 **ANTES:**
+
 ```
 PATCH /api/v1/courses/123e4567-e89b-12d3-a456-426614174000/toggle-status
 ```
 
 **AHORA:**
+
 ```
 PUT /api/v1/admin-panel/courses/status
 ```
@@ -33,6 +39,7 @@ PUT /api/v1/admin-panel/courses/status
 ### **2. Estructura del Body:**
 
 **ANTES:**
+
 ```json
 {
   "status": "Activo"
@@ -40,6 +47,7 @@ PUT /api/v1/admin-panel/courses/status
 ```
 
 **AHORA:**
+
 ```json
 {
   "course_id": "123e4567-e89b-12d3-a456-426614174000",
@@ -50,9 +58,11 @@ PUT /api/v1/admin-panel/courses/status
 ### **3. Transformación de Datos:**
 
 **ANTES:**
+
 - Enviaba `status` como string ("Activo" o "Inactivo")
 
 **AHORA:**
+
 - Envía `course_id` como string (UUID)
 - Envía `active` como boolean (true/false)
 
@@ -62,11 +72,11 @@ PUT /api/v1/admin-panel/courses/status
 
 ### **Desde el UI → API:**
 
-| Campo UI | Tipo UI | → | Campo API | Tipo API |
-|----------|---------|---|-----------|----------|
-| `id` | string | → | `course_id` | string |
-| `status: "Activo"` | string | → | `active` | **true** |
-| `status: "Inactivo"` | string | → | `active` | **false** |
+| Campo UI             | Tipo UI | →   | Campo API   | Tipo API  |
+| -------------------- | ------- | --- | ----------- | --------- |
+| `id`                 | string  | →   | `course_id` | string    |
+| `status: "Activo"`   | string  | →   | `active`    | **true**  |
+| `status: "Inactivo"` | string  | →   | `active`    | **false** |
 
 ### **Código de Transformación:**
 
@@ -76,7 +86,7 @@ const active = status === "Activo";
 
 const requestBody = {
   course_id: id,
-  active: active
+  active: active,
 };
 ```
 
@@ -85,9 +95,11 @@ const requestBody = {
 ## 📊 ARCHIVOS MODIFICADOS
 
 ### **1. Servicio de API** ✅
+
 **Archivo:** `src/lib/services/cursos-service.ts`
 
 **Cambios:**
+
 - ✅ Endpoint: `/api/v1/admin-panel/courses/status`
 - ✅ Método: `PUT` (antes era `PATCH`)
 - ✅ Body: `{ course_id, active }` (antes era `{ status }`)
@@ -95,9 +107,11 @@ const requestBody = {
 - ✅ Logs detallados
 
 ### **2. Documentación** ✅
+
 **Archivo:** `ENDPOINTS_CURSOS_COMPLETOS.md`
 
 **Cambios:**
+
 - ✅ Endpoint actualizado
 - ✅ Método actualizado
 - ✅ Estructura del body actualizada
@@ -108,17 +122,21 @@ const requestBody = {
 ## 🧪 CÓMO PROBAR
 
 ### **Paso 1: Refresca el navegador**
+
 ```
 F5 o Ctrl + R
 ```
 
 ### **Paso 2: Cambia el estado de un curso**
+
 1. Ve a `/dashboard/cursos`
 2. Click en el menú (⋮) de un curso
 3. Click en "Activar" o "Desactivar"
 
 ### **Paso 3: Verifica en la consola**
+
 Deberías ver:
+
 ```
 🔄 CursosService: Cambiando estado del curso: 123e4567-... a Activo
 📤 CursosService: Datos enviados a la API: {
@@ -173,15 +191,18 @@ O en caso de desactivar:
 ## ✅ VENTAJAS DEL NUEVO ENDPOINT
 
 ### **1. Consistencia con otros endpoints:**
+
 - Mismo endpoint base: `/api/v1/admin-panel/courses`
 - Mismo método: `PUT`
 - Estructura similar de body
 
 ### **2. Más explícito:**
+
 - `course_id` claramente indica qué curso modificar
 - `active` boolean es más claro que string
 
 ### **3. Mejor para APIs RESTful:**
+
 - Un solo endpoint para cambiar estado
 - No necesita path parameters
 
@@ -190,15 +211,18 @@ O en caso de desactivar:
 ## 🎯 RESULTADOS POSIBLES
 
 ### **✅ Éxito (200):**
+
 ```
 ✅ CursosService: Estado del curso actualizado
 Toast: "Curso '{nombre}' {activado/desactivado}."
 ```
+
 - El estado se actualiza en la tabla
 - El badge de estado cambia de color
 - Las estadísticas se actualizan si es necesario
 
 ### **❌ Error - Curso no encontrado (404):**
+
 ```json
 {
   "error": "Not Found",
@@ -207,6 +231,7 @@ Toast: "Curso '{nombre}' {activado/desactivado}."
 ```
 
 ### **❌ Error - course_id inválido:**
+
 ```json
 {
   "error": "Bad Request",
@@ -215,6 +240,7 @@ Toast: "Curso '{nombre}' {activado/desactivado}."
 ```
 
 ### **❌ Error - active inválido:**
+
 ```json
 {
   "error": "Validation Error",
@@ -229,11 +255,13 @@ Toast: "Curso '{nombre}' {activado/desactivado}."
 He agregado logs detallados en cada paso:
 
 ### **1. Inicio del cambio:**
+
 ```
 🔄 CursosService: Cambiando estado del curso: {id} a {status}
 ```
 
 ### **2. Datos transformados:**
+
 ```
 📤 CursosService: Datos enviados a la API: {
   course_id: "...",
@@ -242,16 +270,19 @@ He agregado logs detallados en cada paso:
 ```
 
 ### **3. URL de la petición:**
+
 ```
 🌐 CursosService: Haciendo petición a: https://.../courses/status
 ```
 
 ### **4. Respuesta de la API:**
+
 ```
 📦 CursosService: Respuesta de la API: {...}
 ```
 
 ### **5. Éxito:**
+
 ```
 ✅ CursosService: Estado del curso actualizado
 ```
@@ -261,24 +292,28 @@ He agregado logs detallados en cada paso:
 ## ⚠️ NOTAS IMPORTANTES
 
 ### **1. Transformación de Status:**
+
 ```typescript
 // UI usa strings
-status: "Activo" | "Inactivo"
+status: "Activo" | "Inactivo";
 
 // API usa boolean
-active: true | false
+active: true | false;
 
 // Transformación automática
 const active = status === "Activo";
 ```
 
 ### **2. Validación del Backend:**
+
 El backend validará:
+
 - Que el `course_id` sea un UUID válido
 - Que el `course_id` exista en la base de datos
 - Que el `active` sea un boolean
 
 ### **3. Respuesta:**
+
 La API devuelve el curso completo actualizado, no solo el estado.
 
 ---
@@ -304,14 +339,14 @@ graph LR
 
 ## ✅ ESTADO ACTUAL DE ENDPOINTS
 
-| # | Método | Endpoint | Estado |
-|---|--------|----------|--------|
-| 1 | `GET` | `/api/v1/admin-panel/courses` | ✅ CONFIRMADO |
-| 2 | `POST` | `/api/v1/admin-panel/courses` | ✅ CONFIRMADO |
-| 3 | `PUT` | `/api/v1/admin-panel/courses?course_id={id}` | ✅ CONFIRMADO |
-| 4 | `PUT` | `/api/v1/admin-panel/courses/status` | ✅ ACTUALIZADO |
-| 5 | `GET` | `/api/v1/courses/{id}` | ⚠️ Pendiente |
-| 6 | `DELETE` | `/api/v1/courses/{id}` | ⚠️ Pendiente |
+| #   | Método   | Endpoint                                     | Estado         |
+| --- | -------- | -------------------------------------------- | -------------- |
+| 1   | `GET`    | `/api/v1/admin-panel/courses`                | ✅ CONFIRMADO  |
+| 2   | `POST`   | `/api/v1/admin-panel/courses`                | ✅ CONFIRMADO  |
+| 3   | `PUT`    | `/api/v1/admin-panel/courses?course_id={id}` | ✅ CONFIRMADO  |
+| 4   | `PUT`    | `/api/v1/admin-panel/courses/status`         | ✅ ACTUALIZADO |
+| 5   | `GET`    | `/api/v1/courses/{id}`                       | ⚠️ Pendiente   |
+| 6   | `DELETE` | `/api/v1/courses/{id}`                       | ⚠️ Pendiente   |
 
 ---
 

@@ -193,14 +193,14 @@ export class UsersService {
       const endpoint = `/api/v1/admin-panel/users${queryString ? `?${queryString}` : ""}`;
 
       const response = await this.makeRequest<any>(endpoint);
-      
+
       console.log("📦 UsersService: Respuesta del API:", response);
       console.log("📦 UsersService: Tipo de respuesta:", typeof response);
       console.log("📦 UsersService: Es array?:", Array.isArray(response));
 
       // Verificar si la respuesta es un array directamente o viene dentro de un objeto
       let alumnos: UserResponse[];
-      
+
       if (Array.isArray(response)) {
         alumnos = response;
       } else if (response && Array.isArray(response.data)) {
@@ -264,4 +264,3 @@ export class UsersService {
     }
   }
 }
-

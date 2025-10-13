@@ -40,23 +40,13 @@ export function DeleteCursoDialog({ curso, open, onOpenChange }: DeleteCursoDial
         <AlertDialogHeader>
           <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
           <AlertDialogDescription className="space-y-2">
-            <p>
-              Esta acción no se puede deshacer. Esto eliminará permanentemente el curso:
-            </p>
-            {curso && (
-              <p className="font-semibold text-foreground">
-                &quot;{curso.name}&quot;
-              </p>
-            )}
-            <p>
-              Se eliminarán todos los datos asociados a este curso.
-            </p>
+            <p>Esta acción no se puede deshacer. Esto eliminará permanentemente el curso:</p>
+            {curso && <p className="text-foreground font-semibold">&quot;{curso.name}&quot;</p>}
+            <p>Se eliminarán todos los datos asociados a este curso.</p>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleteCursoMutation.isPending}>
-            Cancelar
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={deleteCursoMutation.isPending}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={deleteCursoMutation.isPending}
@@ -69,4 +59,3 @@ export function DeleteCursoDialog({ curso, open, onOpenChange }: DeleteCursoDial
     </AlertDialog>
   );
 }
-

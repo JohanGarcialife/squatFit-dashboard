@@ -33,11 +33,7 @@ export function CursoActions({ curso, onEdit, onDelete, onToggleStatus, onView }
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-        <DropdownMenuItem
-          onClick={() => navigator.clipboard.writeText(curso.id)}
-        >
-          Copiar ID del curso
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(curso.id)}>Copiar ID del curso</DropdownMenuItem>
         <DropdownMenuSeparator />
         {onView && (
           <DropdownMenuItem onClick={() => onView(curso)}>
@@ -54,10 +50,7 @@ export function CursoActions({ curso, onEdit, onDelete, onToggleStatus, onView }
           {curso.status === "Activo" ? "Desactivar" : "Activar"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          className="text-red-600"
-          onClick={() => onDelete(curso)}
-        >
+        <DropdownMenuItem className="text-red-600" onClick={() => onDelete(curso)}>
           <Trash2 className="mr-2 h-4 w-4" />
           Eliminar curso
         </DropdownMenuItem>
@@ -65,4 +58,3 @@ export function CursoActions({ curso, onEdit, onDelete, onToggleStatus, onView }
     </DropdownMenu>
   );
 }
-

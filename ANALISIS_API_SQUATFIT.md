@@ -20,6 +20,7 @@ La API de SquatFit está dividida en módulos funcionales que ya tienes parcialm
 **Base URL (Auth):** `https://squatfit-api-985835765452.europe-southwest1.run.app`
 
 #### **Login Administrativo**
+
 ```http
 POST /api/v1/admin-panel/login
 Content-Type: application/json
@@ -45,6 +46,7 @@ Response 200:
 **Estado:** ✅ **IMPLEMENTADO** en `src/lib/services/auth-service.ts`
 
 #### **Logout**
+
 ```http
 POST /api/v1/admin-panel/logout
 Authorization: Bearer {token}
@@ -65,6 +67,7 @@ Response 200:
 **Base URL (Chat):** `https://squatfit-api-cyrc2g3zra-no.a.run.app`
 
 #### **Obtener Conversaciones**
+
 ```http
 GET /api/v1/coach-chat/conversations
 Authorization: Bearer {token}
@@ -93,6 +96,7 @@ Response 200:
 **Estado:** ✅ **IMPLEMENTADO** en `src/lib/services/chat-service.ts`
 
 #### **Obtener Mensajes de una Conversación**
+
 ```http
 GET /api/v1/coach-chat/conversations/{chatId}/messages?page=1&limit=100
 Authorization: Bearer {token}
@@ -116,6 +120,7 @@ Response 200:
 **Estado:** ✅ **IMPLEMENTADO** en `src/lib/services/chat-service.ts`
 
 #### **Enviar Mensaje**
+
 ```http
 POST /api/v1/coach-chat/conversations/{chatId}/messages
 Authorization: Bearer {token}
@@ -142,6 +147,7 @@ Response 201:
 **Estado:** ✅ **IMPLEMENTADO** en `src/lib/services/chat-service.ts`
 
 #### **Marcar Mensajes como Leídos**
+
 ```http
 POST /api/v1/coach-chat/conversations/{chatId}/messages/read
 Authorization: Bearer {token}
@@ -156,6 +162,7 @@ Response 200:
 **Estado:** ✅ **IMPLEMENTADO** en `src/lib/services/chat-service.ts`
 
 #### **Obtener Estadísticas del Chat**
+
 ```http
 GET /api/v1/coach-chat/stats
 Authorization: Bearer {token}
@@ -182,6 +189,7 @@ Basándose en la estructura de tu dashboard y la [documentación Swagger](https:
 ### **3. Gestión de Cursos**
 
 #### **Listar Cursos**
+
 ```http
 GET /api/v1/courses
 Authorization: Bearer {token}
@@ -222,6 +230,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Obtener Curso por ID**
+
 ```http
 GET /api/v1/courses/{id}
 Authorization: Bearer {token}
@@ -242,6 +251,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Crear Curso**
+
 ```http
 POST /api/v1/courses
 Authorization: Bearer {token}
@@ -271,6 +281,7 @@ Response 201:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Actualizar Curso**
+
 ```http
 PUT /api/v1/courses/{id}
 Authorization: Bearer {token}
@@ -294,6 +305,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Eliminar Curso**
+
 ```http
 DELETE /api/v1/courses/{id}
 Authorization: Bearer {token}
@@ -308,6 +320,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Activar/Desactivar Curso**
+
 ```http
 PATCH /api/v1/courses/{id}/toggle-status
 Authorization: Bearer {token}
@@ -333,6 +346,7 @@ Response 200:
 ### **4. Gestión de Entrenadores**
 
 #### **Listar Entrenadores**
+
 ```http
 GET /api/v1/coaches
 Authorization: Bearer {token}
@@ -374,6 +388,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Obtener Entrenador por ID**
+
 ```http
 GET /api/v1/coaches/{id}
 Authorization: Bearer {token}
@@ -397,6 +412,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Crear Entrenador**
+
 ```http
 POST /api/v1/coaches
 Authorization: Bearer {token}
@@ -425,6 +441,7 @@ Response 201:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Actualizar Entrenador**
+
 ```http
 PUT /api/v1/coaches/{id}
 Authorization: Bearer {token}
@@ -448,6 +465,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Eliminar Entrenador**
+
 ```http
 DELETE /api/v1/coaches/{id}
 Authorization: Bearer {token}
@@ -462,6 +480,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Asignar Cliente a Entrenador**
+
 ```http
 POST /api/v1/coaches/{coachId}/clients/{clientId}
 Authorization: Bearer {token}
@@ -480,6 +499,7 @@ Response 200:
 ### **5. Gestión Financiera**
 
 #### **Obtener Dashboard Financiero**
+
 ```http
 GET /api/v1/finances/dashboard
 Authorization: Bearer {token}
@@ -510,6 +530,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Obtener Transacciones**
+
 ```http
 GET /api/v1/finances/transactions
 Authorization: Bearer {token}
@@ -550,6 +571,7 @@ Response 200:
 ### **6. Analíticas y Reportes**
 
 #### **Dashboard General**
+
 ```http
 GET /api/v1/analytics/dashboard
 Authorization: Bearer {token}
@@ -577,6 +599,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Reportes de Cursos**
+
 ```http
 GET /api/v1/analytics/courses
 Authorization: Bearer {token}
@@ -612,6 +635,7 @@ Response 200:
 ### **7. Gestión de Usuarios y Roles**
 
 #### **Listar Usuarios**
+
 ```http
 GET /api/v1/users
 Authorization: Bearer {token}
@@ -646,6 +670,7 @@ Response 200:
 **Estado:** ❌ **PENDIENTE DE IMPLEMENTAR**
 
 #### **Asignar Rol**
+
 ```http
 POST /api/v1/users/{userId}/roles
 Authorization: Bearer {token}
@@ -689,14 +714,10 @@ src/lib/services/
 // Ejemplo: cursos-service.ts
 import { getAuthToken } from "@/lib/auth/auth-utils";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 
-  "https://squatfit-api-cyrc2g3zra-no.a.run.app";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cyrc2g3zra-no.a.run.app";
 
 export class CursosService {
-  private static async makeRequest<T>(
-    endpoint: string, 
-    options: RequestInit = {}
-  ): Promise<T> {
+  private static async makeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = getAuthToken();
     const url = `${API_BASE_URL}${endpoint}`;
 
@@ -718,20 +739,15 @@ export class CursosService {
   }
 
   static async getCursos(): Promise<Curso[]> {
-    const response = await this.makeRequest<{ data: Curso[] }>(
-      "/api/v1/courses"
-    );
+    const response = await this.makeRequest<{ data: Curso[] }>("/api/v1/courses");
     return response.data;
   }
 
   static async createCurso(data: CreateCursoDto): Promise<Curso> {
-    const response = await this.makeRequest<{ data: Curso }>(
-      "/api/v1/courses",
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      }
-    );
+    const response = await this.makeRequest<{ data: Curso }>("/api/v1/courses", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
     return response.data;
   }
 
@@ -755,10 +771,9 @@ export function useCursos() {
 
 export function useCreateCurso() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: (data: CreateCursoDto) => 
-      CursosService.createCurso(data),
+    mutationFn: (data: CreateCursoDto) => CursosService.createCurso(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["cursos"] });
     },
@@ -782,6 +797,7 @@ Content-Type: application/json
 ### **Manejo de Tokens**
 
 El token se obtiene del login y debe:
+
 1. ✅ Guardarse en `localStorage` (ya implementado)
 2. ✅ Guardarse en cookies HttpOnly (ya implementado)
 3. ✅ Incluirse en todas las peticiones protegidas
@@ -789,6 +805,7 @@ El token se obtiene del login y debe:
 ### **Refresh Token**
 
 Si el token expira:
+
 ```http
 POST /api/v1/auth/refresh
 Content-Type: application/json
@@ -845,7 +862,7 @@ Response 200:
 1. **Dos URLs de API detectadas:**
    - Auth: `https://squatfit-api-985835765452.europe-southwest1.run.app`
    - Main: `https://squatfit-api-cyrc2g3zra-no.a.run.app`
-   
+
    **Recomendación:** Unificar en una sola URL o centralizar la configuración.
 
 2. **Versionado de API:**
@@ -858,6 +875,7 @@ Response 200:
 
 4. **Manejo de Errores:**
    - Todos los errores vienen en formato:
+
    ```json
    {
      "statusCode": 400,
@@ -874,15 +892,15 @@ Response 200:
 
 ## 🎯 RESUMEN
 
-| Módulo | Endpoints | Estado | Prioridad |
-|--------|-----------|--------|-----------|
-| **Autenticación** | 2/2 | ✅ Completo | - |
-| **Chat** | 5/5 | ✅ Completo | - |
-| **Cursos** | 0/6 | ❌ Pendiente | 🔴 Alta |
-| **Entrenadores** | 0/7 | ❌ Pendiente | 🔴 Alta |
-| **Finanzas** | 0/2 | ❌ Pendiente | 🟡 Media |
-| **Analíticas** | 0/2 | ❌ Pendiente | 🟡 Media |
-| **Usuarios** | 0/2 | ❌ Pendiente | 🟢 Baja |
+| Módulo            | Endpoints | Estado       | Prioridad |
+| ----------------- | --------- | ------------ | --------- |
+| **Autenticación** | 2/2       | ✅ Completo  | -         |
+| **Chat**          | 5/5       | ✅ Completo  | -         |
+| **Cursos**        | 0/6       | ❌ Pendiente | 🔴 Alta   |
+| **Entrenadores**  | 0/7       | ❌ Pendiente | 🔴 Alta   |
+| **Finanzas**      | 0/2       | ❌ Pendiente | 🟡 Media  |
+| **Analíticas**    | 0/2       | ❌ Pendiente | 🟡 Media  |
+| **Usuarios**      | 0/2       | ❌ Pendiente | 🟢 Baja   |
 
 **Progreso Total:** 7/26 endpoints (27%)
 
@@ -891,4 +909,3 @@ Response 200:
 **Documento generado por:** Análisis de API SquatFit  
 **Basado en:** Swagger Documentation + Código Existente  
 **Última actualización:** 12 de Octubre, 2025
-

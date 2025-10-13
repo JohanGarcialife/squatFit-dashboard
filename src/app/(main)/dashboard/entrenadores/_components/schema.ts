@@ -16,11 +16,10 @@ export const entrenadorSchema = z.object({
 export type Entrenador = z.infer<typeof entrenadorSchema>;
 
 // Tipo extendido para la UI con campos computados
-export type EntrenadorUI = Omit<Entrenador, 'firstName' | 'lastName'> & {
+export type EntrenadorUI = Omit<Entrenador, "firstName" | "lastName"> & {
   firstName: string;
   lastName: string;
   status: "Activo" | "Inactivo";
   fullName: string;
   avatar?: string;
 };
-

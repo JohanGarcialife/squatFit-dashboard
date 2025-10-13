@@ -3,6 +3,7 @@
 ## 🐛 DESCRIPCIÓN DEL ERROR
 
 ### **Error Original:**
+
 ```
 Error cambiando estado del curso: TypeError: Cannot read properties of undefined (reading 'firstName')
   at CursosService.transformCursoFromApi (cursos-service.ts:170:46)
@@ -10,6 +11,7 @@ Error cambiando estado del curso: TypeError: Cannot read properties of undefined
 ```
 
 ### **Contexto:**
+
 - **Endpoint:** `PUT /api/v1/admin-panel/courses/status`
 - **Body:** `{ "course_id": "uuid", "active": true }`
 - **Problema:** La API devuelve el curso actualizado, pero **sin el objeto `tutor`** completo
@@ -24,7 +26,7 @@ Error cambiando estado del curso: TypeError: Cannot read properties of undefined
 private static transformCursoFromApi(apiCurso: CursoApi): Curso {
   // ❌ Acceso directo sin verificar si tutor existe
   const instructorName = `${apiCurso.tutor.firstName} ${apiCurso.tutor.lastName}`.trim();
-  
+
   return {
     // ...
     instructor: instructorName,
@@ -38,6 +40,7 @@ private static transformCursoFromApi(apiCurso: CursoApi): Curso {
 ```
 
 ### **Problema:**
+
 Algunos endpoints de la API (como `PUT /courses/status`) devuelven el curso **sin el objeto `tutor`**, causando que `apiCurso.tutor` sea `undefined`.
 
 ---
@@ -78,7 +81,7 @@ export const cursoApiSchema = z.object({
 // ANTES
 private static transformCursoFromApi(apiCurso: CursoApi): Curso {
   const instructorName = `${apiCurso.tutor.firstName} ${apiCurso.tutor.lastName}`.trim();
-  
+
   return {
     instructor: instructorName,
     tutorId: apiCurso.tutor.id,
@@ -94,7 +97,7 @@ private static transformCursoFromApi(apiCurso: CursoApi): Curso {
   const instructorName = apiCurso.tutor
     ? `${apiCurso.tutor.firstName} ${apiCurso.tutor.lastName}`.trim()
     : "Sin instructor";
-  
+
   return {
     instructor: instructorName,
     tutorId: apiCurso.tutor?.id, // ✅ Optional chaining
@@ -110,9 +113,11 @@ private static transformCursoFromApi(apiCurso: CursoApi): Curso {
 ## 🔧 CAMBIOS REALIZADOS
 
 ### **1. Schema (`schema.ts`):**
+
 - ✅ `tutor: tutorSchema.optional()` - Ahora el tutor es opcional en la respuesta de la API
 
 ### **2. Transformador (`cursos-service.ts`):**
+
 - ✅ Verificación condicional: `apiCurso.tutor ? ... : "Sin instructor"`
 - ✅ Optional chaining: `apiCurso.tutor?.firstName`
 - ✅ Valor por defecto: `"Sin instructor"` si no hay tutor
@@ -122,23 +127,28 @@ private static transformCursoFromApi(apiCurso: CursoApi): Curso {
 ## 🧪 CÓMO PROBAR
 
 ### **Paso 1: Limpia la caché del navegador**
+
 ```
 Ctrl + Shift + R (Windows/Linux)
 Cmd + Shift + R (Mac)
 ```
 
 ### **Paso 2: Refresca la página**
+
 ```
 F5 o Ctrl + R
 ```
 
 ### **Paso 3: Prueba activar/desactivar un curso**
+
 1. Ve a `/dashboard/cursos`
 2. Click en el menú (⋮) de un curso
 3. Click en "Activar" o "Desactivar"
 
 ### **Paso 4: Verifica en la consola**
+
 Deberías ver:
+
 ```
 🔄 CursosService: Cambiando estado del curso: 880e8400-... a Activo
 📤 CursosService: Datos enviados a la API: {
@@ -155,11 +165,13 @@ Deberías ver:
 ## 📊 COMPARACIÓN
 
 ### **ANTES (con error):**
+
 ```
 ❌ Error cambiando estado del curso: TypeError: Cannot read properties of undefined (reading 'firstName')
 ```
 
 ### **DESPUÉS (funcionando):**
+
 ```
 ✅ CursosService: Estado del curso actualizado
 ✅ Toast: "Curso activado correctamente"
@@ -171,23 +183,29 @@ Deberías ver:
 ## 🎯 POR QUÉ FUNCIONA AHORA
 
 ### **1. Optional Chaining (`?.`):**
+
 ```typescript
-apiCurso.tutor?.firstName
+apiCurso.tutor?.firstName;
 ```
+
 - Si `tutor` es `undefined`, devuelve `undefined` en lugar de lanzar un error
 - Seguro y conciso
 
 ### **2. Verificación Condicional:**
+
 ```typescript
-apiCurso.tutor ? `${firstName} ${lastName}` : "Sin instructor"
+apiCurso.tutor ? `${firstName} ${lastName}` : "Sin instructor";
 ```
+
 - Maneja explícitamente el caso donde `tutor` no existe
 - Proporciona un valor por defecto razonable
 
 ### **3. Schema Flexible:**
+
 ```typescript
-tutor: tutorSchema.optional()
+tutor: tutorSchema.optional();
 ```
+
 - Permite que diferentes endpoints devuelvan o no el objeto `tutor`
 - Mantiene la validación de Zod cuando `tutor` está presente
 
@@ -196,15 +214,18 @@ tutor: tutorSchema.optional()
 ## 📝 ENDPOINTS Y SUS RESPUESTAS
 
 ### **Endpoints que SÍ incluyen `tutor`:**
+
 - ✅ `GET /api/v1/admin-panel/courses` (lista de cursos)
 - ✅ `POST /api/v1/admin-panel/courses` (crear curso)
 - ✅ `GET /api/v1/courses/{id}` (detalle de curso)
 
 ### **Endpoints que NO incluyen `tutor`:**
+
 - ⚠️ `PUT /api/v1/admin-panel/courses/status` (toggle status)
 - ⚠️ Posiblemente otros endpoints de actualización
 
 ### **Solución:**
+
 Nuestro código ahora maneja **ambos casos** automáticamente.
 
 ---
@@ -214,11 +235,13 @@ Nuestro código ahora maneja **ambos casos** automáticamente.
 ### **Si el error persiste:**
 
 1. **Limpia la caché del navegador:**
+
    ```
    Ctrl + Shift + Delete → Limpiar datos de navegación
    ```
 
 2. **Verifica la respuesta de la API:**
+
    ```javascript
    // En la consola del navegador
    console.log("Respuesta de la API:", response);
@@ -237,6 +260,7 @@ Nuestro código ahora maneja **ambos casos** automáticamente.
 ## ✅ ESTADO FINAL
 
 ### **Archivos Modificados:**
+
 1. ✅ `src/lib/services/cursos-service.ts`
    - Método `transformCursoFromApi` con optional chaining
 
@@ -244,6 +268,7 @@ Nuestro código ahora maneja **ambos casos** automáticamente.
    - `tutor` ahora es opcional en `cursoApiSchema`
 
 ### **Funcionalidades Corregidas:**
+
 - ✅ Activar curso
 - ✅ Desactivar curso
 - ✅ Crear curso (sigue funcionando)
@@ -255,12 +280,15 @@ Nuestro código ahora maneja **ambos casos** automáticamente.
 ## 🎯 LECCIÓN APRENDIDA
 
 ### **Problema:**
+
 No todas las respuestas de la API tienen la misma estructura, incluso para el mismo recurso (curso).
 
 ### **Solución:**
+
 Usar **optional chaining** y **valores por defecto** para manejar respuestas variables de la API.
 
 ### **Buena Práctica:**
+
 ```typescript
 // ❌ MAL: Asumir que siempre existe
 const name = apiCurso.tutor.firstName;
@@ -274,15 +302,19 @@ const name = apiCurso.tutor?.firstName ?? "Sin nombre";
 ## 📚 RECURSOS
 
 ### **Optional Chaining en TypeScript:**
+
 ```typescript
-objeto?.propiedad?.subpropiedad
+objeto?.propiedad?.subpropiedad;
 ```
+
 Devuelve `undefined` si cualquier parte de la cadena es `null` o `undefined`.
 
 ### **Nullish Coalescing (`??`):**
+
 ```typescript
-valor ?? valorPorDefecto
+valor ?? valorPorDefecto;
 ```
+
 Usa `valorPorDefecto` solo si `valor` es `null` o `undefined` (no para `0`, `""`, o `false`).
 
 ---
@@ -290,4 +322,3 @@ Usa `valorPorDefecto` solo si `valor` es `null` o `undefined` (no para `0`, `""`
 **¡El error ha sido corregido exitosamente!** 🎉
 
 **Refresca el navegador y prueba activar/desactivar un curso. El error ya no debería aparecer.**
-

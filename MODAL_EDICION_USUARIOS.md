@@ -9,9 +9,10 @@ Sistema modular y reutilizable para editar información de usuarios (coaches, al
 ## 🔌 Endpoint Implementado
 
 ### PUT - Actualizar Usuario
+
 - **URL**: `/api/v1/admin-panel/users/edit`
 - **Método**: PUT
-- **Headers**: 
+- **Headers**:
   - `Authorization: Bearer {token}`
   - `Content-Type: application/json`
 
@@ -20,6 +21,7 @@ Sistema modular y reutilizable para editar información de usuarios (coaches, al
 ## 📊 Estructura de Datos
 
 ### Request Body:
+
 ```typescript
 {
   user_id: string;                    // Requerido
@@ -35,6 +37,7 @@ Sistema modular y reutilizable para editar información de usuarios (coaches, al
 ```
 
 ### Ejemplo de Request:
+
 ```json
 {
   "user_id": "32ab1d00-e9b6-49fa-b4e1-c93171cd982c",
@@ -50,6 +53,7 @@ Sistema modular y reutilizable para editar información de usuarios (coaches, al
 ```
 
 ### Response (UserResponse):
+
 ```typescript
 {
   id: string;
@@ -71,6 +75,7 @@ Sistema modular y reutilizable para editar información de usuarios (coaches, al
 ## 🏗️ Arquitectura del Sistema
 
 ### Estructura Modular:
+
 ```
 src/
 ├── lib/services/
@@ -95,6 +100,7 @@ src/
 ## 📁 Archivos Creados
 
 ### 1. **Servicio de Usuarios** (`users-service.ts`)
+
 - **Ubicación**: `src/lib/services/users-service.ts`
 - **Responsabilidad**: Comunicación con el API
 - **Características**:
@@ -106,11 +112,12 @@ src/
 
 ```typescript
 export class UsersService {
-  static async updateUser(data: UpdateUserDto): Promise<UserResponse>
+  static async updateUser(data: UpdateUserDto): Promise<UserResponse>;
 }
 ```
 
 ### 2. **Hook de Mutación** (`use-update-user.ts`)
+
 - **Ubicación**: `src/hooks/use-update-user.ts`
 - **Responsabilidad**: Lógica de React Query para mutación
 - **Características**:
@@ -120,10 +127,11 @@ export class UsersService {
   - Manejo de estados (loading, success, error)
 
 ```typescript
-export function useUpdateUser()
+export function useUpdateUser();
 ```
 
 ### 3. **Formulario de Edición** (`edit-user-form.tsx`)
+
 - **Ubicación**: `src/components/forms/edit-user-form.tsx`
 - **Responsabilidad**: Renderizado y validación del formulario
 - **Características**:
@@ -134,16 +142,11 @@ export function useUpdateUser()
   - Grid responsive (2 columnas en desktop)
 
 ```typescript
-export function EditUserForm({
-  userId,
-  defaultValues,
-  onSubmit,
-  onCancel,
-  isLoading
-})
+export function EditUserForm({ userId, defaultValues, onSubmit, onCancel, isLoading });
 ```
 
 ### 4. **Modal Reutilizable** (`edit-user-modal.tsx`)
+
 - **Ubicación**: `src/components/modals/edit-user-modal.tsx`
 - **Responsabilidad**: Wrapper del modal y lógica de UI
 - **Características**:
@@ -159,8 +162,8 @@ export function EditUserModal({
   onOpenChange,
   userId,
   userType, // "coach" | "alumno" | "usuario"
-  defaultValues
-})
+  defaultValues,
+});
 ```
 
 ---
@@ -168,13 +171,16 @@ export function EditUserModal({
 ## 🎯 Integración en Entrenadores
 
 ### Cambios en `entrenadores-table.tsx`:
+
 1. **Estado del modal**:
+
 ```typescript
 const [editingUser, setEditingUser] = useState<EntrenadorUI | null>(null);
 const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 ```
 
 2. **Handlers**:
+
 ```typescript
 const handleEditUser = (entrenador: EntrenadorUI) => {
   setEditingUser(entrenador);
@@ -183,6 +189,7 @@ const handleEditUser = (entrenador: EntrenadorUI) => {
 ```
 
 3. **Renderizado del modal**:
+
 ```typescript
 {editingUser && (
   <EditUserModal
@@ -196,7 +203,9 @@ const handleEditUser = (entrenador: EntrenadorUI) => {
 ```
 
 ### Cambios en `columns.entrenadores.tsx`:
+
 1. **Función generadora de columnas**:
+
 ```typescript
 export const getEntrenadoresColumns = (
   handlers: ColumnHandlers = {}
@@ -204,6 +213,7 @@ export const getEntrenadoresColumns = (
 ```
 
 2. **Handler de edición**:
+
 ```typescript
 <DropdownMenuItem onClick={() => handlers.onEdit?.(entrenador)}>
   <Pencil className="mr-2 h-4 w-4" />
@@ -248,6 +258,7 @@ export const getEntrenadoresColumns = (
 ## ✅ Características Implementadas
 
 ### Validación de Formulario:
+
 - ✅ Nombre (mínimo 1 carácter)
 - ✅ Apellido (mínimo 1 carácter)
 - ✅ Email (formato válido)
@@ -258,12 +269,14 @@ export const getEntrenadoresColumns = (
 - ✅ URL de foto de perfil (formato URL válido)
 
 ### Manejo de Estados:
+
 - ✅ Loading durante envío
 - ✅ Deshabilitación de campos durante loading
 - ✅ Toast notifications (loading, success, error)
 - ✅ Cierre automático del modal al éxito
 
 ### Optimizaciones:
+
 - ✅ Filtrado de campos vacíos (solo envía lo modificado)
 - ✅ Invalidación de queries (actualización automática)
 - ✅ Responsive design
@@ -274,12 +287,13 @@ export const getEntrenadoresColumns = (
 ## 🔁 Reutilización del Sistema
 
 ### Para usar en Alumnos:
+
 ```tsx
 <EditUserModal
   open={isOpen}
   onOpenChange={setIsOpen}
   userId={alumno.user_id}
-  userType="alumno"  // ← Cambia el título
+  userType="alumno" // ← Cambia el título
   defaultValues={{
     firstName: alumno.firstName,
     lastName: alumno.lastName,
@@ -290,6 +304,7 @@ export const getEntrenadoresColumns = (
 ```
 
 ### Para usar en cualquier tipo de usuario:
+
 ```tsx
 <EditUserModal
   open={isOpen}
@@ -304,36 +319,39 @@ export const getEntrenadoresColumns = (
 
 ## 📝 Campos del Formulario
 
-| Campo | Tipo | Requerido | Validación |
-|-------|------|-----------|------------|
-| Nombre | text | ❌ | Min 1 carácter |
-| Apellido | text | ❌ | Min 1 carácter |
-| Email | email | ❌ | Formato email válido |
-| Username | text | ❌ | Min 3 caracteres |
-| Teléfono | text | ❌ | Ninguna |
-| Fecha Nacimiento | date | ❌ | Ninguna |
-| Descripción | textarea | ❌ | Ninguna |
-| Foto Perfil | url | ❌ | Formato URL válido |
+| Campo            | Tipo     | Requerido | Validación           |
+| ---------------- | -------- | --------- | -------------------- |
+| Nombre           | text     | ❌        | Min 1 carácter       |
+| Apellido         | text     | ❌        | Min 1 carácter       |
+| Email            | email    | ❌        | Formato email válido |
+| Username         | text     | ❌        | Min 3 caracteres     |
+| Teléfono         | text     | ❌        | Ninguna              |
+| Fecha Nacimiento | date     | ❌        | Ninguna              |
+| Descripción      | textarea | ❌        | Ninguna              |
+| Foto Perfil      | url      | ❌        | Formato URL válido   |
 
 ---
 
 ## 🎨 UI/UX
 
 ### Modal:
+
 - **Tamaño**: Máximo 2xl (max-w-2xl)
 - **Altura**: Máximo 90vh con scroll
 - **Responsive**: Grid 2 columnas → 1 columna en mobile
 
 ### Formulario:
+
 - **Layout**: Grid responsive
 - **Botones**: Cancelar (outline) + Guardar (primary)
 - **Estados**: Loading muestra "Guardando..."
 
 ### Notificaciones:
+
 ```typescript
-toast.loading("Actualizando usuario...");  // Durante
-toast.success("Usuario actualizado");      // Éxito
-toast.error("Error al actualizar");        // Error
+toast.loading("Actualizando usuario..."); // Durante
+toast.success("Usuario actualizado"); // Éxito
+toast.error("Error al actualizar"); // Error
 ```
 
 ---
@@ -341,6 +359,7 @@ toast.error("Error al actualizar");        // Error
 ## 🧪 Testing
 
 ### Para probar:
+
 1. Ir a `/dashboard/entrenadores`
 2. Hacer clic en menú de acciones (⋮) de un entrenador
 3. Seleccionar "Editar información"
@@ -357,12 +376,14 @@ toast.error("Error al actualizar");        // Error
 ## 🛠️ Mantenimiento
 
 ### Para agregar un nuevo campo:
+
 1. Agregar al schema en `edit-user-form.tsx`
 2. Agregar FormField en el JSX
 3. Agregar al tipo `UpdateUserDto` en `users-service.ts`
 4. ¡Listo! La validación y envío es automático
 
 ### Para usar en otro módulo:
+
 1. Importar `<EditUserModal>`
 2. Agregar estado de modal
 3. Pasar `userId` y `defaultValues`
@@ -373,12 +394,14 @@ toast.error("Error al actualizar");        // Error
 ## 📚 Referencias
 
 ### Archivos Principales:
+
 - **Servicio**: `src/lib/services/users-service.ts`
 - **Hook**: `src/hooks/use-update-user.ts`
 - **Formulario**: `src/components/forms/edit-user-form.tsx`
 - **Modal**: `src/components/modals/edit-user-modal.tsx`
 
 ### Librerías Utilizadas:
+
 - React Hook Form
 - Zod (validación)
 - React Query (mutaciones)
@@ -417,4 +440,3 @@ toast.error("Error al actualizar");        // Error
 - [x] Sin errores de linter
 
 **El sistema está listo para producción** 🎉
-

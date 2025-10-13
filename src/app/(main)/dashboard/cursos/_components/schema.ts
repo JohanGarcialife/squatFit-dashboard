@@ -47,4 +47,3 @@ export const cursoSchema = z.object({
 export type CursoApi = z.infer<typeof cursoApiSchema>;
 export type Tutor = z.infer<typeof tutorSchema>;
 export type Curso = z.infer<typeof cursoSchema>;
-

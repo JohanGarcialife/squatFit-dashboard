@@ -31,9 +31,9 @@ const getStatusBadge = (status: string) => {
 };
 
 const getInitials = (firstName: string, lastName: string) => {
-  const first = firstName?.charAt(0) || '';
-  const last = lastName?.charAt(0) || '';
-  return `${first}${last}`.toUpperCase() || '??';
+  const first = firstName?.charAt(0) || "";
+  const last = lastName?.charAt(0) || "";
+  return `${first}${last}`.toUpperCase() || "??";
 };
 
 // ============================================================================
@@ -50,9 +50,7 @@ interface ColumnHandlers {
 // FUNCIÓN PARA GENERAR COLUMNAS CON HANDLERS
 // ============================================================================
 
-export const getEntrenadoresColumns = (
-  handlers: ColumnHandlers = {}
-): ColumnDef<EntrenadorUI>[] => [
+export const getEntrenadoresColumns = (handlers: ColumnHandlers = {}): ColumnDef<EntrenadorUI>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -85,13 +83,11 @@ export const getEntrenadoresColumns = (
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
             {row.original.avatar && <AvatarImage src={row.original.avatar} />}
-            <AvatarFallback className="bg-orange-100 text-orange-700 font-semibold">
-              {initials}
-            </AvatarFallback>
+            <AvatarFallback className="bg-orange-100 font-semibold text-orange-700">{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <span className="font-medium">{row.original.fullName}</span>
-            <span className="text-xs text-muted-foreground">{row.original.email}</span>
+            <span className="text-muted-foreground text-xs">{row.original.email}</span>
           </div>
         </div>
       );
@@ -101,20 +97,14 @@ export const getEntrenadoresColumns = (
   {
     accessorKey: "phone",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Teléfono" />,
-    cell: ({ row }) => (
-      <span className="text-sm">
-        {row.original.phone || "No disponible"}
-      </span>
-    ),
+    cell: ({ row }) => <span className="text-sm">{row.original.phone || "No disponible"}</span>,
   },
   {
     accessorKey: "description",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Descripción" />,
     cell: ({ row }) => (
       <div className="max-w-[300px] truncate">
-        <span className="text-sm text-muted-foreground">
-          {row.original.description || "Sin descripción"}
-        </span>
+        <span className="text-muted-foreground text-sm">{row.original.description || "Sin descripción"}</span>
       </div>
     ),
   },
@@ -141,9 +131,7 @@ export const getEntrenadoresColumns = (
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(entrenador.id)}
-            >
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(entrenador.id)}>
               Copiar ID del entrenador
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -152,38 +140,27 @@ export const getEntrenadoresColumns = (
               Ver perfil completo
             </DropdownMenuItem>
             {entrenador.email && (
-              <DropdownMenuItem
-                onClick={() => window.open(`mailto:${entrenador.email}`, '_blank')}
-              >
+              <DropdownMenuItem onClick={() => window.open(`mailto:${entrenador.email}`, "_blank")}>
                 <Mail className="mr-2 h-4 w-4" />
                 Enviar email
               </DropdownMenuItem>
             )}
             {entrenador.phone && (
-              <DropdownMenuItem
-                onClick={() => window.open(`tel:${entrenador.phone}`, '_blank')}
-              >
+              <DropdownMenuItem onClick={() => window.open(`tel:${entrenador.phone}`, "_blank")}>
                 <Phone className="mr-2 h-4 w-4" />
                 Llamar
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem
-              onClick={() => handlers.onEdit?.(entrenador)}
-            >
+            <DropdownMenuItem onClick={() => handlers.onEdit?.(entrenador)}>
               <Pencil className="mr-2 h-4 w-4" />
               Editar información
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => handlers.onToggleStatus?.(entrenador)}
-            >
+            <DropdownMenuItem onClick={() => handlers.onToggleStatus?.(entrenador)}>
               <Power className="mr-2 h-4 w-4" />
               {entrenador.status === "Activo" ? "Desactivar" : "Activar"}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              className="text-red-600"
-              onClick={() => handlers.onDelete?.(entrenador)}
-            >
+            <DropdownMenuItem className="text-red-600" onClick={() => handlers.onDelete?.(entrenador)}>
               <Trash2 className="mr-2 h-4 w-4" />
               Eliminar entrenador
             </DropdownMenuItem>
@@ -193,4 +170,3 @@ export const getEntrenadoresColumns = (
     },
   },
 ];
-

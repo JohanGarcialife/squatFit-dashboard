@@ -20,7 +20,7 @@ export function EntrenadoresTable() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [editingUser, setEditingUser] = useState<EntrenadorUI | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+
   // Obtener entrenadores del API
   const { data: entrenadoresData, isLoading, error } = useEntrenadores();
 
@@ -38,26 +38,23 @@ export function EntrenadoresTable() {
   // Transformar datos del API a formato UI
   const entrenadores = useMemo<EntrenadorUI[]>(() => {
     if (!entrenadoresData) return [];
-    
+
     return entrenadoresData.map((entrenador) => ({
       ...entrenador,
       // Asegurar que firstName y lastName nunca sean null
-      firstName: entrenador.firstName || '',
-      lastName: entrenador.lastName || '',
-      status: entrenador.user_status === 1 ? "Activo" as const : "Inactivo" as const,
-      fullName: `${entrenador.firstName || ''} ${entrenador.lastName || ''}`.trim() || 'Sin nombre',
+      firstName: entrenador.firstName || "",
+      lastName: entrenador.lastName || "",
+      status: entrenador.user_status === 1 ? ("Activo" as const) : ("Inactivo" as const),
+      fullName: `${entrenador.firstName || ""} ${entrenador.lastName || ""}`.trim() || "Sin nombre",
       avatar: entrenador.profile_picture || undefined,
     }));
   }, [entrenadoresData]);
 
   // Generar columnas con handlers
-  const columns = useMemo(
-    () => getEntrenadoresColumns({ onEdit: handleEditUser }),
-    [handleEditUser]
-  );
-  
-  const table = useDataTableInstance({ 
-    data: entrenadores, 
+  const columns = useMemo(() => getEntrenadoresColumns({ onEdit: handleEditUser }), [handleEditUser]);
+
+  const table = useDataTableInstance({
+    data: entrenadores,
     columns,
     getRowId: (row) => row.id,
     state: {
@@ -71,9 +68,7 @@ export function EntrenadoresTable() {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
           <CardTitle>Gestión de Entrenadores</CardTitle>
-          <CardDescription>
-            Administra el equipo de entrenadores y profesionales
-          </CardDescription>
+          <CardDescription>Administra el equipo de entrenadores y profesionales</CardDescription>
         </div>
         {/* <Button className="gap-2">
           <Plus className="h-4 w-4" />
@@ -84,7 +79,7 @@ export function EntrenadoresTable() {
         {/* Barra de búsqueda y controles */}
         <div className="flex items-center justify-between gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
             <Input
               placeholder="Buscar entrenadores..."
               value={globalFilter ?? ""}
@@ -141,4 +136,3 @@ export function EntrenadoresTable() {
     </Card>
   );
 }
-

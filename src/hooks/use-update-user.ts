@@ -18,7 +18,7 @@ export function useUpdateUser() {
     mutationFn: (data: UpdateUserDto) => UsersService.updateUser(data),
     onMutate: async (data) => {
       toast.loading("Actualizando usuario...", { id: `update-user-${data.user_id}` });
-      
+
       return { userId: data.user_id };
     },
     onSuccess: (response, variables, context) => {
@@ -27,20 +27,19 @@ export function useUpdateUser() {
       queryClient.invalidateQueries({ queryKey: ["entrenadores"] });
       queryClient.invalidateQueries({ queryKey: ["alumnos"] });
       queryClient.invalidateQueries({ queryKey: ["usuarios"] });
-      
-      toast.success("Usuario actualizado exitosamente", { 
-        id: `update-user-${context?.userId}` 
+
+      toast.success("Usuario actualizado exitosamente", {
+        id: `update-user-${context?.userId}`,
       });
-      
+
       console.log("✅ Usuario actualizado:", response);
     },
     onError: (error: Error, variables, context) => {
       console.error("❌ Error actualizando usuario:", error);
-      
-      toast.error(error.message || "Error al actualizar el usuario", { 
-        id: `update-user-${context?.userId}` 
+
+      toast.error(error.message || "Error al actualizar el usuario", {
+        id: `update-user-${context?.userId}`,
       });
     },
   });
 }
-

@@ -191,4 +191,3 @@ const CardDetails: React.FC = () => {
 };
 
 export default CardDetails;
-

@@ -9,17 +9,17 @@ export const createCursoFormSchema = z.object({
     .string()
     .min(3, "El nombre debe tener al menos 3 caracteres")
     .max(100, "El nombre no puede exceder 100 caracteres"),
-  
+
   description: z
     .string()
     .min(10, "La descripción debe tener al menos 10 caracteres")
     .max(500, "La descripción no puede exceder 500 caracteres"),
-  
+
   instructor: z
     .string()
     .min(3, "El nombre del instructor debe tener al menos 3 caracteres")
     .max(100, "El nombre del instructor no puede exceder 100 caracteres"),
-  
+
   price: z
     .number({
       required_error: "El precio es requerido",
@@ -27,26 +27,17 @@ export const createCursoFormSchema = z.object({
     })
     .min(0, "El precio debe ser mayor o igual a 0")
     .max(9999, "El precio no puede exceder 9999"),
-  
-  currency: z
-    .string()
-    .default("€")
-    .optional(),
-  
-  status: z
-    .enum(["Activo", "Inactivo", "En Desarrollo"])
-    .default("En Desarrollo"),
-  
-  duration: z
-    .string()
-    .min(3, "La duración es requerida")
-    .max(50, "La duración no puede exceder 50 caracteres"),
-  
-  level: z
-    .enum(["Principiante", "Intermedio", "Avanzado"], {
-      required_error: "Debes seleccionar un nivel",
-    }),
-  
+
+  currency: z.string().default("€").optional(),
+
+  status: z.enum(["Activo", "Inactivo", "En Desarrollo"]).default("En Desarrollo"),
+
+  duration: z.string().min(3, "La duración es requerida").max(50, "La duración no puede exceder 50 caracteres"),
+
+  level: z.enum(["Principiante", "Intermedio", "Avanzado"], {
+    required_error: "Debes seleccionar un nivel",
+  }),
+
   category: z
     .string()
     .min(3, "La categoría debe tener al menos 3 caracteres")
@@ -81,13 +72,13 @@ export const cursoFormOptions = {
     { value: "Inactivo", label: "Inactivo" },
     { value: "En Desarrollo", label: "En Desarrollo" },
   ] as const,
-  
+
   level: [
     { value: "Principiante", label: "Principiante" },
     { value: "Intermedio", label: "Intermedio" },
     { value: "Avanzado", label: "Avanzado" },
   ] as const,
-  
+
   categories: [
     { value: "Entrenamiento", label: "Entrenamiento" },
     { value: "Nutrición", label: "Nutrición" },
@@ -99,7 +90,7 @@ export const cursoFormOptions = {
     { value: "Certificación", label: "Certificación" },
     { value: "Otro", label: "Otro" },
   ] as const,
-  
+
   durations: [
     { value: "4 semanas", label: "4 semanas" },
     { value: "6 semanas", label: "6 semanas" },
@@ -110,4 +101,3 @@ export const cursoFormOptions = {
     { value: "20 semanas", label: "20 semanas" },
   ] as const,
 };
-

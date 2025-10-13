@@ -19,4 +19,3 @@ export type AlumnoUI = Alumno & {
   fullName: string;
   statusDisplay: "Activo" | "Inactivo";
 };
-

@@ -1,6 +1,7 @@
 # ✅ SOLUCIÓN: Error "No QueryClient set"
 
 ## 🔴 Error Original
+
 ```
 Error: No QueryClient set, use QueryClientProvider to set one
 ```
@@ -12,6 +13,7 @@ He agregado el `QueryClientProvider` de React Query al layout principal de la ap
 ### Archivos modificados:
 
 #### 1. **Nuevo archivo:** `src/providers/query-provider.tsx`
+
 ```typescript
 ✅ QueryClientProvider configurado
 ✅ QueryClient con opciones optimizadas
@@ -20,6 +22,7 @@ He agregado el `QueryClientProvider` de React Query al layout principal de la ap
 ```
 
 #### 2. **Modificado:** `src/app/layout.tsx`
+
 ```typescript
 ✅ Importado QueryProvider
 ✅ Agregado al árbol de providers
@@ -31,21 +34,25 @@ He agregado el `QueryClientProvider` de React Query al layout principal de la ap
 ## 🚀 CÓMO PROBAR LA SOLUCIÓN
 
 ### **Paso 1: Detener el servidor**
+
 ```bash
 Ctrl + C
 ```
 
 ### **Paso 2: Reiniciar el servidor**
+
 ```bash
 npm run dev
 ```
 
 ### **Paso 3: Abrir la página de cursos**
+
 ```
 http://localhost:3000/dashboard/cursos
 ```
 
 ### **✅ Resultado esperado:**
+
 - ✅ La página debería cargar sin errores
 - ✅ Deberías ver las cards de estadísticas
 - ✅ Deberías ver la tabla de cursos (o mensaje de carga)
@@ -71,6 +78,7 @@ http://localhost:3000/dashboard/cursos
 ```
 
 ### **React Query DevTools:**
+
 - Solo visible en modo desarrollo
 - Posición: esquina inferior derecha
 - Abre con un click para inspeccionar queries y mutations
@@ -92,29 +100,38 @@ Una vez que reinicies el servidor, deberías poder:
 ## 🐛 SI AÚN HAY ERRORES
 
 ### **Error de conexión con la API:**
+
 ```
 ❌ Network Error
 ❌ Failed to fetch
 ```
+
 **Solución:**
+
 1. Verifica que la URL de la API sea correcta
 2. Verifica que el backend esté corriendo
 3. Verifica que CORS esté habilitado en el backend
 
 ### **Error de autenticación:**
+
 ```
 ❌ 401 Unauthorized
 ```
+
 **Solución:**
+
 1. Asegúrate de haber hecho login
 2. Verifica que el token se esté guardando correctamente
 3. Revisa la consola para ver si el token se envía en las peticiones
 
 ### **Ver logs en la consola:**
+
 ```
 F12 → Console
 ```
+
 Busca mensajes como:
+
 ```
 ✅ CursosService: Obteniendo cursos...
 ❌ CursosService: Error obteniendo cursos: [mensaje]
@@ -139,9 +156,9 @@ html
 ## 🎉 ¡LISTO!
 
 El error debería estar resuelto. Solo necesitas:
+
 1. **Reiniciar el servidor** (`Ctrl + C` → `npm run dev`)
 2. **Refrescar el navegador** (`F5`)
 3. **Navegar a** `/dashboard/cursos`
 
 **¡Ahora React Query debería funcionar correctamente!** 🚀
-

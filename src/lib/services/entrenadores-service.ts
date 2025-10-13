@@ -276,7 +276,7 @@ export class EntrenadoresService {
    */
   static async toggleEntrenadorStatus(
     id: string,
-    status: "Activo" | "Inactivo" | "Vacaciones" | "Pendiente"
+    status: "Activo" | "Inactivo" | "Vacaciones" | "Pendiente",
   ): Promise<Entrenador> {
     if (!id) {
       throw new Error("ID de entrenador requerido");
@@ -285,13 +285,10 @@ export class EntrenadoresService {
     try {
       console.log("🔄 EntrenadoresService: Cambiando estado del entrenador:", id, "a", status);
 
-      const response = await this.makeRequest<ApiResponse<Entrenador>>(
-        `/api/v1/coaches/${id}/status`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({ status }),
-        }
-      );
+      const response = await this.makeRequest<ApiResponse<Entrenador>>(`/api/v1/coaches/${id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      });
 
       console.log("✅ EntrenadoresService: Estado del entrenador actualizado");
       return response.data;
@@ -313,12 +310,9 @@ export class EntrenadoresService {
     try {
       console.log("👥 EntrenadoresService: Asignando cliente", clientId, "al entrenador", coachId);
 
-      await this.makeRequest<{ success: boolean; message: string }>(
-        `/api/v1/coaches/${coachId}/clients/${clientId}`,
-        {
-          method: "POST",
-        }
-      );
+      await this.makeRequest<{ success: boolean; message: string }>(`/api/v1/coaches/${coachId}/clients/${clientId}`, {
+        method: "POST",
+      });
 
       console.log("✅ EntrenadoresService: Cliente asignado exitosamente");
     } catch (error) {
@@ -370,4 +364,3 @@ export class EntrenadoresService {
     }
   }
 }
-

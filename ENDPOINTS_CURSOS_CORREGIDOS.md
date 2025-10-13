@@ -5,13 +5,15 @@
 He corregido el endpoint para obtener todos los cursos:
 
 ### **ANTES:**
+
 ```typescript
-GET /api/v1/courses
+GET / api / v1 / courses;
 ```
 
 ### **AHORA:**
+
 ```typescript
-GET /api/v1/course/all
+GET / api / v1 / course / all;
 ```
 
 ---
@@ -21,31 +23,37 @@ GET /api/v1/course/all
 Por favor confirma si estos endpoints son correctos para tu API:
 
 ### **1. Listar todos los cursos** ✅
+
 ```
 GET /api/v1/course/all
 ```
 
 ### **2. Obtener un curso específico** ❓
+
 ```
 GET /api/v1/course/{id}
 ```
 
 ### **3. Crear un nuevo curso** ❓
+
 ```
 POST /api/v1/course
 ```
 
 ### **4. Actualizar un curso** ❓
+
 ```
 PUT /api/v1/course/{id}
 ```
 
 ### **5. Eliminar un curso** ❓
+
 ```
 DELETE /api/v1/course/{id}
 ```
 
 ### **6. Cambiar estado de un curso** ❓
+
 ```
 PATCH /api/v1/course/{id}/status
 ```
@@ -56,35 +64,39 @@ PATCH /api/v1/course/{id}/status
 
 Si los endpoints son diferentes, necesito actualizar estos métodos en `src/lib/services/cursos-service.ts`:
 
-| Método | Línea actual | Endpoint actual | ¿Es correcto? |
-|--------|-------------|----------------|---------------|
-| `getCursos()` | ✅ Actualizado | `/api/v1/course/all` | ✅ |
-| `getCursoById()` | ~185 | `/api/v1/course/{id}` | ❓ |
-| `createCurso()` | ~200 | `/api/v1/course` | ❓ |
-| `updateCurso()` | ~220 | `/api/v1/course/{id}` | ❓ |
-| `deleteCurso()` | ~240 | `/api/v1/course/{id}` | ❓ |
-| `toggleCursoStatus()` | ~260 | `/api/v1/course/{id}/status` | ❓ |
+| Método                | Línea actual   | Endpoint actual              | ¿Es correcto? |
+| --------------------- | -------------- | ---------------------------- | ------------- |
+| `getCursos()`         | ✅ Actualizado | `/api/v1/course/all`         | ✅            |
+| `getCursoById()`      | ~185           | `/api/v1/course/{id}`        | ❓            |
+| `createCurso()`       | ~200           | `/api/v1/course`             | ❓            |
+| `updateCurso()`       | ~220           | `/api/v1/course/{id}`        | ❓            |
+| `deleteCurso()`       | ~240           | `/api/v1/course/{id}`        | ❓            |
+| `toggleCursoStatus()` | ~260           | `/api/v1/course/{id}/status` | ❓            |
 
 ---
 
 ## 🚀 CÓMO PROBAR AHORA
 
 ### **Paso 1: Verificar que el servidor esté corriendo**
+
 ```bash
 npm run dev
 ```
 
 ### **Paso 2: Abrir la página de cursos**
+
 ```
 http://localhost:3000/dashboard/cursos
 ```
 
 ### **Paso 3: Verificar en la consola**
+
 ```
 F12 → Console
 ```
 
 Deberías ver logs como:
+
 ```
 🌐 CursosService: Haciendo petición a: https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/course/all
 ✅ CursosService: X cursos obtenidos

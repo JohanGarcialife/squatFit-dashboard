@@ -32,11 +32,11 @@ La URL de la API ya está configurada por defecto en el código:
 
 ```typescript
 // src/lib/services/cursos-service.ts
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 
-  "https://squatfit-api-cyrc2g3zra-no.a.run.app";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cyrc2g3zra-no.a.run.app";
 ```
 
 **Si necesitas cambiarla:**
+
 1. Crea archivo `.env.local` en la raíz del proyecto
 2. Agrega: `NEXT_PUBLIC_API_URL=https://tu-api-url.com`
 3. Reinicia el servidor
@@ -58,11 +58,13 @@ http://localhost:3000/dashboard/cursos
 ## 🧪 QUÉ PROBAR
 
 ### 1. **Ver cursos** (GET)
+
 - Al abrir la página, debería cargar los cursos desde la API
 - Las cards muestran estadísticas calculadas dinámicamente
 - Si no hay cursos, muestra "No hay cursos disponibles"
 
 ### 2. **Crear curso** (POST)
+
 1. Click en "Nuevo Curso"
 2. Llenar formulario
 3. Click en "Crear Curso"
@@ -71,6 +73,7 @@ http://localhost:3000/dashboard/cursos
 6. ✅ Estadísticas se actualizan
 
 ### 3. **Editar curso** (PUT)
+
 1. Click en menú (⋮) de un curso
 2. Click en "Editar curso"
 3. Modificar campos
@@ -79,12 +82,14 @@ http://localhost:3000/dashboard/cursos
 6. ✅ Cambios reflejados
 
 ### 4. **Cambiar estado** (PATCH)
+
 1. Click en menú (⋮) de un curso
 2. Click en "Activar" o "Desactivar"
 3. ✅ Toast de éxito
 4. ✅ Badge cambia inmediatamente
 
 ### 5. **Eliminar curso** (DELETE)
+
 1. Click en menú (⋮) de un curso
 2. Click en "Eliminar curso"
 3. Confirmar
@@ -104,14 +109,17 @@ F12 → Console
 ### Errores comunes:
 
 **❌ "Network Error"**
+
 - La API no está disponible
 - Verificar URL en `.env.local`
 
 **❌ "401 Unauthorized"**
+
 - No estás autenticado
 - Hacer login primero
 
 **❌ "CORS Error"**
+
 - El backend debe tener CORS habilitado
 - Verificar configuración del backend
 
@@ -120,6 +128,7 @@ F12 → Console
 ## 📦 ARCHIVOS CREADOS/MODIFICADOS
 
 ### **Archivos nuevos:**
+
 ```
 src/lib/services/cursos-service.ts          (325 líneas)
 src/hooks/use-cursos.ts                     (259 líneas)
@@ -133,6 +142,7 @@ src/app/(main)/dashboard/cursos/_components/
 ```
 
 ### **Archivos modificados:**
+
 ```
 src/app/(main)/dashboard/cursos/_components/
   ├── cursos-table.tsx      → Conectada a API
@@ -144,38 +154,43 @@ src/app/(main)/dashboard/cursos/_components/
 
 ## 📊 ENDPOINTS UTILIZADOS
 
-| Método | Endpoint | Hook |
-|--------|----------|------|
-| GET | `/api/v1/courses` | `useCursos()` |
-| GET | `/api/v1/courses/:id` | `useCurso(id)` |
-| POST | `/api/v1/courses` | `useCreateCurso()` |
-| PUT | `/api/v1/courses/:id` | `useUpdateCurso()` |
-| PATCH | `/api/v1/courses/:id/status` | `useToggleCursoStatus()` |
-| DELETE | `/api/v1/courses/:id` | `useDeleteCurso()` |
+| Método | Endpoint                     | Hook                     |
+| ------ | ---------------------------- | ------------------------ |
+| GET    | `/api/v1/courses`            | `useCursos()`            |
+| GET    | `/api/v1/courses/:id`        | `useCurso(id)`           |
+| POST   | `/api/v1/courses`            | `useCreateCurso()`       |
+| PUT    | `/api/v1/courses/:id`        | `useUpdateCurso()`       |
+| PATCH  | `/api/v1/courses/:id/status` | `useToggleCursoStatus()` |
+| DELETE | `/api/v1/courses/:id`        | `useDeleteCurso()`       |
 
 ---
 
 ## 🎨 CARACTERÍSTICAS IMPLEMENTADAS
 
 ### ⚡ **Optimistic Updates**
+
 La UI se actualiza inmediatamente, antes de que el servidor responda. Si falla, se revierte automáticamente.
 
 ### 🔄 **Auto-refresh**
+
 - Refetch cada 5 minutos
 - Refetch al volver a la ventana
 - Cache de 1 minuto
 
 ### 🎯 **Error Handling**
+
 - Toast notifications
 - Mensajes descriptivos
 - Retry automático
 
 ### 💾 **Loading States**
+
 - Skeleton loaders
 - Spinners
 - Botones deshabilitados
 
 ### 🔐 **Autenticación**
+
 - Token JWT automático
 - Fallback a localStorage
 - Headers configurados
@@ -187,6 +202,7 @@ La UI se actualiza inmediatamente, antes de que el servidor responda. Si falla, 
 **La integración está completa y lista para producción.**
 
 Si todo funciona correctamente, puedes replicar este mismo patrón para:
+
 - ✅ Entrenadores
 - ✅ Finanzas
 - ✅ Analíticas
@@ -197,9 +213,9 @@ Si todo funciona correctamente, puedes replicar este mismo patrón para:
 ## 📞 SOPORTE
 
 Para más detalles, ver:
+
 - `CONFIGURACION_API.md` - Documentación completa
 - `ANALISIS_API_SQUATFIT.md` - Análisis de todos los endpoints
 - React Query DevTools (esquina inferior derecha en desarrollo)
 
 **¿Preguntas?** Revisa la consola del navegador para logs detallados.
-

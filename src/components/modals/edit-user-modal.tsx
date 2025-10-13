@@ -2,13 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditUserForm, EditUserFormData } from "@/components/forms/edit-user-form";
 import { useUpdateUser } from "@/hooks/use-update-user";
 
@@ -41,13 +35,7 @@ export interface EditUserModalProps {
  * Modal reutilizable para editar información de usuarios
  * Puede usarse para coaches, alumnos o cualquier tipo de usuario
  */
-export function EditUserModal({
-  open,
-  onOpenChange,
-  userId,
-  userType = "usuario",
-  defaultValues,
-}: EditUserModalProps) {
+export function EditUserModal({ open, onOpenChange, userId, userType = "usuario", defaultValues }: EditUserModalProps) {
   const updateUserMutation = useUpdateUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,7 +51,7 @@ export function EditUserModal({
 
     try {
       await updateUserMutation.mutateAsync(data);
-      
+
       // Cerrar modal después de actualizar exitosamente
       onOpenChange(false);
     } catch (error) {
@@ -104,7 +92,7 @@ export function EditUserModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{getTitleByUserType()}</DialogTitle>
           <DialogDescription>{getDescriptionByUserType()}</DialogDescription>
@@ -121,4 +109,3 @@ export function EditUserModal({
     </Dialog>
   );
 }
-

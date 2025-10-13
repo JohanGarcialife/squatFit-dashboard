@@ -1,6 +1,7 @@
 # ✅ SOLUCIÓN: Error "Cannot read properties of undefined (reading 'length')"
 
 ## 🔴 Error Original
+
 ```
 TypeError: Cannot read properties of undefined (reading 'length')
 at CursosService.getCursos (cursos-service.ts:175:53)
@@ -8,9 +9,10 @@ at CursosService.getCursos (cursos-service.ts:175:53)
 
 ## ❓ ¿QUÉ PASÓ?
 
-El error ocurrió porque intentamos acceder a `response.data.length` pero `response.data` era `undefined`. 
+El error ocurrió porque intentamos acceder a `response.data.length` pero `response.data` era `undefined`.
 
 Esto significa que la API no está devolviendo los datos en el formato esperado:
+
 ```json
 {
   "data": [...]
@@ -24,6 +26,7 @@ He actualizado el método `getCursos()` para manejar múltiples estructuras de r
 ### **Ahora soporta:**
 
 1. **Array directo:**
+
 ```json
 [
   { "id": "1", "name": "Curso 1", ... },
@@ -32,6 +35,7 @@ He actualizado el método `getCursos()` para manejar múltiples estructuras de r
 ```
 
 2. **Objeto con propiedad `data`:**
+
 ```json
 {
   "data": [
@@ -41,6 +45,7 @@ He actualizado el método `getCursos()` para manejar múltiples estructuras de r
 ```
 
 3. **Objeto con propiedad `courses`:**
+
 ```json
 {
   "courses": [
@@ -69,16 +74,19 @@ Ahora verás logs detallados en la consola:
 ## 🧪 CÓMO PROBAR
 
 ### **Paso 1: Refresca el navegador**
+
 ```
 F5 o Ctrl + R
 ```
 
 ### **Paso 2: Abre la consola**
+
 ```
 F12 → Console
 ```
 
 ### **Paso 3: Ve a la página de cursos**
+
 ```
 http://localhost:3000/dashboard/cursos
 ```
@@ -86,6 +94,7 @@ http://localhost:3000/dashboard/cursos
 ### **Paso 4: Revisa los logs**
 
 Deberías ver algo como:
+
 ```
 🔍 CursosService: Obteniendo cursos...
 🌐 CursosService: Haciendo petición a: https://...
@@ -139,4 +148,3 @@ Cuando pruebes, sería útil tener:
 ---
 
 **¡Refresca el navegador y dime qué ves en la consola!** 🚀
-

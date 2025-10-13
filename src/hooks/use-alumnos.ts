@@ -1,12 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { 
-  UsersService, 
-  GetAlumnosParams,
-  UpdateUserDto,
-  UserResponse
-} from "@/lib/services/users-service";
+import { UsersService, GetAlumnosParams, UpdateUserDto, UserResponse } from "@/lib/services/users-service";
 
 // ============================================================================
 // QUERY KEYS
@@ -49,7 +44,7 @@ export function useAlumno(id: string) {
     queryFn: async () => {
       // Obtener todos los alumnos y filtrar por ID
       const alumnos = await UsersService.getAlumnos();
-      const alumno = alumnos.find(a => a.id === id);
+      const alumno = alumnos.find((a) => a.id === id);
       if (!alumno) throw new Error("Alumno no encontrado");
       return alumno;
     },
@@ -70,26 +65,25 @@ export function useUpdateAlumno() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateUserDto) =>
-      UsersService.updateUser(data),
+    mutationFn: (data: UpdateUserDto) => UsersService.updateUser(data),
     onMutate: async ({ user_id }) => {
       toast.loading("Actualizando alumno...", { id: `update-alumno-${user_id}` });
-      
+
       // Cancelar queries en curso para evitar conflictos
       await queryClient.cancelQueries({ queryKey: alumnosKeys.detail(user_id) });
-      
+
       // Guardar snapshot del estado anterior (para rollback)
       const previousAlumno = queryClient.getQueryData<UserResponse>(alumnosKeys.detail(user_id));
-      
+
       return { previousAlumno, user_id };
     },
     onSuccess: (updatedAlumno, { user_id }) => {
       // Actualizar cache del alumno específico
       queryClient.setQueryData(alumnosKeys.detail(user_id), updatedAlumno);
-      
+
       // Invalidar lista para refrescar
       queryClient.invalidateQueries({ queryKey: alumnosKeys.lists() });
-      
+
       toast.success("Alumno actualizado exitosamente", { id: `update-alumno-${user_id}` });
     },
     onError: (error: Error, { user_id }, context) => {
@@ -97,7 +91,7 @@ export function useUpdateAlumno() {
       if (context?.previousAlumno) {
         queryClient.setQueryData(alumnosKeys.detail(user_id), context.previousAlumno);
       }
-      
+
       console.error("Error actualizando alumno:", error);
       toast.error(error.message || "Error al actualizar el alumno", { id: `update-alumno-${user_id}` });
     },
@@ -119,7 +113,7 @@ export function usePrefetchAlumno() {
       queryKey: alumnosKeys.detail(id),
       queryFn: async () => {
         const alumnos = await UsersService.getAlumnos();
-        const alumno = alumnos.find(a => a.id === id);
+        const alumno = alumnos.find((a) => a.id === id);
         if (!alumno) throw new Error("Alumno no encontrado");
         return alumno;
       },
@@ -138,4 +132,3 @@ export function useInvalidateAlumnos() {
     queryClient.invalidateQueries({ queryKey: alumnosKeys.all });
   };
 }
-

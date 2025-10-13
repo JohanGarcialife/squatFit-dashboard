@@ -11,12 +11,14 @@
 La aplicación SquatFit Dashboard es un panel de administración moderno construido con tecnologías de vanguardia. Presenta una arquitectura sólida con autenticación real conectada a API externa, pero con algunas áreas de mejora en rendimiento y optimización.
 
 ### ✅ **Fortalezas Principales**
+
 - Arquitectura moderna con Next.js 15 y React 19
 - Sistema de autenticación robusto con JWT y cookies HttpOnly
 - UI consistente con shadcn/ui y Tailwind CSS v4
 - Configuración de desarrollo profesional con ESLint, Prettier y Husky
 
 ### ⚠️ **Áreas de Mejora Identificadas**
+
 - Duplicación de lógica de autenticación
 - Posibles re-renderizados innecesarios
 - Configuración de dependencias con algunas redundancias
@@ -26,6 +28,7 @@ La aplicación SquatFit Dashboard es un panel de administración moderno constru
 ## 🔧 **INFRAESTRUCTURA TÉCNICA**
 
 ### **Stack Tecnológico Principal**
+
 ```json
 {
   "framework": "Next.js 15.3.5",
@@ -40,6 +43,7 @@ La aplicación SquatFit Dashboard es un panel de administración moderno constru
 ```
 
 ### **Configuración del Proyecto**
+
 - **TypeScript:** Configuración estricta habilitada
 - **ESLint:** Configuración avanzada con 8 plugins especializados
 - **Prettier:** Integrado con reglas de formato consistentes
@@ -51,6 +55,7 @@ La aplicación SquatFit Dashboard es un panel de administración moderno constru
 ## 🏛️ **ARQUITECTURA DE LA APLICACIÓN**
 
 ### **Estructura de Directorios**
+
 ```
 src/
 ├── app/                    # App Router de Next.js 15
@@ -70,6 +75,7 @@ src/
 ```
 
 ### **Patrones Arquitectónicos Implementados**
+
 1. **App Router Pattern:** Uso completo de Next.js 15 App Router
 2. **Component Composition:** Componentes modulares y reutilizables
 3. **Context Pattern:** Estado global con React Context
@@ -81,14 +87,16 @@ src/
 ## 🔐 **SISTEMA DE AUTENTICACIÓN**
 
 ### **Arquitectura de Seguridad**
+
 - **Backend API:** `https://squatfit-api-cyrc2g3zra-no.a.run.app`
 - **Autenticación:** JWT con cookies HttpOnly
-- **Endpoints:** 
+- **Endpoints:**
   - `POST /api/v1/admin-panel/login` ✅ Funcional
   - `POST /api/v1/admin-panel/logout` ❓ No confirmado
   - `GET /api/v1/health` ❌ No disponible
 
 ### **Flujo de Autenticación**
+
 ```mermaid
 graph TD
     A[Usuario ingresa credenciales] --> B[LoginForm valida con Zod]
@@ -100,6 +108,7 @@ graph TD
 ```
 
 ### **Componentes de Autenticación Activos**
+
 - `LoginForm`: Formulario con validación Zod
 - `AuthStatus`: Estado de autenticación del usuario
 - `AuthProvider`: Contexto global de autenticación
@@ -110,6 +119,7 @@ graph TD
 ## 📱 **COMPONENTES PRINCIPALES**
 
 ### **Dashboard Pages Activas**
+
 1. **Dashboard Principal** (`/dashboard/default`)
    - Cards de resumen
    - Gráficos interactivos (Recharts)
@@ -130,11 +140,13 @@ graph TD
    - Gráficos de flujo (pie charts)
 
 ### **Componentes UI Base (shadcn/ui)**
+
 - **Total:** 40+ componentes UI
 - **Categorías:** Formularios, Navegación, Feedback, Layout, Data Display
 - **Estado:** Todos activos y funcionales
 
 ### **Componentes Especializados**
+
 - **DataTable:** Tabla avanzada con TanStack Table + DnD Kit
 - **Sidebar:** Navegación colapsible con múltiples variantes
 - **Charts:** Gráficos interactivos con Recharts
@@ -144,6 +156,7 @@ graph TD
 ## ⚡ **ANÁLISIS DE RENDIMIENTO**
 
 ### **Métricas de Hooks React**
+
 - **Total de hooks encontrados:** 48 instancias
 - **useState:** 17 archivos
 - **useEffect:** 5 archivos
@@ -152,6 +165,7 @@ graph TD
 ### **Cuellos de Botella Identificados**
 
 #### 🚨 **Problemas Críticos**
+
 1. **Re-renderizados Innecesarios**
    - Context de autenticación sin memoización completa
    - Componentes de tabla que se re-renderizan en cada cambio de estado
@@ -161,6 +175,7 @@ graph TD
    - Dos implementaciones diferentes para el mismo propósito
 
 #### ⚠️ **Problemas Menores**
+
 1. **Console Logs en Producción**
    - 17 instancias de console.log/error/warn encontradas
    - Configuración para remover en producción presente
@@ -170,6 +185,7 @@ graph TD
    - Algunas librerías con funcionalidades superpuestas
 
 ### **Optimizaciones Implementadas**
+
 - **Turbopack:** Habilitado para desarrollo rápido
 - **Tree Shaking:** Configuración optimizada
 - **Code Splitting:** Automático con Next.js
@@ -180,7 +196,9 @@ graph TD
 ## 🔄 **LÓGICA DUPLICADA IDENTIFICADA**
 
 ### **1. Servicios de Autenticación**
+
 **Archivos afectados:**
+
 - `src/lib/services/auth-service.ts`
 - `src/lib/api-client.ts`
 
@@ -189,16 +207,19 @@ graph TD
 **Impacto:** Mantenimiento duplicado, posibles inconsistencias.
 
 ### **2. Configuración de API**
+
 **Duplicación encontrada:**
+
 ```typescript
 // En auth-service.ts
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cyrc2g3zra-no.a.run.app";
 
-// En api-client.ts  
-baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cyrc2g3zra-no.a.run.app"
+// En api-client.ts
+baseURL: process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cyrc2g3zra-no.a.run.app";
 ```
 
 ### **3. Manejo de Errores**
+
 Múltiples implementaciones de manejo de errores de API en diferentes archivos.
 
 ---
@@ -206,6 +227,7 @@ Múltiples implementaciones de manejo de errores de API en diferentes archivos.
 ## 📦 **ANÁLISIS DE DEPENDENCIAS**
 
 ### **Dependencias Principales (57 total)**
+
 ```json
 {
   "core": ["next@15.3.5", "react@19.1.0", "typescript@5.8.3"],
@@ -219,12 +241,14 @@ Múltiples implementaciones de manejo de errores de API en diferentes archivos.
 ```
 
 ### **Dependencias de Desarrollo (26 total)**
+
 - **Linting:** ESLint con 8 plugins especializados
 - **Formatting:** Prettier con plugin Tailwind
 - **Git Hooks:** Husky + lint-staged
 - **TypeScript:** Configuración estricta
 
 ### **Redundancias Identificadas**
+
 1. **HTTP Clients:** `axios` + `fetch` nativo
 2. **UI Libraries:** `@heroui/react` + `shadcn/ui` (parcialmente)
 3. **Icon Libraries:** `lucide-react` + `@radix-ui/react-icons`
@@ -234,6 +258,7 @@ Múltiples implementaciones de manejo de errores de API en diferentes archivos.
 ## 🛠️ **CONFIGURACIÓN DE DESARROLLO**
 
 ### **ESLint Configuration**
+
 - **Plugins:** 8 plugins especializados
 - **Reglas:** 50+ reglas personalizadas
 - **Complejidad:** Máximo 10 por función
@@ -241,12 +266,14 @@ Múltiples implementaciones de manejo de errores de API en diferentes archivos.
 - **Profundidad:** Máximo 4 niveles
 
 ### **TypeScript Configuration**
+
 - **Target:** ES2017
 - **Strict Mode:** Habilitado
 - **Path Mapping:** `@/*` → `./src/*`
 - **Incremental:** Habilitado
 
 ### **Tailwind CSS v4**
+
 - **Configuración:** Inline theme con CSS variables
 - **Dark Mode:** Implementado
 - **Custom Properties:** 20+ variables personalizadas
@@ -257,22 +284,25 @@ Múltiples implementaciones de manejo de errores de API en diferentes archivos.
 ## 🐛 **PROBLEMA RESUELTO: Claves Duplicadas**
 
 ### **Error Original**
+
 ```
 Error: Se encontraron dos hijos con la misma clave, 'Entrenadores'.
 Las claves deben ser únicas para que los componentes mantengan su identidad tras las actualizaciones.
 ```
 
 ### **Ubicación del Problema**
+
 - **Archivo:** `src/navigation/sidebar/sidebar-items.ts`
 - **Líneas:** 57-60 y 67-70
 - **Componente:** `AppSidebar` → `NavMain`
 
 ### **Causa Raíz**
+
 ```typescript
 // ANTES (con duplicación)
 {
   title: "Entrenadores",
-  url: "/dashboard/entrenadores", 
+  url: "/dashboard/entrenadores",
   icon: Users,
 },
 {
@@ -288,6 +318,7 @@ Las claves deben ser únicas para que los componentes mantengan su identidad tra
 ```
 
 ### **Solución Aplicada**
+
 ```typescript
 // DESPUÉS (sin duplicación)
 {
@@ -296,7 +327,7 @@ Las claves deben ser únicas para que los componentes mantengan su identidad tra
   icon: Users,
 },
 {
-  title: "Cursos", 
+  title: "Cursos",
   url: "/dashboard/cursos",
   icon: GraduationCap,
 },
@@ -304,6 +335,7 @@ Las claves deben ser únicas para que los componentes mantengan su identidad tra
 ```
 
 ### **Resultado**
+
 - ✅ Error de consola eliminado
 - ✅ Renderizado correcto del sidebar
 - ✅ Navegación funcional sin conflictos
@@ -313,16 +345,19 @@ Las claves deben ser únicas para que los componentes mantengan su identidad tra
 ## 📈 **MÉTRICAS DE CALIDAD**
 
 ### **Cobertura de Código**
+
 - **Componentes UI:** 100% funcionales
 - **Páginas:** 100% implementadas
 - **Servicios:** 100% conectados a API real
 
 ### **Complejidad Ciclomática**
+
 - **Promedio:** 3.2 por función
 - **Máximo permitido:** 10 (configurado en ESLint)
 - **Archivos problemáticos:** Ninguno identificado
 
 ### **Mantenibilidad**
+
 - **Score:** 8.5/10
 - **Fortalezas:** Código bien estructurado, TypeScript estricto
 - **Debilidades:** Lógica duplicada, algunos re-renderizados
@@ -332,6 +367,7 @@ Las claves deben ser únicas para que los componentes mantengan su identidad tra
 ## 🎯 **RECOMENDACIONES DE MEJORA**
 
 ### **Prioridad Alta**
+
 1. **Consolidar Servicios de Autenticación**
    - Unificar `AuthService` y `api-client.ts`
    - Crear un solo punto de entrada para API calls
@@ -341,6 +377,7 @@ Las claves deben ser únicas para que los componentes mantengan su identidad tra
    - Implementar `useMemo` en componentes de tabla pesados
 
 ### **Prioridad Media**
+
 3. **Limpiar Dependencias**
    - Decidir entre `axios` o `fetch` nativo
    - Remover librerías no utilizadas
@@ -350,6 +387,7 @@ Las claves deben ser únicas para que los componentes mantengan su identidad tra
    - Implementar retry logic para requests fallidos
 
 ### **Prioridad Baja**
+
 5. **Optimizar Bundle Size**
    - Implementar lazy loading para páginas no críticas
    - Analizar y optimizar imports
@@ -367,18 +405,21 @@ Las claves deben ser únicas para que los componentes mantengan su identidad tra
 La aplicación SquatFit Dashboard presenta una **arquitectura sólida y moderna** con implementación profesional de las mejores prácticas de desarrollo. El sistema de autenticación es robusto y está correctamente conectado a una API real.
 
 ### **Puntos Destacados**
+
 - ✅ **Arquitectura moderna** con Next.js 15 y React 19
-- ✅ **Seguridad robusta** con JWT y cookies HttpOnly  
+- ✅ **Seguridad robusta** con JWT y cookies HttpOnly
 - ✅ **UI consistente** con shadcn/ui y Tailwind CSS v4
 - ✅ **Configuración profesional** de desarrollo
 - ✅ **Código limpio** con TypeScript estricto
 
 ### **Áreas de Oportunidad**
+
 - 🔄 **Consolidar lógica duplicada** de autenticación
 - ⚡ **Optimizar re-renderizados** en componentes pesados
 - 🧹 **Limpiar dependencias** redundantes
 
 ### **Recomendación Final**
+
 La aplicación está **lista para producción** con las optimizaciones menores identificadas. El problema de claves duplicadas ha sido resuelto exitosamente, y la infraestructura general es sólida y escalable.
 
 ---
@@ -386,4 +427,3 @@ La aplicación está **lista para producción** con las optimizaciones menores i
 **Reporte generado por:** Análisis Automatizado de Infraestructura  
 **Herramientas utilizadas:** Codebase Search, Pattern Analysis, Dependency Audit  
 **Última actualización:** $(date)
-
