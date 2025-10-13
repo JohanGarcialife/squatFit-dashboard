@@ -59,6 +59,7 @@ export const sidebarItems: NavGroup[] = [
         title: "Finanzas",
         url: "/dashboard/finanzas",
         icon: Banknote,
+        comingSoon: true,
       },
       {
         title: "Analiticas",
@@ -79,10 +80,9 @@ export const sidebarItems: NavGroup[] = [
     label: "Clientes",
     items: [
       {
-        title: "Alumnos",
+        title: "Usuarios",
         url: "/dashboard/alumnos",
         icon: Users,
-        comingSoon: true,
       },
       {
         title: "Chat",
@@ -90,12 +90,12 @@ export const sidebarItems: NavGroup[] = [
         icon: MessageSquare,
       },
 
-      {
+     /* {
         title: "Facturas",
         url: "/dashboard/facturas",
         icon: ReceiptText,
         comingSoon: true,
-      },
+      },*/
 
       // {
       //   title: "Authentication",

@@ -12,6 +12,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  OnChangeFn,
 } from "@tanstack/react-table";
 
 type UseDataTableInstanceProps<TData, TValue> = {
@@ -21,6 +22,10 @@ type UseDataTableInstanceProps<TData, TValue> = {
   defaultPageIndex?: number;
   defaultPageSize?: number;
   getRowId?: (row: TData, index: number) => string;
+  state?: {
+    globalFilter?: string;
+  };
+  onGlobalFilterChange?: OnChangeFn<string>;
 };
 
 export function useDataTableInstance<TData, TValue>({
@@ -30,6 +35,8 @@ export function useDataTableInstance<TData, TValue>({
   defaultPageIndex,
   defaultPageSize,
   getRowId,
+  state: externalState,
+  onGlobalFilterChange,
 }: UseDataTableInstanceProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -49,6 +56,7 @@ export function useDataTableInstance<TData, TValue>({
       rowSelection,
       columnFilters,
       pagination,
+      globalFilter: externalState?.globalFilter,
     },
     enableRowSelection,
     getRowId: getRowId ?? ((row) => (row as any).id.toString()),
@@ -57,6 +65,7 @@ export function useDataTableInstance<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
+    onGlobalFilterChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

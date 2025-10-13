@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { APP_CONFIG } from "@/config/app-config";
 import { AuthProvider } from "@/contexts/auth-context";
+import { QueryProvider } from "@/providers/query-provider";
 
 import "./globals.css";
 
@@ -20,13 +21,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="es" className="light" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen antialiased`}>
+    <html lang="es" suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen antialiased`} suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange enableSystem={false}>
-          <AuthProvider>
-            {children}
-            <Toaster />
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              {children}
+              <Toaster />
+            </AuthProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
