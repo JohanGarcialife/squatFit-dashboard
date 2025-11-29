@@ -1,8 +1,10 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
+
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
+
 import { useWebSocketSimple } from "@/hooks/use-websocket-simple";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 import { ChatService, getInitials } from "@/lib/services/chat-service";
@@ -119,7 +121,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
         const decoded = jwtDecode(token);
         return decoded.sub;
       }
-    } catch (error) {}
+    } catch {
+      // Token decode failed, return null
+    }
     return null;
   }, []);
 
@@ -320,8 +324,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
     if (!messageExistsInCache) {
       const updatedCachedMessages = [...currentCachedMessages, newMessage];
       messagesCache.current.set(targetChatId, updatedCachedMessages);
-    } else {
     }
+    // If message already exists in cache, no action needed
   };
 
   const addMessageToCurrentChat = (newMessage: any, chatId: string, userId: string) => {
@@ -489,10 +493,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
         const cachedMessages = messagesCache.current.get(chatId);
         if (cachedMessages && cachedMessages.length > 0) {
           setMessages(cachedMessages);
-
           return;
-        } else {
         }
+        // No cached messages available, continue to error handling
       }
 
       setMessages([]);

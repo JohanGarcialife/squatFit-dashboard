@@ -1,5 +1,5 @@
-import { getAuthToken } from "@/lib/auth/auth-utils";
 import { Curso, CursoApi } from "@/app/(main)/dashboard/cursos/_components/schema";
+import { getAuthToken } from "@/lib/auth/auth-utils";
 
 // ============================================================================
 // CONFIGURACIÓN DEL SERVICIO

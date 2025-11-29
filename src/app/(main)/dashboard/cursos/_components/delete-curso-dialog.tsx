@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useDeleteCurso } from "@/hooks/use-cursos";
+
 import { Curso } from "./schema";
 
 interface DeleteCursoDialogProps {

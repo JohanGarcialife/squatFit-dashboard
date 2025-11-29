@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+
 import { TrendingUp, GraduationCap, Users, DollarSign } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";

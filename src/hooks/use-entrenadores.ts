@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { Entrenador } from "@/app/(main)/dashboard/entrenadores/_components/schema";
 import {
   EntrenadoresService,
   CreateEntrenadorDto,
   GetEntrenadoresParams,
   UpdateEntrenadorDto,
 } from "@/lib/services/entrenadores-service";
-import { Entrenador } from "@/app/(main)/dashboard/entrenadores/_components/schema";
 
 // ============================================================================
 // QUERY KEYS

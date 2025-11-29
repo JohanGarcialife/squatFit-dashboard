@@ -1,5 +1,5 @@
-import { getAuthToken } from "@/lib/auth/auth-utils";
 import { Entrenador } from "@/app/(main)/dashboard/entrenadores/_components/schema";
+import { getAuthToken } from "@/lib/auth/auth-utils";
 
 // ============================================================================
 // CONFIGURACIÓN DEL SERVICIO

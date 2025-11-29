@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+
 import clsx from "clsx";
 import { MoreHorizontal, Paperclip, Send, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@/contexts/chat-context";
@@ -115,7 +117,11 @@ export default function Conversation() {
   const toggleMessageExpansion = (messageId: string) => {
     setExpandedMessages((prev) => {
       const newSet = new Set(prev);
-      newSet.has(messageId) ? newSet.delete(messageId) : newSet.add(messageId);
+      if (newSet.has(messageId)) {
+        newSet.delete(messageId);
+      } else {
+        newSet.add(messageId);
+      }
       return newSet;
     });
   };

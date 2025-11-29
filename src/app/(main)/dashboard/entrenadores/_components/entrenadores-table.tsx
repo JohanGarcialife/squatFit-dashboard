@@ -1,17 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import { Plus, Search } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
+import { EditUserModal } from "@/components/modals/edit-user-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { useEntrenadores } from "@/hooks/use-entrenadores";
-import { EditUserModal } from "@/components/modals/edit-user-modal";
 
 import { getEntrenadoresColumns } from "./columns.entrenadores";
 import { EntrenadorUI } from "./schema";

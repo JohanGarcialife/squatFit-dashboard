@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EditUserForm, EditUserFormData } from "@/components/forms/edit-user-form";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useUpdateUser } from "@/hooks/use-update-user";
 
 // ============================================================================

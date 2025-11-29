@@ -1,16 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import { Search } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
+import { EditUserModal } from "@/components/modals/edit-user-modal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { useAlumnos } from "@/hooks/use-alumnos";
-import { EditUserModal } from "@/components/modals/edit-user-modal";
+import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 
 import { getAlumnosColumns } from "./columns.alumnos";
 import { AlumnoUI } from "./schema";
