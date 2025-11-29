@@ -11,6 +11,7 @@ export interface Conversation {
   tags: string[];
   unread: number;
   user_id?: string; // ID del usuario para comparaciones
+  professionalId?: string; // ID del profesional principal del chat
   lastMessage?: {
     content: string;
     created_at: string;
@@ -36,6 +37,13 @@ export interface Message {
     fileName?: string;
     fileSize?: number;
     fileType?: string;
+  };
+  sender?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
   };
 }
 

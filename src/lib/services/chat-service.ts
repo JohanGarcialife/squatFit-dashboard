@@ -1,13 +1,15 @@
-import { getAuthToken } from "@/lib/auth/auth-utils";
+import { getAuthToken, decodeToken } from "@/lib/auth/auth-utils";
+
+import { Conversation, Message, ChatStats, SendMessageData, ApiResponse } from "./chat-types";
+import { rolesConfigService } from "./roles-config.service";
 
 // Importar tipos desde archivo separado
-import { Conversation, Message, ChatStats, SendMessageData, ApiResponse } from "./chat-types";
 
 // ============================================================================
 // CONFIGURACIÓN DEL SERVICIO
 // ============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cyrc2g3zra-no.a.run.app";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
 const REQUEST_TIMEOUT = 10000;
 
 /**
@@ -118,6 +120,7 @@ export class ChatService {
       id: conv.id ?? conv.chat_id ?? `temp-id-${index}`,
       name: conv.name ?? conv.user_email ?? "Conversación sin nombre",
       user_id: conv.user_id ?? conv.userId,
+      professionalId: conv.professional_id ?? conv.professionalId, // ID del profesional principal
     };
   }
 
@@ -163,30 +166,105 @@ export class ChatService {
   // ========================================================================
 
   /**
+   * Obtiene el rol REAL del usuario desde el JWT (sin mapeo)
+   * Para uso en peticiones HTTP al backend
+   */
+  private static getRealUserRoleFromToken(): string {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        console.warn("⚠️ No hay token disponible");
+        return "";
+      }
+
+      // Decodificar JWT usando la utilidad existente
+      const payload = decodeToken(token);
+      if (!payload) {
+        console.warn("⚠️ No se pudo decodificar el token");
+        return "";
+      }
+
+      const role = payload.role?.toLowerCase() || "";
+      console.log("🎭 Rol REAL extraído del JWT:", role);
+
+      return role;
+    } catch (error) {
+      console.warn("⚠️ Error detectando rol del usuario:", error);
+      return "";
+    }
+  }
+
+  /**
    * Obtiene todas las conversaciones del usuario autenticado
-   * Endpoint: GET /api/v1/coach-chat/conversations
+   * Endpoint: GET /api/v1/admin-panel/chats?from={role}
    * @returns Promise con array de conversaciones
    */
   static async getConversations(): Promise<Conversation[]> {
+    console.log("🔍 [GETCONVERSATIONS] INICIO - Obteniendo conversaciones...");
+
     try {
-      console.log("🔍 ChatService: Obteniendo conversaciones...");
-      const response = await this.makeRequest<ApiResponse<Conversation[]>>("/api/v1/coach-chat/conversations");
+      // Usar el rol REAL del JWT para peticiones HTTP (sin mapeo)
+      console.log("🔍 [GETCONVERSATIONS] Paso 1: Obteniendo rol del JWT...");
+      const userRole = this.getRealUserRoleFromToken();
+      console.log("🔍 [GETCONVERSATIONS] Rol obtenido:", userRole);
+
+      if (!userRole) {
+        console.error("❌ [GETCONVERSATIONS] ERROR: No se pudo obtener el rol del usuario");
+        throw new Error("No se pudo obtener el rol del usuario");
+      }
+
+      console.log(`🎯 [GETCONVERSATIONS] Paso 2: Haciendo petición HTTP con rol: ${userRole}`);
+      console.log(`🌐 [GETCONVERSATIONS] URL: /api/v1/admin-panel/chats?from=${userRole}`);
+
+      const response = await this.makeRequest<ApiResponse<Conversation[]>>(
+        `/api/v1/admin-panel/chats?from=${userRole}`,
+      );
+
+      console.log("📦 [GETCONVERSATIONS] Paso 3: Respuesta recibida del backend");
+
+      console.log("📦 ChatService: Respuesta completa del backend:", response);
+      console.log("📦 ChatService: Tipo de response:", typeof response);
+      console.log("📦 ChatService: ¿Es Array response?", Array.isArray(response));
+      console.log("📦 ChatService: response.data:", response.data);
+      console.log("📦 ChatService: Tipo de response.data:", typeof response.data);
+      console.log("📦 ChatService: ¿Es Array response.data?", Array.isArray(response.data));
 
       // Verificar si la respuesta es directamente un array
       let conversationsData = response.data;
       if (!Array.isArray(conversationsData) && response && Array.isArray(response)) {
+        console.log("⚠️ ChatService: La respuesta es directamente un array, no tiene .data");
         conversationsData = response;
       }
 
+      console.log("📋 ChatService: conversationsData a procesar:", conversationsData);
+      console.log("📋 ChatService: Longitud:", conversationsData?.length);
+
       // Normalizar datos para asegurar que todas las conversaciones tengan la estructura correcta
       const conversations = (conversationsData ?? [])
-        .filter((conv: any) => conv && (conv.id ?? conv.chat_id)) // Filtrar conversaciones sin ID o chat_id
-        .map((conv: any, index: number) => this.normalizeConversation(conv, index));
+        .filter((conv: any) => {
+          const hasId = !!(conv && (conv.id ?? conv.chat_id));
+          console.log("🔍 ChatService: Filtrando conversación:", {
+            hasId,
+            convId: conv?.id,
+            chatId: conv?.chat_id,
+            conv: conv,
+          });
+          return hasId;
+        })
+        .map((conv: any, index: number) => {
+          const normalized = this.normalizeConversation(conv, index);
+          console.log("🔄 ChatService: Conversación normalizada:", normalized);
+          return normalized;
+        });
 
-      console.log(`✅ ChatService: ${conversations.length} conversaciones obtenidas`);
+      console.log(`✅ [GETCONVERSATIONS] Paso 4: ${conversations.length} conversaciones procesadas exitosamente`);
+      console.log("📊 [GETCONVERSATIONS] Lista final de conversaciones:", conversations);
+      console.log("🎉 [GETCONVERSATIONS] FIN - Retornando conversaciones");
       return conversations;
     } catch (error) {
-      console.error("❌ ChatService: Error obteniendo conversaciones:", error);
+      console.error("❌ [GETCONVERSATIONS] ERROR CRÍTICO:", error);
+      console.error("❌ [GETCONVERSATIONS] Tipo de error:", error instanceof Error ? error.message : String(error));
+      console.error("❌ [GETCONVERSATIONS] Stack:", error instanceof Error ? error.stack : "No stack trace");
       throw error;
     }
   }
@@ -203,12 +281,30 @@ export class ChatService {
     }
 
     try {
-      const response = await this.makeRequest<ApiResponse<Message[]>>(
-        `/api/v1/coach-chat/conversations/${chatId}/messages?page=1&limit=1000000`,
+      console.log("🔍 ChatService: Obteniendo mensajes para chat:", chatId);
+      const response = await this.makeRequest<ApiResponse<any[]> | any[]>(
+        `/api/v1/admin-panel/messages?chat_id=${chatId}&page=1&limit=100`,
       );
-      return response.data ?? [];
+
+      // ✅ Manejar tanto respuesta con { data: [...] } como array directo
+      const rawMessages = Array.isArray(response) ? response : (response.data ?? []);
+      console.log("🔍 ChatService: Mensajes crudos recibidos:", rawMessages.length, rawMessages.slice(0, 2));
+
+      // Normalizar mensajes del backend al formato del frontend
+      const normalizedMessages = rawMessages.map((msg: any) => ({
+        id: msg.message_id || msg.id,
+        chatId: chatId,
+        content: msg.message || msg.content,
+        sender_id: msg.from || msg.sender_id,
+        created_at: msg.sended_at || msg.created_at,
+        isRead: msg.read ?? msg.isRead ?? false,
+        messageType: msg.messageType || ("text" as "text" | "image" | "audio" | "file"),
+      }));
+
+      console.log("✅ ChatService: Mensajes normalizados:", normalizedMessages.length);
+      return normalizedMessages;
     } catch (error) {
-      console.error("Error obteniendo mensajes:", error);
+      console.error("❌ ChatService: Error obteniendo mensajes:", error);
       throw error;
     }
   }
@@ -273,19 +369,24 @@ export class ChatService {
 
   /**
    * Marca los mensajes de una conversación como leídos
-   * Endpoint: POST /api/v1/coach-chat/conversations/{chatId}/messages/read
    * @param chatId - ID de la conversación
+   * @param messageIds - IDs de los mensajes a marcar como leídos (opcional)
    * @returns Promise que se resuelve cuando se completa la operación
    */
-  static async markAsRead(chatId: string): Promise<void> {
+  static async markAsRead(chatId: string, messageIds?: string[]): Promise<void> {
     if (!chatId) {
       throw new Error("ID de conversación requerido");
     }
 
     try {
-      await this.makeRequest<ApiResponse<void>>(`/api/v1/coach-chat/conversations/${chatId}/messages/read`, {
-        method: "POST",
-      });
+      const { websocketService } = await import("@/lib/services/websocket.service");
+
+      // Si no se proveen IDs, marcar con array vacío (el backend interpretará como "todos")
+      const ids = messageIds || [];
+
+      console.log("📝 Marcando mensajes como leídos vía WebSocket:", { chatId, count: ids.length });
+      await websocketService.markMessagesAsRead(chatId, ids);
+      console.log("✅ Mensajes marcados como leídos correctamente");
     } catch (error) {
       console.error("Error marcando mensajes como leídos:", error);
       throw error;
@@ -294,12 +395,22 @@ export class ChatService {
 
   /**
    * Obtiene estadísticas del chat
-   * Endpoint: GET /api/v1/coach-chat/stats
+   * Endpoint: GET /api/v1/admin-panel/chats/stats?channel={role}
    * @returns Promise con las estadísticas del chat
    */
   static async getStats(): Promise<ChatStats> {
     try {
-      const response = await this.makeRequest<ApiResponse<ChatStats>>("/api/v1/coach-chat/stats");
+      // Usar el rol REAL del JWT para peticiones HTTP
+      const userRole = this.getRealUserRoleFromToken();
+
+      if (!userRole) {
+        console.error("❌ ChatService: No se pudo obtener el rol del usuario");
+        throw new Error("No se pudo obtener el rol del usuario");
+      }
+
+      const response = await this.makeRequest<ApiResponse<ChatStats>>(
+        `/api/v1/admin-panel/chats/stats?channel=${userRole}`,
+      );
       return response.data;
     } catch (error) {
       console.error("Error obteniendo estadísticas:", error);
