@@ -4,14 +4,14 @@ import { getAuthToken } from "@/lib/auth/auth-utils";
 // TIPOS E INTERFACES
 // ============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://squatfit-api-985835765452.europe-southwest1.run.app";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:10000";
 const REQUEST_TIMEOUT = 30000; // 30 segundos
 
 export interface ChatParticipant {
   id: string;
   participant_id: string;
   chat_id: string;
-  role: "adviser" | "dietitian" | "support_agent";
+  role: "adviser" | "dietitian" | "support_agent" | "sales" | "psychologist";
   is_active: boolean;
   is_representative: boolean; // ✅ Indica si es el profesional principal del chat
   added_by: string;
@@ -39,7 +39,7 @@ export interface Professional {
 
 export interface AddParticipantRequest {
   participant_id: string;
-  role: "adviser" | "dietitian" | "support_agent";
+  role: "adviser" | "dietitian" | "support_agent" | "sales" | "psychologist";
 }
 
 export interface ReassignTicketRequest {

@@ -113,12 +113,12 @@ export default [
       // Naming Conventions
       "no-underscore-dangle": ["error", { allow: ["_id", "__dirname"] }],
 
-      // Complexity (relaxed for large existing codebase)
-      complexity: ["warn", { max: 15 }],
-      "max-lines": ["warn", { max: 500, skipBlankLines: true, skipComments: true }],
+      // Complexity - Changed to warn temporarily to allow gradual fixes
+      complexity: ["warn", { max: 10 }],
+      "max-lines": ["warn", { max: 300, skipBlankLines: true, skipComments: true }],
       "max-depth": ["error", 4],
 
-      // TypeScript-Specific Rules (customized)
+      // TypeScript-Specific Rules (customized) - nullish coalescing changed to warn
       "@typescript-eslint/prefer-nullish-coalescing": "warn",
       "@typescript-eslint/no-unnecessary-type-assertion": "error",
       "@typescript-eslint/no-unnecessary-condition": "warn",

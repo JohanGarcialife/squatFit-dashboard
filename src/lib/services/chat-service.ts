@@ -9,7 +9,7 @@ import { rolesConfigService } from "./roles-config.service";
 // CONFIGURACIÓN DEL SERVICIO
 // ============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:10000";
 const REQUEST_TIMEOUT = 10000;
 
 /**
@@ -143,9 +143,15 @@ export class ChatService {
    * Mapear información adicional
    */
   private static mapAdditionalInfo(conv: any): Partial<Conversation> {
+    // Mapear labels del backend a tags del frontend
+    const labels = conv.labels ?? [];
+    const tags = Array.isArray(labels) ? labels : labels ? [labels] : [];
+
     return {
-      tags: conv.tags ?? [],
+      tags: conv.tags ?? tags,
       isActive: conv.isActive ?? true,
+      chat_type: conv.chat_type, // ✅ Tipo de chat
+      professionalRole: conv.professional_role, // ✅ Rol del profesional
     };
   }
 
@@ -441,4 +447,4 @@ export class ChatService {
 }
 
 // Re-exportar funciones utilitarias desde archivo separado
-export { formatMessageTime, isRecentMessage, getInitials } from "./chat-utils";
+export { formatMessageTime, isRecentMessage, getInitials, getRoleDisplayName } from "./chat-utils";

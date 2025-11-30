@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import WebSocketSimple from "@/components/WebSocketSimple";
+// WebSocketSimple eliminado - La funcionalidad se maneja en los contextos específicos
 import { ChatProvider } from "@/contexts/chat-context";
 import { users } from "@/data/users";
 import { getSidebarVariant, getSidebarCollapsible, getContentLayout } from "@/lib/layout-preferences";
@@ -26,7 +26,6 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
 
   return (
     <ChatProvider>
-      <WebSocketSimple />
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar variant={sidebarVariant} collapsible={sidebarCollapsible} />
         <SidebarInset

@@ -66,8 +66,8 @@ const getRoleBadge = (role: string | null | undefined) => {
 };
 
 const getInitials = (firstName: string | null, lastName: string | null) => {
-  const first = firstName?.charAt(0) || "";
-  const last = lastName?.charAt(0) || "";
+  const first = firstName?.charAt(0) ?? "";
+  const last = lastName?.charAt(0) ?? "";
   return `${first}${last}`.toUpperCase() || "??";
 };
 

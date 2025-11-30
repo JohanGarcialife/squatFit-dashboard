@@ -56,11 +56,12 @@ class RolesConfigService {
       }
 
       const data = await response.json();
-      this.rolesCache = data.data || data;
+      const roles: RoleConfig[] = data.data ?? data ?? [];
+      this.rolesCache = roles;
       this.cacheExpiry = Date.now() + this.CACHE_TTL;
 
       console.log("✅ RolesConfig: Roles obtenidos:", this.rolesCache);
-      return this.rolesCache!;
+      return roles;
     } catch (error) {
       console.error("❌ RolesConfig: Error obteniendo roles:", error);
 

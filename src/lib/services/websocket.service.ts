@@ -17,6 +17,7 @@ export interface MessageData {
   chat_id: string;
   to: string;
   message: string;
+  reply_to_message_id?: string;
 }
 
 export interface NewMessageEvent {
@@ -28,22 +29,10 @@ export interface NewMessageEvent {
     message: string;
     timestamp: Date;
     created_at: Date;
-    ticket_id?: string;
-    sender?: {
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      role: string;
-    };
+    ticket_id?: string; // Para mensajes de soporte
   };
-  channel?: string;
-  chat?: {
-    id: string;
-    professional_id: string;
-    user_id: string;
-    type?: string;
-  };
+  channel?: string; // Canal detectado automáticamente (coach, dietitian, support)
+  chat?: any;
 }
 
 export interface WebSocketCallbacks {
@@ -51,9 +40,9 @@ export interface WebSocketCallbacks {
   onDisconnect?: (reason: string) => void;
   onError?: (error: Error) => void;
   onNewMessage?: (data: NewMessageEvent) => void;
-  onMessagesHistory?: (data: { chat_id: string; messages: unknown[]; total: number }) => void;
-  onNotification?: (data: unknown) => void;
-  onNewConversation?: (data: { conversation: unknown }) => void;
+  onMessagesHistory?: (data: { chat_id: string; messages: any[]; total: number }) => void;
+  onNotification?: (data: any) => void;
+  onNewConversation?: (data: { conversation: any }) => void;
   onParticipantRemoved?: (data: { chat_id: string; participant_id: string }) => void;
 }
 
@@ -63,7 +52,7 @@ export interface WebSocketCallbacks {
 
 /**
  * Servicio WebSocket unificado para comunicación en tiempo real
- * Maneja tanto canales de chat (coach/dietitian) como de soporte
+ * Maneja tanto canales de coach como de soporte
  */
 class WebSocketService {
   private socket: Socket | null = null;
@@ -90,18 +79,23 @@ class WebSocketService {
     try {
       console.log(`🔌 Conectando WebSocket como ${config.userType}...`);
 
-      // Determinar namespace según tipo de usuario
+      // ✅ Determinar namespace según tipo de usuario
       let namespace = "messages-chat"; // Default para coach, dietitian, user
       if (config.userType === "support") {
-        namespace = "messages-support"; // Agentes de soporte usan namespace específico
+        namespace = "messages-support"; // ✅ Agentes de soporte usan namespace específico
       }
 
       console.log(`🔌 Usando namespace: /${namespace}`);
 
       this.socket = io(`${config.url}/${namespace}`, {
+        // ✅ CORREGIDO: Enviar token en auth.token (Socket.IO v4+)
+        auth: {
+          token: config.token, // El token sin "Bearer " prefix (el backend lo maneja)
+        },
         extraHeaders: {
           from: config.userType,
           platform: config.platform || "web",
+          // ✅ También incluir en headers por compatibilidad
           authorization: `Bearer ${config.token}`,
         },
         transports: ["websocket", "polling"],
@@ -111,6 +105,8 @@ class WebSocketService {
         reconnectionDelayMax: 10000,
         reconnectionAttempts: 3,
         autoConnect: true,
+        // ✅ IMPORTANTE: Incluir credentials para CORS
+        withCredentials: true,
       });
 
       this.setupEventListeners();
@@ -159,49 +155,43 @@ class WebSocketService {
 
     if (isSupport) {
       // Para soporte, escuchar 'new_message_support'
-      this.socket.on("new_message_support", (data: NewMessageEvent | unknown) => {
+      this.socket.on("new_message_support", (data: NewMessageEvent | any) => {
         this.notificationsReceived++;
         console.log(`📨 Mensaje de soporte #${this.notificationsReceived} recibido:`, data);
 
-        // Normalizar datos: el backend puede enviar formato directo o formato anidado
+        // ✅ Normalizar datos: el backend puede enviar formato directo o formato anidado
         let normalizedData: NewMessageEvent;
 
-        const typedData = data as NewMessageEvent;
-        if (typedData.message && typedData.message.chat_id) {
-          // Formato correcto ya viene del backend
+        if (data.message && data.message.chat_id) {
+          // ✅ Formato correcto ya viene del backend
           normalizedData = {
-            message: typedData.message,
-            channel: typedData.channel || "support",
-            chat: typedData.chat,
+            message: data.message,
+            channel: data.channel || "support",
+            chat: data.chat,
           };
-        } else if ((data as { data?: unknown }).data) {
-          // Formato anidado (compatibilidad con formato antiguo)
-          const nestedData = (data as { data: Record<string, unknown> }).data;
-          const nestedMessage = nestedData.message as Record<string, unknown> | undefined;
+        } else if (data.data) {
+          // ✅ Formato anidado (compatibilidad con formato antiguo)
+          const nestedData = data.data;
           normalizedData = {
             message: {
-              id: (nestedMessage?.id as string) || `temp_${Date.now()}`,
-              from: (nestedData.user_id as string) || (nestedMessage?.sender_id as string) || "",
-              to: (nestedData.agent_id as string) || "",
-              chat_id: nestedData.chat_id as string,
-              message: (nestedMessage?.content as string) || (nestedMessage?.message as string) || "",
-              timestamp: new Date(
-                (nestedData.timestamp as string) || (nestedMessage?.created_at as string) || Date.now(),
-              ),
-              created_at: new Date(
-                (nestedMessage?.created_at as string) || (nestedData.timestamp as string) || Date.now(),
-              ),
-              ticket_id: nestedData.chat_id as string,
+              id: nestedData.message?.id || `temp_${Date.now()}`,
+              from: nestedData.user_id || nestedData.message?.sender_id,
+              to: nestedData.agent_id || "",
+              chat_id: nestedData.chat_id,
+              message: nestedData.message?.content || nestedData.message?.message || "",
+              timestamp: nestedData.timestamp || nestedData.message?.created_at || new Date(),
+              created_at: nestedData.message?.created_at || nestedData.timestamp || new Date(),
+              ticket_id: nestedData.chat_id,
             },
             channel: "support",
-            chat: (data as { chat?: NewMessageEvent["chat"] }).chat,
+            chat: data.chat,
           };
         } else {
-          // Fallback: intentar usar datos directamente
+          // ✅ Fallback: intentar usar datos directamente
           normalizedData = {
-            message: typedData.message || (data as { message: NewMessageEvent["message"] }).message,
+            message: data.message || data.message,
             channel: "support",
-            chat: (data as { chat?: NewMessageEvent["chat"] }).chat,
+            chat: data.chat,
           };
         }
 
@@ -222,7 +212,7 @@ class WebSocketService {
     }
 
     // Escuchar historial de mensajes
-    this.socket.on("messages_chat_history", (data: { chat_id: string; messages: unknown[]; total: number }) => {
+    this.socket.on("messages_chat_history", (data: any) => {
       console.log(`📚 Historial de mensajes recibido:`, {
         chatId: data.chat_id,
         count: data.messages?.length || 0,
@@ -231,28 +221,28 @@ class WebSocketService {
     });
 
     // Escuchar notificaciones generales
-    this.socket.on("notification", (data: unknown) => {
+    this.socket.on("notification", (data: any) => {
       this.notificationsReceived++;
       console.log(`🔔 Notificación #${this.notificationsReceived} recibida:`, data);
       this.callbacks.onNotification?.(data);
     });
 
-    // Escuchar nuevas conversaciones disponibles
-    this.socket.on("new_conversation_available", (data: { conversation: unknown }) => {
+    // ✅ NUEVO: Escuchar nuevas conversaciones disponibles
+    this.socket.on("new_conversation_available", (data: { conversation: any }) => {
       console.log("📋 Nueva conversación disponible:", data);
       this.callbacks.onNewConversation?.(data);
     });
 
-    // Escuchar cuando un participante es removido de un chat
+    // ✅ NUEVO: Escuchar cuando un participante es removido de un chat
     this.socket.on("participant_removed_from_chat", (data: { chat_id: string; participant_id: string }) => {
       console.log("❌ Participante removido del chat:", data);
       this.callbacks.onParticipantRemoved?.(data);
     });
 
     // Escuchar errores
-    this.socket.on("error", (error: unknown) => {
+    this.socket.on("error", (error: any) => {
       console.error("❌ Error del servidor WebSocket:", error);
-      this.callbacks.onError?.(error as Error);
+      this.callbacks.onError?.(error);
     });
 
     // Escuchar desconexión
@@ -295,7 +285,7 @@ class WebSocketService {
       throw new Error("WebSocket no conectado");
     }
 
-    // Determinar si es soporte o chat normal según el namespace del usuario
+    // ✅ DETECTAR: Determinar si es soporte o chat normal según el namespace del usuario
     const isSupport = this.config?.userType === "support";
     const eventName = isSupport ? "update_message_support_read" : "update_message_chat_read";
     const responseEventName = isSupport ? "updated_message_support" : "updated_message_chat";
@@ -323,18 +313,18 @@ class WebSocketService {
       };
 
       // Escuchar error
-      const handleError = (error: unknown) => {
+      const handleError = (error: any) => {
         clearTimeout(timeout);
         this.socket!.off(responseEventName, handleResponse);
         this.socket!.off("error", handleError);
         console.error("❌ Error marcando mensajes como leídos:", error);
-        reject(new Error((error as { message?: string }).message || "Error al marcar mensajes"));
+        reject(new Error(error.message || "Error al marcar mensajes"));
       };
 
       this.socket!.once(responseEventName, handleResponse);
       this.socket!.once("error", handleError);
 
-      // Enviar evento correcto según el namespace
+      // ✅ Enviar evento correcto según el namespace
       this.socket!.emit(eventName, {
         chat_id: chatId,
         messagesId: messageIds,
@@ -359,23 +349,21 @@ class WebSocketService {
       const handleResponse = (response: NewMessageEvent) => {
         clearTimeout(timeout);
         this.socket!.off("new_message_chat", handleResponse);
-        this.socket!.off("new_message_support", handleResponse);
         this.socket!.off("error", handleError);
         console.log("✅ Mensaje enviado exitosamente:", response);
         resolve(response);
       };
 
       // Escuchar error
-      const handleError = (error: unknown) => {
+      const handleError = (error: any) => {
         clearTimeout(timeout);
         this.socket!.off("new_message_chat", handleResponse);
-        this.socket!.off("new_message_support", handleResponse);
         this.socket!.off("error", handleError);
         console.error("❌ Error enviando mensaje:", error);
-        reject(new Error((error as { message?: string }).message || "Error al enviar mensaje"));
+        reject(new Error(error.message || "Error al enviar mensaje"));
       };
 
-      // Determinar eventos según el tipo de usuario
+      // ✅ Determinar eventos según el tipo de usuario
       const userType = this.getUserType();
       const isSupport = userType === "support";
 

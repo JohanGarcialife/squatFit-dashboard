@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
@@ -52,7 +52,7 @@ export function EntrenadoresTable() {
   }, [entrenadoresData]);
 
   // Generar columnas con handlers
-  const columns = useMemo(() => getEntrenadoresColumns({ onEdit: handleEditUser }), [handleEditUser]);
+  const columns = useMemo(() => getEntrenadoresColumns({ onEdit: handleEditUser }), []);
 
   const table = useDataTableInstance({
     data: entrenadores,

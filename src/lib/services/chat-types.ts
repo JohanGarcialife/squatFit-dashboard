@@ -12,6 +12,8 @@ export interface Conversation {
   unread: number;
   user_id?: string; // ID del usuario para comparaciones
   professionalId?: string; // ID del profesional principal del chat
+  chat_type?: "user_professional" | "professional_professional"; // ✅ Tipo de chat
+  professionalRole?: string; // ✅ Rol del profesional (adviser, dietitian, support_agent, etc.)
   lastMessage?: {
     content: string;
     created_at: string;
@@ -33,6 +35,19 @@ export interface Message {
   created_at: string;
   isRead: boolean;
   messageType: "text" | "image" | "audio" | "file";
+  reply_to_message_id?: string;
+  reply_to_message?: {
+    id: string;
+    content: string;
+    sender_id: string;
+    sender?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      role: string;
+    };
+  };
   metadata?: {
     fileName?: string;
     fileSize?: number;
@@ -65,6 +80,7 @@ export interface ChatStats {
 export interface SendMessageData {
   content: string;
   messageType?: "text" | "image" | "audio" | "file";
+  reply_to_message_id?: string;
   metadata?: {
     fileName?: string;
     fileSize?: number;

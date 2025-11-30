@@ -103,49 +103,15 @@ const NavItemCollapsed = ({
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
 }) => {
-  // Si el item tiene subItems, mostrar un DropdownMenu
-  if (item.subItems && item.subItems.length > 0) {
-    return (
-      <SidebarMenuItem key={item.title}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              disabled={item.comingSoon}
-              data-active={isActive(item.url, item.subItems)}
-              className="peer/menu-button ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground flex h-8 w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden transition-[width,height,padding] group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 data-[active=true]:font-medium [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0"
-            >
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
-              <ChevronRight className="ml-auto" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="right" align="start" sideOffset={8}>
-            {item.subItems.map((subItem) => (
-              <DropdownMenuItem key={subItem.title} asChild disabled={subItem.comingSoon}>
-                <Link
-                  href={subItem.url}
-                  target={subItem.newTab ? "_blank" : undefined}
-                  className="flex items-center gap-2"
-                >
-                  {subItem.icon && <subItem.icon className="h-4 w-4" />}
-                  <span>{subItem.title}</span>
-                  {subItem.comingSoon && <IsComingSoon />}
-                </Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarMenuItem>
-    );
-  }
+  console.log(item);
 
-  // Si no tiene subItems, comportamiento normal con Link
   return (
     <SidebarMenuItem key={item.title}>
       <Link href={item.url}>
-        <SidebarMenuButton disabled={item.comingSoon} tooltip={item.title} isActive={isActive(item.url)}>
+        <SidebarMenuButton disabled={item.comingSoon} tooltip={item.title} isActive={isActive(item.url, item.subItems)}>
           {item.icon && <item.icon />}
           <span>{item.title}</span>
+          <ChevronRight />
         </SidebarMenuButton>
       </Link>
     </SidebarMenuItem>

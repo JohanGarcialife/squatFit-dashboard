@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { UsersService, UpdateUserDto, UserResponse } from "@/lib/services/users-service";
+import { UsersService, UpdateUserDto } from "@/lib/services/users-service";
 
 // ============================================================================
 // MUTATION - ACTUALIZACIÓN DE USUARIOS

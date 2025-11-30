@@ -4,7 +4,8 @@ import React, { useState, useEffect } from "react";
 
 import { Search, Plus } from "lucide-react";
 
-import WebSocketSimple from "@/components/WebSocketSimple";
+// WebSocketSimple eliminado - La funcionalidad se maneja en los contextos específicos
+import CreateProfessionalChatModal from "@/components/chat/CreateProfessionalChatModal";
 import { useAuth } from "@/contexts/auth-context";
 import { useChat } from "@/contexts/chat-context";
 
@@ -27,9 +28,10 @@ import Filtros from "./_components/Filtros";
  * - Botón para crear nueva conversación
  */
 export default function Page() {
-  const { conversations, loading } = useChat();
+  const { conversations, loading, loadConversations } = useChat();
   const { user, token } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Manejar búsqueda
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,8 +45,14 @@ export default function Page() {
 
   // Manejar creación de nueva conversación
   const handleNewConversation = () => {
-    // TODO: Implementar modal para crear nueva conversación
-    console.log("Crear nueva conversación");
+    setIsCreateModalOpen(true);
+  };
+
+  // Manejar chat creado exitosamente
+  const handleChatCreated = async (chatId: string) => {
+    // Recargar conversaciones para mostrar el nuevo chat
+    await loadConversations();
+    setIsCreateModalOpen(false);
   };
 
   if (!token) return null;
@@ -68,7 +76,7 @@ export default function Page() {
         <Filtros />
 
         {/* Componente WebSocket Simple */}
-        <WebSocketSimple />
+        {/* WebSocketSimple eliminado - La funcionalidad se maneja en los contextos específicos */}
 
         {/* Lista de conversaciones */}
         <div className="flex-grow overflow-hidden">
@@ -96,6 +104,13 @@ export default function Page() {
       <div className="flex h-full w-full flex-col gap-4 lg:w-1/4">
         <FichaTecnica />
       </div>
+
+      {/* Modal para crear chat entre profesionales */}
+      <CreateProfessionalChatModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleChatCreated}
+      />
     </div>
   );
 }

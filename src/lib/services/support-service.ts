@@ -6,7 +6,7 @@ import { Ticket, SupportMessage, SupportStats, SendSupportMessageData, ApiRespon
 // CONFIGURACIÓN DEL SERVICIO
 // ============================================================================
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:10000";
 const REQUEST_TIMEOUT = 10000;
 
 /**
@@ -17,13 +17,10 @@ export class SupportService {
    * Configurar headers por defecto con token de autenticación
    */
   private static getDefaultHeaders(token: string | null): Record<string, string> {
-    const defaultHeaders: Record<string, string> = {
+    const defaultHeaders = {
       "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
     };
-
-    if (token) {
-      defaultHeaders.Authorization = `Bearer ${token}`;
-    }
 
     // Si no hay token, intentar obtenerlo de localStorage como fallback
     if (!token && typeof window !== "undefined") {
@@ -131,7 +128,7 @@ export class SupportService {
   static async getTickets(agentId: string): Promise<Ticket[]> {
     try {
       console.log("🔍 SupportService: Obteniendo tickets del agente:", agentId);
-      const response = await this.makeRequest<unknown>(`/api/v1/support/backoffice/agents/${agentId}/tickets`);
+      const response = await this.makeRequest<any>(`/api/v1/support/backoffice/agents/${agentId}/tickets`);
 
       console.log("🔍 SupportService: Respuesta de tickets:", response);
 
@@ -140,16 +137,13 @@ export class SupportService {
 
       if (Array.isArray(response)) {
         // Respuesta directa como array
-        tickets = response as Ticket[];
-      } else if ((response as { data?: unknown[] })?.data && Array.isArray((response as { data?: unknown[] }).data)) {
+        tickets = response;
+      } else if (response?.data && Array.isArray(response.data)) {
         // Respuesta envuelta en objeto con propiedad data
-        tickets = (response as { data: Ticket[] }).data;
-      } else if (
-        (response as { tickets?: unknown[] })?.tickets &&
-        Array.isArray((response as { tickets?: unknown[] }).tickets)
-      ) {
+        tickets = response.data;
+      } else if (response?.tickets && Array.isArray(response.tickets)) {
         // Respuesta con propiedad tickets
-        tickets = (response as { tickets: Ticket[] }).tickets;
+        tickets = response.tickets;
       } else {
         console.warn("⚠️ SupportService: Estructura de respuesta desconocida:", response);
         tickets = [];
@@ -192,7 +186,7 @@ export class SupportService {
 
     try {
       console.log("🔍 SupportService: Obteniendo mensajes del ticket:", ticketId);
-      const response = await this.makeRequest<unknown>(`/api/v1/support/backoffice/tickets/${ticketId}/messages`);
+      const response = await this.makeRequest<any>(`/api/v1/support/backoffice/tickets/${ticketId}/messages`);
 
       console.log("🔍 SupportService: Respuesta de mensajes:", response);
 
@@ -201,16 +195,13 @@ export class SupportService {
 
       if (Array.isArray(response)) {
         // Respuesta directa como array
-        messages = response as SupportMessage[];
-      } else if ((response as { data?: unknown[] })?.data && Array.isArray((response as { data?: unknown[] }).data)) {
+        messages = response;
+      } else if (response?.data && Array.isArray(response.data)) {
         // Respuesta envuelta en objeto con propiedad data
-        messages = (response as { data: SupportMessage[] }).data;
-      } else if (
-        (response as { messages?: unknown[] })?.messages &&
-        Array.isArray((response as { messages?: unknown[] }).messages)
-      ) {
+        messages = response.data;
+      } else if (response?.messages && Array.isArray(response.messages)) {
         // Respuesta con propiedad messages
-        messages = (response as { messages: SupportMessage[] }).messages;
+        messages = response.messages;
       } else {
         console.warn("⚠️ SupportService: Estructura de respuesta desconocida:", response);
         messages = [];
@@ -226,7 +217,7 @@ export class SupportService {
 
   /**
    * Envía un mensaje a un ticket específico vía REST API
-   * Nota: Preferir envío vía WebSocket usando el evento 'add_message_support'
+   * Nota: También se puede enviar vía WebSocket usando el evento 'add_message_coach'
    * Endpoint: POST /api/v1/support/backoffice/tickets/:ticketId/message
    * @param ticketId - ID del ticket
    * @param messageData - Datos del mensaje a enviar
@@ -260,10 +251,15 @@ export class SupportService {
       );
 
       console.log("🔍 SupportService: Respuesta del servidor:", response);
+      console.log("🔍 SupportService: response.data:", response.data);
+      console.log("🔍 SupportService: response.data type:", typeof response.data);
+      console.log("🔍 SupportService: response.data is null:", response.data === null);
+      console.log("🔍 SupportService: response.data is undefined:", response.data === undefined);
 
       // Validar que la respuesta tenga el contenido esperado
       if (!response.data) {
         console.error("❌ SupportService: El servidor no devolvió datos del mensaje");
+        console.error("❌ SupportService: Respuesta completa:", JSON.stringify(response, null, 2));
         throw new Error("El servidor no devolvió datos del mensaje");
       }
 

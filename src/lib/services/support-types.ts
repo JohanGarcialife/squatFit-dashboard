@@ -1,6 +1,6 @@
 /**
  * Tipos para el sistema de soporte
- * Basado en la documentación del sistema de mensajería de soporte
+ * Basado en la documentación de SISTEMA_MENSAJERIA_SOPORTE_COMPLETO.md
  */
 
 // ============================================================================
@@ -57,7 +57,7 @@ export interface SupportMessage {
   updated_at: string;
   classified_channel?: string;
   confidence_score?: number;
-  classification_factors?: unknown;
+  classification_factors?: any;
   sender?: TicketUser;
 }
 

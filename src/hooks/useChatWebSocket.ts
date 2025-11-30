@@ -7,9 +7,9 @@ import { websocketService, WebSocketConfig, MessageData, NewMessageEvent } from 
 interface UseChatWebSocketOptions {
   autoConnect?: boolean;
   onNewMessage?: (data: NewMessageEvent) => void;
-  onMessagesHistory?: (data: { chat_id: string; messages: unknown[]; total: number }) => void;
+  onMessagesHistory?: (data: { chat_id: string; messages: any[]; total: number }) => void;
   onError?: (error: Error) => void;
-  onNewConversation?: (data: { conversation: unknown }) => void;
+  onNewConversation?: (data: { conversation: any }) => void;
   onParticipantRemoved?: (data: { chat_id: string; participant_id: string }) => void;
 }
 
@@ -38,7 +38,13 @@ export function useChatWebSocket(options: UseChatWebSocketOptions = {}) {
       const roleMapping = await rolesConfigService.getRoleMapping(user.role.toLowerCase());
       console.log(`🎯 Rol detectado dinámicamente: ${user.role} → userType: ${roleMapping.uiRole}`);
 
-      return roleMapping.uiRole;
+      // Filtrar solo los tipos permitidos
+      const allowedTypes = ["coach", "dietitian", "support"] as const;
+      const uiRole = roleMapping.uiRole;
+      if (uiRole === "coach" || uiRole === "dietitian" || uiRole === "support") {
+        return uiRole;
+      }
+      return "coach";
     } catch (error) {
       console.warn('⚠️ Error obteniendo mapeo dinámico de rol, usando "coach" por defecto:', error);
       return "coach";

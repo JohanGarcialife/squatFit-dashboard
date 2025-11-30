@@ -12,7 +12,6 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  OnChangeFn,
 } from "@tanstack/react-table";
 
 type UseDataTableInstanceProps<TData, TValue> = {
@@ -25,7 +24,7 @@ type UseDataTableInstanceProps<TData, TValue> = {
   state?: {
     globalFilter?: string;
   };
-  onGlobalFilterChange?: OnChangeFn<string>;
+  onGlobalFilterChange?: (value: string) => void;
 };
 
 export function useDataTableInstance<TData, TValue>({
@@ -58,6 +57,7 @@ export function useDataTableInstance<TData, TValue>({
       pagination,
       globalFilter: externalState?.globalFilter,
     },
+    onGlobalFilterChange,
     enableRowSelection,
     getRowId: getRowId ?? ((row) => (row as any).id.toString()),
     onRowSelectionChange: setRowSelection,
@@ -65,7 +65,6 @@ export function useDataTableInstance<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
-    onGlobalFilterChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

@@ -10,6 +10,7 @@ import {
   Dumbbell,
   ShoppingCart,
   BarChart3,
+  Headphones,
   type LucideIcon,
 } from "lucide-react";
 
@@ -73,6 +74,11 @@ export const sidebarItems: NavGroup[] = [
         title: "Chat",
         url: "/dashboard/chat",
         icon: MessageSquare,
+      },
+      {
+        title: "Soporte",
+        url: "/dashboard/support",
+        icon: Headphones,
       },
     ],
   },

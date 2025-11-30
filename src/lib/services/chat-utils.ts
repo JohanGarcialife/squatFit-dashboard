@@ -71,3 +71,24 @@ export function isValidChatId(chatId: string): boolean {
 export function generateTempId(prefix: string = "temp"): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
+
+/**
+ * Obtener nombre amigable para mostrar de un rol
+ * @param roleName - Nombre técnico del rol (adviser, dietitian, support_agent, etc.)
+ * @returns Nombre amigable en español
+ */
+export function getRoleDisplayName(roleName: string): string {
+  if (!roleName) return "";
+
+  const roleNames: Record<string, string> = {
+    adviser: "Coach",
+    coach: "Coach",
+    dietitian: "Nutricionista",
+    support_agent: "Soporte",
+    sales: "Ventas",
+    psychologist: "Psicóloga",
+    admin: "Administrador",
+  };
+
+  return roleNames[roleName.toLowerCase()] || roleName;
+}

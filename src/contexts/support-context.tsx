@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { getAuthToken } from "@/lib/auth/auth-utils";
 import { SupportService, getInitials } from "@/lib/services/support-service";
-import { Ticket, SupportMessage, SupportStats } from "@/lib/services/support-types";
+import { Ticket, SupportMessage, SupportStats, SendSupportMessageData } from "@/lib/services/support-types";
 import { websocketService } from "@/lib/services/websocket.service";
 
 interface SupportContextType {
@@ -56,6 +56,7 @@ export function SupportProvider({ children }: SupportProviderProps) {
   const isSendingMessage = useRef(false);
   const lastSelectedTicket = useRef<string | null>(null);
   const requestThrottle = useRef<Map<string, number>>(new Map());
+  const lastTicketLoad = useRef<number>(0);
   const isInitializing = useRef(false);
 
   // ========================================================================
@@ -69,8 +70,8 @@ export function SupportProvider({ children }: SupportProviderProps) {
     try {
       const token = getAuthToken();
       if (token) {
-        const decoded = jwtDecode(token);
-        return decoded.sub ?? decoded.id ?? null;
+        const decoded: any = jwtDecode(token);
+        return decoded.sub ?? decoded.id;
       }
     } catch (error) {
       console.error("Error obteniendo ID del usuario actual:", error);
@@ -263,7 +264,7 @@ export function SupportProvider({ children }: SupportProviderProps) {
         setSelectedTicket(ticket);
         lastSelectedTicket.current = ticketId;
 
-        // Intentar cargar desde cache
+        // Intentar cargar desde cache (como chat de coach)
         const cachedMessages = messagesCache.current.get(ticketId);
         console.log("💾 SupportContext: Mensajes en cache:", cachedMessages?.length ?? 0);
 
@@ -274,7 +275,7 @@ export function SupportProvider({ children }: SupportProviderProps) {
           return;
         }
 
-        // Cargar mensajes desde la API con timeout
+        // Cargar mensajes desde la API con timeout (como chat de coach)
         console.log("🌐 SupportContext: Cargando mensajes desde API...");
         selectTicketTimeoutRef.current = setTimeout(async () => {
           if (isLoadingMessages.current) {
@@ -289,14 +290,14 @@ export function SupportProvider({ children }: SupportProviderProps) {
             const data = await SupportService.getMessages(ticketId);
             console.log("📥 SupportContext: Mensajes recibidos:", data.length, data);
 
-            // Guardar en cache
+            // Guardar en cache (como chat de coach)
             messagesCache.current.set(ticketId, data);
             setMessages(data);
             console.log("✅ SupportContext: Mensajes establecidos en el estado");
           } catch (err) {
             console.error("❌ SupportContext: Error cargando mensajes:", err);
 
-            // Si es un error de throttling, intentar usar cache si está disponible
+            // Si es un error de throttling, intentar usar cache si está disponible (como chat de coach)
             if (err instanceof Error && (err.message.includes("ThrottlerException") || err.message.includes("429"))) {
               console.warn("⚠️ SupportContext: Throttling detectado, intentando usar cache...");
 
@@ -317,7 +318,7 @@ export function SupportProvider({ children }: SupportProviderProps) {
             setIsSelectingTicket(false);
             isLoadingMessages.current = false;
           }
-        }, 1000);
+        }, 1000); // Timeout de 1 segundo como chat de coach
       } catch (err) {
         console.error("❌ SupportContext: Error seleccionando ticket:", err);
         handleError(err, "Error seleccionando ticket");
@@ -372,7 +373,8 @@ export function SupportProvider({ children }: SupportProviderProps) {
           currentUserId,
         });
 
-        // Usar SOLO WebSocket según la guía actualizada
+        // ⚠️ IMPORTANTE: Usar SOLO WebSocket según la guía actualizada
+        // El endpoint HTTP POST ya no existe
         console.log("🔌 SupportContext: Enviando mensaje vía WebSocket:", {
           chat_id: selectedTicket.id,
           to: selectedTicket.user_id,
@@ -437,10 +439,11 @@ export function SupportProvider({ children }: SupportProviderProps) {
         setMessages((prev) => prev.map((msg) => (msg.id === tempId ? newMessage : msg)));
 
         // Actualizar cache
-        const currentCache = messagesCache.current.get(selectedTicket.id) || [];
         messagesCache.current.set(
           selectedTicket.id,
-          currentCache.map((msg) => (msg.id === tempId ? newMessage : msg)),
+          messagesCache.current.get(selectedTicket.id)?.map((msg) => (msg.id === tempId ? newMessage : msg)) || [
+            newMessage,
+          ],
         );
 
         toast.success("Mensaje enviado");
@@ -502,11 +505,11 @@ export function SupportProvider({ children }: SupportProviderProps) {
    * Efecto para manejar eventos personalizados de WebSocket para soporte
    */
   useEffect(() => {
-    const handleWebSocketSupportMessage = (event: CustomEvent) => {
+    const handleWebSocketSupportMessage = (event: any) => {
       console.log("🔔 SupportContext: Notificación de WebSocket recibida", event.detail);
       const notification = event.detail;
 
-      if (notification.type === "new_message_coach" || notification.type === "new_message") {
+      if (notification.type === "new_message_coach") {
         // Extraer datos del mensaje según el nuevo formato
         const messageData = notification.data.message || notification.data;
         const chatData = notification.data.chat;
@@ -579,11 +582,11 @@ export function SupportProvider({ children }: SupportProviderProps) {
     };
 
     // Agregar listener para eventos personalizados
-    window.addEventListener("websocket-support-message", handleWebSocketSupportMessage as EventListener);
+    window.addEventListener("websocket-support-message", handleWebSocketSupportMessage);
 
     // Cleanup
     return () => {
-      window.removeEventListener("websocket-support-message", handleWebSocketSupportMessage as EventListener);
+      window.removeEventListener("websocket-support-message", handleWebSocketSupportMessage);
     };
   }, [selectedTicket]);
 
@@ -605,6 +608,7 @@ export function SupportProvider({ children }: SupportProviderProps) {
 
       try {
         hasInitialized.current = true;
+        // Usar loadTickets (versión simple sin retry) para evitar throttling (como chat de coach)
         await loadTickets();
         console.log("✅ SupportContext: Inicialización completada");
       } catch (error) {
