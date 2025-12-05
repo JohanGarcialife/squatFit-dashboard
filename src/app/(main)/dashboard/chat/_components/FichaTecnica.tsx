@@ -31,7 +31,7 @@ import { getInitials, formatMessageTime, getRoleDisplayName } from "@/lib/servic
 import { chatTasksService, type Task } from "@/lib/services/chat-tasks.service";
 
 /**
- * Componente DetailItem - Elemento de detalle en la ficha tÃ©cnica
+ * Componente DetailItem - Elemento de detalle en la ficha técnica
  */
 interface DetailItemProps {
   label: string;
@@ -60,14 +60,14 @@ const DetailItem: React.FC<DetailItemProps> = ({ label, value, interactive, icon
 );
 
 /**
- * Componente FichaTecnica - Panel de informaciÃ³n del usuario
+ * Componente FichaTecnica - Panel de información del usuario
  *
- * Este componente muestra informaciÃ³n detallada del usuario seleccionado
- * y estadÃ­sticas del chat.
+ * Este componente muestra información detallada del usuario seleccionado
+ * y estadísticas del chat.
  *
- * CaracterÃ­sticas:
- * - InformaciÃ³n del usuario
- * - EstadÃ­sticas del chat
+ * Características:
+ * - Información del usuario
+ * - Estadísticas del chat
  * - Acciones principales y secundarias
  * - Estados de carga y error
  */
@@ -133,7 +133,7 @@ export default function FichaTecnica() {
   };
 
   /**
-   * Verifica si la conversaciÃ³n es un ticket de soporte
+   * Verifica si la conversación es un ticket de soporte
    */
   const isSupportTicket = useMemo(() => {
     // Un ticket de soporte tiene al menos un participante con rol support_agent y is_representative: true
@@ -147,8 +147,8 @@ export default function FichaTecnica() {
     if (!selectedConversation) return;
 
     const confirmed = window.confirm(
-      `Â¿EstÃ¡s seguro de que deseas reasignar este ticket a otro agente?\n\n` +
-        `El agente actual se convertirÃ¡ en colaborador y el nuevo agente serÃ¡ el principal.`,
+      `¿Estás seguro de que deseas reasignar este ticket a otro agente?\n\n` +
+        `El agente actual se convertirá en colaborador y el nuevo agente será el principal.`,
     );
 
     if (!confirmed) return;
@@ -159,7 +159,7 @@ export default function FichaTecnica() {
         agent_id: newAgentId,
       });
 
-      alert("âœ… Ticket reasignado exitosamente");
+      alert("✅ Ticket reasignado exitosamente");
 
       // Recargar participantes y conversaciones
       await loadParticipants();
@@ -180,8 +180,8 @@ export default function FichaTecnica() {
     if (!selectedConversation) return;
 
     const confirmed = window.confirm(
-      `Â¿EstÃ¡s seguro de que deseas reasignar este chat a otro profesional?\n\n` +
-        `El profesional actual se convertirÃ¡ en colaborador y el nuevo profesional serÃ¡ el principal.`,
+      `¿Estás seguro de que deseas reasignar este chat a otro profesional?\n\n` +
+        `El profesional actual se convertirá en colaborador y el nuevo profesional será el principal.`,
     );
 
     if (!confirmed) return;
@@ -192,7 +192,7 @@ export default function FichaTecnica() {
         professional_id: newProfessionalId,
       });
 
-      alert("âœ… Chat reasignado exitosamente");
+      alert("✅ Chat reasignado exitosamente");
 
       // Recargar participantes y conversaciones
       await loadParticipants();
@@ -218,15 +218,15 @@ export default function FichaTecnica() {
       return;
     }
 
-    console.log("ðŸ”µ [COMPLETE_CHAT] Mostrando confirmaciÃ³n...");
+    console.log("🔔 [COMPLETE_CHAT] Mostrando confirmación...");
     const confirmed = window.confirm(
-      `Â¿EstÃ¡s seguro de que deseas marcar esta conversaciÃ³n con ${selectedConversation.name} como completada?\n\n` +
-        `Esto cerrarÃ¡ el chat activo y enviarÃ¡ un mensaje de despedida al usuario vÃ­a Telegram.`,
+      `¿Estás seguro de que deseas marcar esta conversación con ${selectedConversation.name} como completada?\n\n` +
+        `Esto cerrará el chat activo y enviará un mensaje de despedida al usuario vía Telegram.`,
     );
 
-    console.log("ðŸ”µ [COMPLETE_CHAT] ConfirmaciÃ³n:", confirmed);
+    console.log("🔔 [COMPLETE_CHAT] Confirmación:", confirmed);
     if (!confirmed) {
-      console.log("ðŸ”µ [COMPLETE_CHAT] Usuario cancelÃ³ la operaciÃ³n");
+      console.log("🔔 [COMPLETE_CHAT] Usuario canceló la operación");
       return;
     }
 
@@ -234,22 +234,22 @@ export default function FichaTecnica() {
     const chatIdToComplete = selectedConversation.id;
     const userName = selectedConversation.name;
 
-    console.log("ðŸ”µ [COMPLETE_CHAT] Iniciando proceso de completar chat:", {
+    console.log("🔔 [COMPLETE_CHAT] Iniciando proceso de completar chat:", {
       chatId: chatIdToComplete,
       userName,
       professionalId: selectedConversation.professionalId,
     });
 
     try {
-      console.log("ðŸ”µ [COMPLETE_CHAT] Llamando a ChatCompleteService.completeChat...");
+      console.log("🔔 [COMPLETE_CHAT] Llamando a ChatCompleteService.completeChat...");
       await ChatCompleteService.completeChat(chatIdToComplete);
-      console.log("âœ… [COMPLETE_CHAT] Chat completado exitosamente");
+      console.log("✅ [COMPLETE_CHAT] Chat completado exitosamente");
 
-      // Mostrar mensaje de Ã©xito
-      alert(`âœ… Chat completado exitosamente.\n\nSe ha enviado un mensaje de despedida a ${userName} vÃ­a Telegram.`);
+      // Mostrar mensaje de éxito
+      alert(`✅ Chat completado exitosamente.\n\nSe ha enviado un mensaje de despedida a ${userName} vía Telegram.`);
 
-      // âœ… Recargar la lista de conversaciones para actualizar la UI
-      // El chat completado desaparecerÃ¡ de la lista automÃ¡ticamente
+      // ✅ Recargar la lista de conversaciones para actualizar la UI
+      // El chat completado desaparecerá de la lista automáticamente
       // NO usar window.location.reload() - esto desconecta el WebSocket innecesariamente
       if (loadConversations) {
         await loadConversations();
@@ -294,8 +294,8 @@ export default function FichaTecnica() {
         // Permitir si es admin
         if (decoded.role === "admin") return true;
 
-        // âœ… NUEVO: Para agentes de soporte, permitir que vean el botÃ³n
-        // El backend validarÃ¡ los permisos reales (si es el agente asignado o puede asignarse)
+        // ✅ NUEVO: Para agentes de soporte, permitir que vean el botón
+        // El backend validará los permisos reales (si es el agente asignado o puede asignarse)
         if (decoded.role === "support_agent") {
           return true;
         }
@@ -314,7 +314,7 @@ export default function FichaTecnica() {
   }, [selectedConversation]);
 
   /**
-   * Cargar participantes y tareas cuando cambia la conversaciÃ³n seleccionada
+   * Cargar participantes y tareas cuando cambia la conversación seleccionada
    */
   useEffect(() => {
     if (selectedConversation) {
@@ -326,7 +326,7 @@ export default function FichaTecnica() {
     }
   }, [selectedConversation?.id]);
 
-  // Renderizar estado sin conversaciÃ³n seleccionada
+  // Renderizar estado sin conversación seleccionada
   if (!selectedConversation) {
     return (
       <div className="flex h-full items-center justify-center rounded-lg bg-gray-50/50 p-4 dark:bg-gray-900/20">
@@ -334,7 +334,7 @@ export default function FichaTecnica() {
           <div className="mb-4 text-gray-400">
             <Users size={48} />
           </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Selecciona una conversaciÃ³n para ver detalles</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Selecciona una conversación para ver detalles</p>
         </div>
       </div>
     );
@@ -343,7 +343,7 @@ export default function FichaTecnica() {
   // Obtener iniciales del usuario
   const initials = getInitials(selectedConversation.name);
 
-  // Calcular tiempo desde Ãºltimo mensaje
+  // Calcular tiempo desde último mensaje
   const getLastActivity = () => {
     if (!selectedConversation.lastMessage) return "Sin actividad";
 
@@ -369,11 +369,11 @@ export default function FichaTecnica() {
     return `${activeParticipants.length} colaboradores`;
   };
 
-  // FunciÃ³n para obtener el color de una etiqueta
+  // Función para obtener el color de una etiqueta
   const getTagColor = (tag: string) => {
     switch (tag.toLowerCase()) {
       case "nutrition":
-      case "nutriciÃ³n":
+      case "nutrición":
         return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
       case "training":
       case "entrenamiento":
@@ -392,7 +392,7 @@ export default function FichaTecnica() {
     }
   };
 
-  // Datos de la ficha tÃ©cnica
+  // Datos de la ficha técnica
   const fichaData = {
     initials,
     name: selectedConversation.name,
@@ -409,12 +409,12 @@ export default function FichaTecnica() {
         ),
       },
       {
-        label: "Mensajes no leÃ­dos",
+        label: "Mensajes no leídos",
         value: selectedConversation.unread.toString(),
         icon: <MessageSquare size={14} className="text-blue-500" />,
       },
       {
-        label: "Ãšltima actividad",
+        label: "Última actividad",
         value: getLastActivity(),
         icon: <Clock size={14} className="text-gray-500" />,
       },
@@ -426,7 +426,7 @@ export default function FichaTecnica() {
       },
     ],
     mainActions: [
-      "AÃ±adir colaborador",
+      "Añadir colaborador",
       ...(isSupportTicket ? ["Reasignar ticket"] : ["Reasignar chat"]),
       // "Marcar como completado", // Comentado temporalmente
     ],
@@ -436,9 +436,9 @@ export default function FichaTecnica() {
 
   return (
     <div className="flex h-full flex-col gap-6 rounded-lg bg-gray-50/50 p-4 dark:bg-gray-900/20">
-      <h2 className="text-primary text-lg font-bold">Ficha TÃ©cnica</h2>
+      <h2 className="text-primary text-lg font-bold">Ficha Técnica</h2>
 
-      {/* InformaciÃ³n del Usuario */}
+      {/* Información del Usuario */}
       <div className="flex flex-col items-center gap-2 text-center">
         <Avatar className="h-20 w-20 bg-gradient-to-br from-orange-500 to-red-500">
           <AvatarFallback className="bg-transparent text-2xl font-bold text-white">{fichaData.initials}</AvatarFallback>
@@ -454,7 +454,7 @@ export default function FichaTecnica() {
             ))}
           </div>
         ) : (
-          // âœ… Mostrar rol del profesional si es professional_professional, sino "Sin etiquetas"
+          // ✅ Mostrar rol del profesional si es professional_professional, sino "Sin etiquetas"
           <p className="text-sm text-gray-500 dark:text-gray-400">
             {selectedConversation?.chat_type === "professional_professional" && selectedConversation?.professionalRole
               ? `Rol: ${getRoleDisplayName(selectedConversation.professionalRole)}`
@@ -474,7 +474,7 @@ export default function FichaTecnica() {
               selectedConversation.isActive ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400",
             )}
           >
-            {selectedConversation.isActive ? "En lÃ­nea" : "Desconectado"}
+            {selectedConversation.isActive ? "En línea" : "Desconectado"}
           </span>
         </div>
       </div>
@@ -584,12 +584,12 @@ export default function FichaTecnica() {
         )}
       </div>
 
-      {/* EstadÃ­sticas del Chat */}
+      {/* Estadísticas del Chat */}
       {stats && (
         <div className="flex flex-col gap-3">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
             <TrendingUp size={16} />
-            EstadÃ­sticas
+            Estadísticas
           </h3>
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
@@ -607,7 +607,7 @@ export default function FichaTecnica() {
                 <Circle size={14} className="text-green-600 dark:text-green-400" />
                 <div>
                   <p className="text-lg font-bold text-green-800 dark:text-green-200">{stats.unreadMessages}</p>
-                  <p className="text-xs text-green-600 dark:text-green-400">No leÃ­dos</p>
+                  <p className="text-xs text-green-600 dark:text-green-400">No leídos</p>
                 </div>
               </div>
             </div>
@@ -639,7 +639,7 @@ export default function FichaTecnica() {
       <div className="flex flex-col gap-3">
         {fichaData.mainActions.map((action) => {
           const isCompleteButton = action === "Marcar como completado";
-          const isAddCollaborator = action === "AÃ±adir colaborador";
+          const isAddCollaborator = action === "Añadir colaborador";
           const isReassignTicket = action === "Reasignar ticket";
           const isReassignChat = action === "Reasignar chat";
 
@@ -659,13 +659,13 @@ export default function FichaTecnica() {
               key={action}
               variant="ghost"
               onClick={(e) => {
-                console.log("ðŸ”µ [BUTTON] onClick disparado para:", action);
+                console.log("🔔 [BUTTON] onClick disparado para:", action);
                 if (isAddCollaborator) {
                   setIsModalOpen(true);
                 } else if (isReassignTicket || isReassignChat) {
                   setIsReassignModalOpen(true);
                 } else if (isCompleteButton) {
-                  console.log("ðŸ”µ [BUTTON] Ejecutando handleCompleteChat");
+                  console.log("🔔 [BUTTON] Ejecutando handleCompleteChat");
                   handleCompleteChat();
                 }
               }}
@@ -707,7 +707,7 @@ export default function FichaTecnica() {
       {/* Mensaje de error */}
       {error && (
         <div className="rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
-          <p className="text-sm text-red-600 dark:text-red-400">Error cargando informaciÃ³n</p>
+          <p className="text-sm text-red-600 dark:text-red-400">Error cargando información</p>
         </div>
       )}
 

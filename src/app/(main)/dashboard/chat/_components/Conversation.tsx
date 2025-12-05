@@ -160,8 +160,8 @@ const MessageInput = React.memo(
 
 MessageInput.displayName = "MessageInput";
 
-// Componente Conversation - Muestra conversaciÃ³n seleccionada y permite enviar mensajes
-// FunciÃ³n para generar un color consistente basado en un ID
+// Componente Conversation - Muestra conversación seleccionada y permite enviar mensajes
+// Función para generar un color consistente basado en un ID
 const generateColorFromId = (id: string): string => {
   if (!id) return "bg-gray-400";
 
@@ -248,7 +248,7 @@ export default function Conversation() {
       const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
 
-      // Solo hacer scroll automÃ¡tico si estÃ¡ cerca del final o si se fuerza
+      // Solo hacer scroll automático si está cerca del final o si se fuerza
       if (isNearBottom || force) {
         setTimeout(
           () => {
@@ -275,7 +275,7 @@ export default function Conversation() {
     }, 100);
   }, []);
 
-  // Scroll automÃ¡tico cuando cambian los mensajes o la conversaciÃ³n
+  // Scroll automático cuando cambian los mensajes o la conversación
   useEffect(() => {
     if (messages.length > 0) {
       // Scroll suave cuando hay mensajes nuevos
@@ -289,10 +289,10 @@ export default function Conversation() {
     };
   }, [messages.length, selectedConversation?.id, scrollToBottom]);
 
-  // Scroll forzado cuando se carga una nueva conversaciÃ³n
+  // Scroll forzado cuando se carga una nueva conversación
   useEffect(() => {
     if (selectedConversation) {
-      // Forzar scroll al final cuando se cambia de conversaciÃ³n
+      // Forzar scroll al final cuando se cambia de conversación
       setTimeout(() => scrollToBottom(true), 200);
     }
   }, [selectedConversation?.id, scrollToBottom]);
@@ -324,7 +324,7 @@ export default function Conversation() {
       const isFromMainUser = senderIdFromMessage === mainUserId;
       const isFromOtherProfessional = !isFromMe && !isFromMainUser;
 
-      // Generar color dinÃ¡mico para colaboradores
+      // Generar color dinámico para colaboradores
       const dynamicColor = isFromOtherProfessional ? generateColorFromId(senderIdFromMessage) : null;
 
       // Construir nombre del remitente
@@ -370,7 +370,7 @@ export default function Conversation() {
   const formatDate = (dateString: string) => {
     if (!dateString) return "Fecha no disponible";
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "Fecha invÃ¡lida";
+    if (isNaN(date.getTime())) return "Fecha inválida";
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -386,7 +386,7 @@ export default function Conversation() {
           <div className="mb-4 text-gray-400">
             <MoreHorizontal size={48} />
           </div>
-          <p className="mb-2 text-lg font-semibold text-gray-500 dark:text-gray-400">Selecciona una conversaciÃ³n</p>
+          <p className="mb-2 text-lg font-semibold text-gray-500 dark:text-gray-400">Selecciona una conversación</p>
           <p className="text-sm text-gray-400 dark:text-gray-500">
             Elige un chat de la lista para comenzar a conversar
           </p>
@@ -417,11 +417,11 @@ export default function Conversation() {
           {!isConnected && (
             <div className="flex items-center gap-1 text-xs text-red-500">
               <div className="h-2 w-2 rounded-full bg-red-500" />
-              Sin conexiÃ³n
+              Sin conexión
             </div>
           )}
           <Button variant="ghost" size="sm" onClick={() => {}} className="text-xs">
-            Probar LÃ­mites
+            Probar Límites
           </Button>
           <Button
             variant="ghost"
@@ -453,7 +453,7 @@ export default function Conversation() {
         </div>
       </header>
 
-      {/* Barra de bÃºsqueda */}
+      {/* Barra de búsqueda */}
       {searchQuery && (
         <div className="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-2 dark:border-gray-700 dark:bg-gray-800">
           <div className="flex flex-1 items-center gap-2">
@@ -634,7 +634,7 @@ export default function Conversation() {
                           const content = message.content ?? "";
                           const isLong = isLongMessage(content);
 
-                          // Aplicar resaltado si hay bÃºsqueda activa
+                          // Aplicar resaltado si hay búsqueda activa
                           const displayContent = searchQuery.trim()
                             ? content.replace(new RegExp(`(${searchQuery})`, "gi"), "<mark>$1</mark>")
                             : content;
@@ -657,7 +657,7 @@ export default function Conversation() {
                             );
                           }
 
-                          // Mostrar solo las primeras lÃ­neas para mensajes largos
+                          // Mostrar solo las primeras líneas para mensajes largos
                           const lines = content.split("\n");
                           const preview = lines.slice(0, 3).join("\n");
                           const hasMore = lines.length > 3 || content.length > 200;
@@ -674,7 +674,7 @@ export default function Conversation() {
                                     onClick={() => toggleMessageExpansion(message.id)}
                                     className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                                   >
-                                    Ver mÃ¡s <ChevronDown className="h-3 w-3" />
+                                    Ver más <ChevronDown className="h-3 w-3" />
                                   </button>
                                 </div>
                               )}
