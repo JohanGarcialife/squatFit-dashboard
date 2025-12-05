@@ -47,12 +47,8 @@ export function IMCHistory({ onSelect, date, compact = false }: IMCHistoryProps)
   // Ordenar historial por fecha (más reciente primero)
   const sortedHistory = useMemo(() => {
     return [...history].sort((a, b) => {
-      const dateA = new Date(
-        (a as { date?: string; created_at?: string }).date || a.created_at || a.createdAt,
-      ).getTime();
-      const dateB = new Date(
-        (b as { date?: string; created_at?: string }).date || b.created_at || b.createdAt,
-      ).getTime();
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
       return dateB - dateA;
     });
   }, [history]);
@@ -142,9 +138,9 @@ export function IMCHistory({ onSelect, date, compact = false }: IMCHistoryProps)
       <ScrollArea className="h-[400px] pr-4">
         <div className="space-y-3">
           {sortedHistory.map((record, index) => {
-            // Obtener categoría del IMC si no viene en el record
-            const category = record.category || (record.imc ? getIMCCategory(record.imc) : "normal");
-            const categoryInfo = IMCCategoryMap[category as keyof typeof IMCCategoryMap];
+            // Obtener categoría del IMC calculándola desde el valor
+            const category = getIMCCategory(record.imc);
+            const categoryInfo = IMCCategoryMap[category];
             const trend = getTrend(index);
             const isSelected = selectedId === record.id;
 
@@ -166,30 +162,11 @@ export function IMCHistory({ onSelect, date, compact = false }: IMCHistoryProps)
                     {/* Fecha y hora */}
                     <div className="flex items-center gap-2">
                       <Calendar className="text-muted-foreground size-3" />
-                      <span className="text-xs font-medium">
-                        {formatDate(
-                          (record as { date?: string; created_at?: string }).date ||
-                            record.created_at ||
-                            record.createdAt ||
-                            "",
-                        )}
-                      </span>
-                      {formatTime(
-                        (record as { date?: string; created_at?: string }).date ||
-                          record.created_at ||
-                          record.createdAt ||
-                          "",
-                      ) && (
+                      <span className="text-xs font-medium">{formatDate(record.created_at)}</span>
+                      {formatTime(record.created_at) && (
                         <>
                           <span className="text-muted-foreground text-xs">•</span>
-                          <span className="text-muted-foreground text-xs">
-                            {formatTime(
-                              (record as { date?: string; created_at?: string }).date ||
-                                record.created_at ||
-                                record.createdAt ||
-                                "",
-                            )}
-                          </span>
+                          <span className="text-muted-foreground text-xs">{formatTime(record.created_at)}</span>
                         </>
                       )}
                     </div>
@@ -208,7 +185,7 @@ export function IMCHistory({ onSelect, date, compact = false }: IMCHistoryProps)
                           "border-gray-200 bg-gray-50 text-gray-700 dark:bg-gray-950 dark:text-gray-400"
                         }
                       >
-                        {categoryInfo?.label ?? record.category ?? "N/A"}
+                        {categoryInfo?.label ?? "N/A"}
                       </Badge>
 
                       {/* Tendencia */}

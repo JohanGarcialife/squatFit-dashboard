@@ -164,6 +164,44 @@ export class CursosService {
   // ========================================================================
 
   /**
+   * Valida si una URL de imagen es válida o es un placeholder genérico
+   */
+  private static isValidImageUrl(url: string | null | undefined): boolean {
+    if (!url || typeof url !== "string" || url.trim() === "") {
+      return false;
+    }
+
+    const trimmedUrl = url.trim();
+
+    // Lista de URLs inválidas conocidas
+    const invalidUrls = [
+      "image.jpg",
+      "/image.jpg",
+      "https://storage.googleapis.com/course-images/image.jpg",
+      "storage.googleapis.com/course-images/image.jpg",
+      "fitness-fundamentals.jpg",
+      "/fitness-fundamentals.jpg",
+    ];
+
+    // Filtrar URLs inválidas conocidas
+    if (invalidUrls.includes(trimmedUrl)) {
+      return false;
+    }
+
+    // Filtrar URLs que contengan "image.jpg" genérico
+    if (trimmedUrl.toLowerCase().includes("/image.jpg") || trimmedUrl.toLowerCase().endsWith("image.jpg")) {
+      return false;
+    }
+
+    // Filtrar URLs de Google Storage que sean genéricas o inválidas
+    if (trimmedUrl.includes("storage.googleapis.com") && trimmedUrl.includes("/image.jpg")) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Transforma los datos de la API al formato esperado por la UI
    */
   private static transformCursoFromApi(apiCurso: CursoApi): Curso {
@@ -173,6 +211,9 @@ export class CursosService {
       : "Sin instructor";
 
     const priceNumber = parseFloat(apiCurso.price) || 0;
+
+    // Validar y filtrar imágenes inválidas antes de asignarlas
+    const validThumbnail = this.isValidImageUrl(apiCurso.image) ? apiCurso.image : undefined;
 
     return {
       id: apiCurso.id,
@@ -186,7 +227,7 @@ export class CursosService {
       duration: "8 semanas", // Valor por defecto
       level: "Principiante", // Valor por defecto
       category: "General", // Valor por defecto
-      thumbnail: apiCurso.image || undefined,
+      thumbnail: validThumbnail,
       tutorId: apiCurso.tutor?.id,
       tutorFirstName: apiCurso.tutor?.firstName,
       tutorLastName: apiCurso.tutor?.lastName,

@@ -360,7 +360,7 @@ export function IMCCalculator({
                   if (onCalculated) {
                     onCalculated({
                       imc: record.imc,
-                      category: record.category || getIMCCategory(record.imc),
+                      classification: record.classification,
                       tips: record.tips || [],
                       weight: record.weight,
                       height: record.height,

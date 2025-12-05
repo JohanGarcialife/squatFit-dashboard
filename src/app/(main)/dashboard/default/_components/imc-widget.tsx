@@ -174,7 +174,12 @@ export function IMCWidget() {
                 {history.length > 1 && (
                   <div>
                     <p className="text-muted-foreground mb-2 text-xs">Últimas 7 mediciones</p>
-                    <MiniBarChart data={history} />
+                    <MiniBarChart
+                      data={history.map((record) => ({
+                        imc: record.imc,
+                        date: record.created_at,
+                      }))}
+                    />
                   </div>
                 )}
               </div>
