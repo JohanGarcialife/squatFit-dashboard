@@ -54,9 +54,9 @@ function CursoCard({ curso }: { curso: Curso }) {
     <Card className="overflow-hidden transition-shadow hover:shadow-lg">
       {/* Imagen del curso */}
       <div className="bg-muted relative h-40 w-full overflow-hidden">
-        {curso.image ? (
+        {curso.thumbnail ? (
           <Image
-            src={curso.image}
+            src={curso.thumbnail}
             alt={curso.name}
             fill
             className="object-cover"
