@@ -39,9 +39,19 @@ function formatDate(dateString: string): string {
 /**
  * Formatea el precio con el símbolo de moneda
  */
-function formatPrice(amount: number, currency?: string): string {
+function formatPrice(amount: number | null | undefined, currency?: string): string {
+  // Validar que amount sea un número válido
+  if (amount == null || amount === undefined) {
+    return "—";
+  }
+
+  const numAmount = Number(amount);
+  if (isNaN(numAmount) || !isFinite(numAmount)) {
+    return "—";
+  }
+
   const symbol = currency === "USD" ? "$" : "€";
-  return `${symbol}${amount.toFixed(2)}`;
+  return `${symbol}${numAmount.toFixed(2)}`;
 }
 
 /**

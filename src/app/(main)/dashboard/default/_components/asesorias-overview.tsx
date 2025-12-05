@@ -136,8 +136,8 @@ export function AsesoriasOverview() {
               </div>
             ) : (
               <div className="space-y-3">
-                {data.advices.map((asesoria) => (
-                  <AsesoriaItem key={asesoria.id} asesoria={asesoria} />
+                {data.advices.map((asesoria, index) => (
+                  <AsesoriaItem key={`asesoria-${asesoria.id || index}-${index}`} asesoria={asesoria} />
                 ))}
               </div>
             )}
