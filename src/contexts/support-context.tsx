@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable max-lines */
 
 import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from "react";
 

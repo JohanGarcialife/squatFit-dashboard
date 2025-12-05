@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable max-lines */
 
 import { useState, useMemo } from "react";
 
@@ -470,6 +471,49 @@ function EditRestriccionesDialog({ cliente, open, onOpenChange, onSave }: EditRe
 // ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
+
+/**
+ * ============================================================================
+ * COMPONENTE: LesionesRestricciones - Gestión de Lesiones y Restricciones
+ * ============================================================================
+ *
+ * ESTADO DE CONEXIÓN AL BACKEND:
+ *
+ * ❌ SIN CONEXIÓN AL BACKEND (MOCK DATA):
+ *
+ * Este componente NO está conectado al backend. Todos los datos provienen
+ * de archivos estáticos (data.ts).
+ *
+ * ENDPOINTS NECESARIOS (NO IMPLEMENTADOS EN BACKEND):
+ * - GET    /api/v1/clientes/:id/restricciones  - Obtener restricciones de cliente
+ * - PATCH  /api/v1/clientes/:id/restricciones  - Actualizar restricciones
+ * - GET    /api/v1/clientes/:id/lesiones       - Obtener lesiones de cliente
+ * - PATCH  /api/v1/clientes/:id/lesiones      - Actualizar lesiones
+ *
+ * NOTA SOBRE IMC:
+ * - El endpoint GET /api/v1/calculator/history existe pero solo devuelve
+ *   el historial del usuario autenticado, no de clientes específicos.
+ * - Para mostrar IMC de clientes necesitaríamos:
+ *   GET /api/v1/clientes/:id/imc/history
+ *
+ * DATOS ACTUALES:
+ * - clientesEntrenamientoData: Array estático de clientes con lesiones/restricciones
+ * - tiposLesion: Array estático de tipos de lesiones
+ * - tiposRestriccion: Array estático de tipos de restricciones
+ *
+ * FUNCIONALIDADES ACTUALES (MOCK):
+ * - ✅ Visualización de clientes con lesiones y restricciones
+ * - ✅ Búsqueda y filtrado de clientes
+ * - ✅ Estadísticas de lesiones más comunes
+ * - ✅ Edición de lesiones y restricciones (solo en memoria local)
+ * - ✅ Sugerencias de ejercicios a evitar según lesión
+ * - ❌ No persiste cambios (se pierden al recargar)
+ *
+ * LÍNEA 539: TODO: Integrar con API - PATCH /api/clientes/:id/restricciones
+ *
+ * REFERENCIA: ANALISIS_FUNCIONALIDADES_BACKEND.md
+ * ============================================================================
+ */
 
 export function LesionesRestricciones() {
   const [busqueda, setBusqueda] = useState("");

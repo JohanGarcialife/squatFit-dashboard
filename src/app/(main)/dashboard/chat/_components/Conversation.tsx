@@ -1,4 +1,5 @@
-"use client";
+﻿"use client";
+/* eslint-disable max-lines */
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 
@@ -88,14 +89,14 @@ const MessageInput = React.memo(
       [handleSendMessage],
     );
 
-    // ✅ PRIORIDAD 2: Marcar como leído al hacer foco en el input (fallback)
-    // NOTA: Este handler solo se ejecuta si el useEffect no marcó los mensajes
-    // El debounce en markAsRead evitará llamadas duplicadas
+    // âœ… PRIORIDAD 2: Marcar como leÃ­do al hacer foco en el input (fallback)
+    // NOTA: Este handler solo se ejecuta si el useEffect no marcÃ³ los mensajes
+    // El debounce en markAsRead evitarÃ¡ llamadas duplicadas
     const handleInputFocus = useCallback(() => {
-      // Solo marcar si hay mensajes no leídos
-      // El debounce interno de markAsRead evitará llamadas duplicadas
+      // Solo marcar si hay mensajes no leÃ­dos
+      // El debounce interno de markAsRead evitarÃ¡ llamadas duplicadas
       if (selectedConversation && selectedConversation.unread > 0 && markAsRead) {
-        console.log("📝 MessageInput: Foco en input - intentando marcar como leído (fallback)");
+        console.log("ðŸ“ MessageInput: Foco en input - intentando marcar como leÃ­do (fallback)");
         // Usar setTimeout para dar prioridad al useEffect si se ejecuta al mismo tiempo
         setTimeout(() => {
           markAsRead();
@@ -159,8 +160,8 @@ const MessageInput = React.memo(
 
 MessageInput.displayName = "MessageInput";
 
-// Componente Conversation - Muestra conversación seleccionada y permite enviar mensajes
-// Función para generar un color consistente basado en un ID
+// Componente Conversation - Muestra conversaciÃ³n seleccionada y permite enviar mensajes
+// FunciÃ³n para generar un color consistente basado en un ID
 const generateColorFromId = (id: string): string => {
   if (!id) return "bg-gray-400";
 
@@ -228,7 +229,7 @@ export default function Conversation() {
       if (token) {
         const decoded = decodeToken(token);
         if (decoded) {
-          console.log("👤 [Conversation] Usuario actual detectado:", {
+          console.log("ðŸ‘¤ [Conversation] Usuario actual detectado:", {
             id: decoded.sub,
             email: decoded.email,
             role: decoded.role,
@@ -247,7 +248,7 @@ export default function Conversation() {
       const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
 
-      // Solo hacer scroll automático si está cerca del final o si se fuerza
+      // Solo hacer scroll automÃ¡tico si estÃ¡ cerca del final o si se fuerza
       if (isNearBottom || force) {
         setTimeout(
           () => {
@@ -274,7 +275,7 @@ export default function Conversation() {
     }, 100);
   }, []);
 
-  // Scroll automático cuando cambian los mensajes o la conversación
+  // Scroll automÃ¡tico cuando cambian los mensajes o la conversaciÃ³n
   useEffect(() => {
     if (messages.length > 0) {
       // Scroll suave cuando hay mensajes nuevos
@@ -288,10 +289,10 @@ export default function Conversation() {
     };
   }, [messages.length, selectedConversation?.id, scrollToBottom]);
 
-  // Scroll forzado cuando se carga una nueva conversación
+  // Scroll forzado cuando se carga una nueva conversaciÃ³n
   useEffect(() => {
     if (selectedConversation) {
-      // Forzar scroll al final cuando se cambia de conversación
+      // Forzar scroll al final cuando se cambia de conversaciÃ³n
       setTimeout(() => scrollToBottom(true), 200);
     }
   }, [selectedConversation?.id, scrollToBottom]);
@@ -301,7 +302,7 @@ export default function Conversation() {
 
     const mainUserId = selectedConversation?.user_id; // Usuario principal (Telegram)
 
-    console.log("🔍 [Conversation] Procesando mensajes:", {
+    console.log("ðŸ” [Conversation] Procesando mensajes:", {
       total: messages.length,
       currentUserId,
       mainUserId,
@@ -323,7 +324,7 @@ export default function Conversation() {
       const isFromMainUser = senderIdFromMessage === mainUserId;
       const isFromOtherProfessional = !isFromMe && !isFromMainUser;
 
-      // Generar color dinámico para colaboradores
+      // Generar color dinÃ¡mico para colaboradores
       const dynamicColor = isFromOtherProfessional ? generateColorFromId(senderIdFromMessage) : null;
 
       // Construir nombre del remitente
@@ -338,7 +339,7 @@ export default function Conversation() {
       }
 
       if (message.id) {
-        console.log(`🔍 [Conversation] Mensaje ${message.id.substring(0, 8)}:`, {
+        console.log(`ðŸ” [Conversation] Mensaje ${message.id.substring(0, 8)}:`, {
           sender: senderIdFromMessage?.substring(0, 8),
           senderName,
           senderRole,
@@ -369,7 +370,7 @@ export default function Conversation() {
   const formatDate = (dateString: string) => {
     if (!dateString) return "Fecha no disponible";
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "Fecha inválida";
+    if (isNaN(date.getTime())) return "Fecha invÃ¡lida";
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -385,7 +386,7 @@ export default function Conversation() {
           <div className="mb-4 text-gray-400">
             <MoreHorizontal size={48} />
           </div>
-          <p className="mb-2 text-lg font-semibold text-gray-500 dark:text-gray-400">Selecciona una conversación</p>
+          <p className="mb-2 text-lg font-semibold text-gray-500 dark:text-gray-400">Selecciona una conversaciÃ³n</p>
           <p className="text-sm text-gray-400 dark:text-gray-500">
             Elige un chat de la lista para comenzar a conversar
           </p>
@@ -416,11 +417,11 @@ export default function Conversation() {
           {!isConnected && (
             <div className="flex items-center gap-1 text-xs text-red-500">
               <div className="h-2 w-2 rounded-full bg-red-500" />
-              Sin conexión
+              Sin conexiÃ³n
             </div>
           )}
           <Button variant="ghost" size="sm" onClick={() => {}} className="text-xs">
-            Probar Límites
+            Probar LÃ­mites
           </Button>
           <Button
             variant="ghost"
@@ -452,7 +453,7 @@ export default function Conversation() {
         </div>
       </header>
 
-      {/* Barra de búsqueda */}
+      {/* Barra de bÃºsqueda */}
       {searchQuery && (
         <div className="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-2 dark:border-gray-700 dark:bg-gray-800">
           <div className="flex flex-1 items-center gap-2">
@@ -565,7 +566,7 @@ export default function Conversation() {
                 }
                 const alignment = message.isFromMe ? "justify-end" : "justify-start";
                 console.log(
-                  `🎨 [Render] Mensaje "${message.content?.substring(0, 30)}": tipo=${messageType}, bgClass=${bgClass}, alignment=${alignment}`,
+                  `ðŸŽ¨ [Render] Mensaje "${message.content?.substring(0, 30)}": tipo=${messageType}, bgClass=${bgClass}, alignment=${alignment}`,
                 );
               }
 
@@ -605,12 +606,12 @@ export default function Conversation() {
                       {/* Badge para identificar el remitente */}
                       {messageTyped.isFromOtherProfessional && (
                         <div className="mb-1 text-xs font-semibold opacity-90">
-                          👨‍⚕️ {messageTyped.senderName} (Colaborador)
+                          ðŸ‘¨â€âš•ï¸ {messageTyped.senderName} (Colaborador)
                         </div>
                       )}
                       {messageTyped.isFromMainUser && (
                         <div className="mb-1 text-xs font-semibold opacity-80">
-                          👤 {messageTyped.senderName} ({messageTyped.senderRole})
+                          ðŸ‘¤ {messageTyped.senderName} ({messageTyped.senderRole})
                         </div>
                       )}
                       {/* Mostrar mensaje citado si existe */}
@@ -633,7 +634,7 @@ export default function Conversation() {
                           const content = message.content ?? "";
                           const isLong = isLongMessage(content);
 
-                          // Aplicar resaltado si hay búsqueda activa
+                          // Aplicar resaltado si hay bÃºsqueda activa
                           const displayContent = searchQuery.trim()
                             ? content.replace(new RegExp(`(${searchQuery})`, "gi"), "<mark>$1</mark>")
                             : content;
@@ -656,7 +657,7 @@ export default function Conversation() {
                             );
                           }
 
-                          // Mostrar solo las primeras líneas para mensajes largos
+                          // Mostrar solo las primeras lÃ­neas para mensajes largos
                           const lines = content.split("\n");
                           const preview = lines.slice(0, 3).join("\n");
                           const hasMore = lines.length > 3 || content.length > 200;
@@ -673,7 +674,7 @@ export default function Conversation() {
                                     onClick={() => toggleMessageExpansion(message.id)}
                                     className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
                                   >
-                                    Ver más <ChevronDown className="h-3 w-3" />
+                                    Ver mÃ¡s <ChevronDown className="h-3 w-3" />
                                   </button>
                                 </div>
                               )}
@@ -697,7 +698,9 @@ export default function Conversation() {
                         </div>
                         <div className="flex items-center gap-1">
                           <p className="text-xs opacity-70">{formatMessageTime(message.created_at)}</p>
-                          {message.isFromMe && <div className="text-xs opacity-70">{message.isRead ? "✓✓" : "✓"}</div>}
+                          {message.isFromMe && (
+                            <div className="text-xs opacity-70">{message.isRead ? "âœ“âœ“" : "âœ“"}</div>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { TrendingUp, TrendingDown, Minus, Ticket } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTopCausasTickets } from "@/hooks/use-marketing";
 
 import { getMockCausasTickets } from "./data";
 import type { CausaTicket } from "./schema";
@@ -63,7 +63,10 @@ function TicketCauseItem({ causa, index }: TicketCauseItemProps) {
 }
 
 export function TicketsCauses() {
-  const causas = useMemo(() => getMockCausasTickets(), []);
+  const { data: causasData, isLoading } = useTopCausasTickets(5);
+
+  // Fallback a datos mock si no hay datos o mientras carga
+  const causas = causasData || getMockCausasTickets();
   const totalTickets = causas.reduce((acc, curr) => acc + curr.cantidad, 0);
 
   const tendenciasResumen = {
@@ -89,11 +92,25 @@ export function TicketsCauses() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {causas.map((causa, index) => (
-            <TicketCauseItem key={causa.id} causa={causa} index={index} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="size-8 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-2 w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {causas.map((causa, index) => (
+              <TicketCauseItem key={causa.id} causa={causa} index={index} />
+            ))}
+          </div>
+        )}
 
         <div className="bg-muted/50 mt-6 flex items-center justify-center gap-6 rounded-lg p-3">
           <div className="flex items-center gap-2 text-sm">

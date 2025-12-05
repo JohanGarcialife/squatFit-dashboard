@@ -2,15 +2,34 @@
 
 import { useMemo } from "react";
 
-import { FileText, Users, TrendingUp, AlertCircle, CheckCircle2, Clock } from "lucide-react";
+import { FileText, Users, TrendingUp, AlertCircle, CheckCircle2, Clock, Loader2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePautasStats } from "@/hooks/use-pautas";
 
 import { getPautasStats } from "./data";
 
 export function PautasCards() {
-  const stats = useMemo(() => getPautasStats(), []);
+  // Obtener estadísticas del backend
+  const { stats: backendStats, isLoading } = usePautasStats();
+  // Usar datos mock como fallback
+  const mockStats = useMemo(() => getPautasStats(), []);
+
+  // Combinar datos del backend con datos mock
+  const stats = useMemo(() => {
+    if (isLoading) {
+      return mockStats; // Mostrar datos mock mientras carga
+    }
+
+    // Combinar estadísticas del backend con datos mock
+    // El backend solo provee promedioMacros y ultimasActualizaciones
+    return {
+      ...mockStats, // Mantener datos mock para campos no disponibles en backend
+      promedioMacros: backendStats?.promedioMacros ?? mockStats.promedioMacros,
+      ultimasActualizaciones: backendStats?.ultimasActualizaciones ?? mockStats.ultimasActualizaciones,
+    };
+  }, [backendStats, mockStats, isLoading]);
 
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
@@ -19,7 +38,7 @@ export function PautasCards() {
         <CardHeader>
           <CardDescription>Total de Pautas</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.totalPautas}
+            {isLoading ? <Loader2 className="inline-block size-5 animate-spin" /> : stats.totalPautas}
           </CardTitle>
           <CardAction>
             <Badge
@@ -94,7 +113,11 @@ export function PautasCards() {
         <CardHeader>
           <CardDescription>Macros Promedio</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.promedioMacros.calorias} kcal
+            {isLoading ? (
+              <Loader2 className="inline-block size-5 animate-spin" />
+            ) : (
+              `${stats.promedioMacros.calorias} kcal`
+            )}
           </CardTitle>
           <CardAction>
             <Badge

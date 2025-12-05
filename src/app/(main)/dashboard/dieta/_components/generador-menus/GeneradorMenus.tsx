@@ -5,7 +5,7 @@ import { useState, useMemo } from "react";
 import { Download, Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 import { ComidaMenu } from "../schema";
 
@@ -112,22 +112,23 @@ export function GeneradorMenus() {
             <Download className="mr-2 size-4" />
             Exportar
           </Button>
-          <DialogTrigger asChild>
-            <Button size="sm" onClick={() => setIsDialogOpen(true)}>
-              <Save className="mr-2 size-4" />
-              Guardar Menú
-            </Button>
-          </DialogTrigger>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Save className="mr-2 size-4" />
+                Guardar Menú
+              </Button>
+            </DialogTrigger>
+            <GuardarMenuDialog
+              isOpen={isDialogOpen}
+              onOpenChange={setIsDialogOpen}
+              nombreMenu={nombreMenu}
+              setNombreMenu={setNombreMenu}
+              onGuardar={handleGuardarMenu}
+            />
+          </Dialog>
         </div>
       </div>
-
-      <GuardarMenuDialog
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        nombreMenu={nombreMenu}
-        setNombreMenu={setNombreMenu}
-        onGuardar={handleGuardarMenu}
-      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         {/* Panel de configuración */}

@@ -1,4 +1,61 @@
 "use client";
+/* eslint-disable max-lines */
+
+/**
+ * ============================================================================
+ * COMPONENTE: RenovarSemana - Renovación de Semanas de Entrenamiento
+ * ============================================================================
+ *
+ * ESTADO DE CONEXIÓN AL BACKEND:
+ *
+ * ❌ SIN CONEXIÓN AL BACKEND (MOCK DATA):
+ *
+ * Este componente NO está conectado al backend. Todos los datos provienen
+ * de archivos estáticos (data.ts) y funciones de generación mock.
+ *
+ * ENDPOINTS NECESARIOS (NO IMPLEMENTADOS EN BACKEND):
+ * - GET    /api/v1/semanas                - Listar semanas de entrenamiento
+ * - GET    /api/v1/semanas/:id            - Obtener semana específica
+ * - POST   /api/v1/semanas/renovar        - Renovar semana con progresión
+ * - PUT    /api/v1/semanas/:id            - Actualizar semana
+ * - DELETE /api/v1/semanas/:id            - Eliminar semana
+ *
+ * DATOS ACTUALES:
+ * - clientesEntrenamientoData: Array estático de clientes de ejemplo
+ * - plantillasEntrenamiento: Array estático de plantillas
+ * - tiposProgresion: Array estático de tipos de progresión
+ *
+ * FUNCIONALIDADES ACTUALES (MOCK):
+ * - ✅ Selección de clientes múltiples
+ * - ✅ Selección de plantilla de entrenamiento
+ * - ✅ Configuración de progresión (porcentaje, incremento, etc.)
+ * - ✅ Opciones de renovación (copiar semana anterior, respetar restricciones)
+ * - ✅ Preview de configuración
+ * - ❌ No persiste cambios (se pierden al recargar)
+ * - ❌ No genera semanas reales en el backend
+ *
+ * LÍNEA 372: TODO: Integrar con API - POST /api/semanas/renovar
+ *
+ * REQUEST ESPERADO PARA RENOVAR SEMANA:
+ * {
+ *   clienteIds: string[],
+ *   plantilla: TipoPlantilla,
+ *   fechaInicio: string,
+ *   progresion: {
+ *     tipoProgresion: "porcentaje_1rm" | "incremento_kg" | "incremento_reps" | "autoregulacion",
+ *     valorIncremento: number,
+ *     aplicarA: "todos" | "principales" | "accesorios",
+ *     maxRPE?: number,
+ *     deloadCadaSemanas?: number,
+ *     porcentajeDeload?: number
+ *   },
+ *   respetarRestricciones: boolean,
+ *   copiarSemanaAnterior: boolean
+ * }
+ *
+ * REFERENCIA: ANALISIS_FUNCIONALIDADES_BACKEND.md - Sección 2: Biblioteca de Ejercicios
+ * ============================================================================
+ */
 
 import { useState, useMemo } from "react";
 

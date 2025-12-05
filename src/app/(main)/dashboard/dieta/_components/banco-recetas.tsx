@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable max-lines */
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 
@@ -50,8 +51,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { useRecetas, useDuplicarReceta } from "@/hooks/use-recetas";
 
-import { recetasData, tiposComida, etiquetasComunes, estadosReceta } from "./data";
+import { tiposComida, etiquetasComunes, estadosReceta } from "./data";
 import { Receta, FiltrosRecetas } from "./schema";
 
 // Custom hook para debounce
@@ -106,7 +108,7 @@ function RecetaCard({ receta, onEdit, onDuplicate, onDelete }: RecetaCardProps) 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onEdit}>
+              <DropdownMenuItem onClick={onEdit} disabled title="Edición no disponible en el backend actual">
                 <Edit2 className="mr-2 size-4" />
                 Editar
               </DropdownMenuItem>
@@ -115,7 +117,12 @@ function RecetaCard({ receta, onEdit, onDuplicate, onDelete }: RecetaCardProps) 
                 Duplicar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onDelete} className="text-destructive">
+              <DropdownMenuItem
+                onClick={onDelete}
+                disabled
+                className="text-muted-foreground"
+                title="Eliminación no disponible en el backend actual"
+              >
                 <Trash2 className="mr-2 size-4" />
                 Eliminar
               </DropdownMenuItem>
@@ -209,6 +216,10 @@ export function BancoRecetas() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedReceta, setSelectedReceta] = useState<Receta | null>(null);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+
+  // Hooks de datos reales
+  const { data: recetasData, isLoading, isError, refetch } = useRecetas();
+  const { duplicarReceta, isLoading: isDuplicating } = useDuplicarReceta();
 
   // Debounce para búsqueda
   const debouncedBusqueda = useDebounce(busqueda, 300);
@@ -325,14 +336,18 @@ export function BancoRecetas() {
     setIsSheetOpen(true);
   }, []);
 
-  const handleDuplicarReceta = (receta: Receta) => {
-    // TODO: Integrar con backend
-    console.log("Duplicando receta:", receta.nombre);
+  const handleDuplicarReceta = async (receta: Receta) => {
+    try {
+      await duplicarReceta(receta);
+      refetch();
+    } catch (error) {
+      console.error("Error al duplicar receta:", error);
+    }
   };
 
-  const handleEliminarReceta = (receta: Receta) => {
-    // TODO: Integrar con backend
-    console.log("Eliminando receta:", receta.id);
+  const handleEliminarReceta = (_receta: Receta) => {
+    // ❌ NO DISPONIBLE: El backend no tiene endpoint DELETE /api/v1/recipe/:id
+    console.warn("La eliminación de recetas no está disponible en el backend actual");
   };
 
   const hayFiltrosActivos =
@@ -520,7 +535,21 @@ export function BancoRecetas() {
       </Card>
 
       {/* Grid de recetas */}
-      {recetasFiltradas.length > 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">Cargando recetas...</p>
+        </div>
+      ) : isError ? (
+        <Card className="border-destructive">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <p className="text-destructive mb-2 text-lg font-medium">Error al cargar recetas</p>
+            <p className="text-muted-foreground mb-4 text-sm">Intenta recargar la página</p>
+            <Button variant="outline" onClick={() => refetch()}>
+              Reintentar
+            </Button>
+          </CardContent>
+        </Card>
+      ) : recetasFiltradas.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {recetasFiltradas.map((receta) => (
             <RecetaCard

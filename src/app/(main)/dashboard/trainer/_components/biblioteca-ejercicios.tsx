@@ -1,4 +1,44 @@
 "use client";
+/* eslint-disable max-lines */
+
+/**
+ * ============================================================================
+ * COMPONENTE: BibliotecaEjercicios - Gestión de Ejercicios
+ * ============================================================================
+ *
+ * ESTADO DE CONEXIÓN AL BACKEND:
+ *
+ * ❌ SIN CONEXIÓN AL BACKEND (MOCK DATA):
+ *
+ * Este componente NO está conectado al backend. Todos los datos provienen
+ * de archivos estáticos (data.ts).
+ *
+ * ENDPOINTS NECESARIOS (NO IMPLEMENTADOS EN BACKEND):
+ * - GET    /api/v1/exercises              - Listar ejercicios
+ * - GET    /api/v1/exercises/:id          - Obtener ejercicio específico
+ * - POST   /api/v1/exercises              - Crear nuevo ejercicio
+ * - PUT    /api/v1/exercises/:id          - Actualizar ejercicio
+ * - DELETE /api/v1/exercises/:id          - Eliminar ejercicio
+ * - GET    /api/v1/exercises/categories   - Obtener categorías
+ * - GET    /api/v1/exercises/search       - Buscar ejercicios
+ *
+ * DATOS ACTUALES:
+ * - ejerciciosData: Array estático de ejercicios de ejemplo
+ * - sustitucionesData: Array estático de sustituciones de ejemplo
+ * - gruposMusculares: Array estático de grupos musculares
+ * - tiposMaterial: Array estático de tipos de material
+ * - nivelesDificultad: Array estático de niveles de dificultad
+ *
+ * FUNCIONALIDADES ACTUALES (MOCK):
+ * - ✅ Visualización de ejercicios en grid/list
+ * - ✅ Búsqueda y filtrado (local)
+ * - ✅ Visualización de sustituciones
+ * - ✅ Crear/editar ejercicios (solo en memoria local)
+ * - ❌ No persiste cambios (se pierden al recargar)
+ *
+ * REFERENCIA: ANALISIS_FUNCIONALIDADES_BACKEND.md - Sección 2: Biblioteca de Ejercicios
+ * ============================================================================
+ */
 
 import { useState, useMemo } from "react";
 

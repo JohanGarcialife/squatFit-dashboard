@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { Area, AreaChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Pie, PieChart, Label, LabelList } from "recharts";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend } from "@/components/ui/chart";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useVentasPorProducto, useTareasPendientes } from "@/hooks/use-marketing";
 
 import {
   getMockIngresos,
@@ -18,9 +18,15 @@ import {
 } from "./data";
 
 export function KPICharts() {
-  const ingresosMensual = useMemo(() => getMockIngresos("mensual"), []);
-  const ventasProducto = useMemo(() => getMockVentasProducto(), []);
-  const tareasPorArea = useMemo(() => getMockTareasPorArea(), []);
+  // Obtener datos reales del backend
+  const { data: ventasProductoData, isLoading: isLoadingVentas } = useVentasPorProducto();
+  const { data: tareasPorAreaData, isLoading: isLoadingTareas } = useTareasPendientes();
+
+  // Fallback a datos mock si no hay datos o mientras carga
+  const ventasProducto = ventasProductoData || getMockVentasProducto();
+  const tareasPorArea = tareasPorAreaData || getMockTareasPorArea();
+  // Ingresos mensuales: mantener mock hasta que el backend lo implemente
+  const ingresosMensual = getMockIngresos("mensual");
 
   const totalVentas = ventasProducto.reduce((acc, curr) => acc + curr.cantidad, 0);
   const totalIngresos = ventasProducto.reduce((acc, curr) => acc + curr.ingresos, 0);
@@ -41,9 +47,16 @@ export function KPICharts() {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs lg:grid-cols-2 xl:grid-cols-5">
-      {/* Gráfico de Ingresos - Área */}
-      <Card className="col-span-1 xl:col-span-3">
+    <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs lg:grid-cols-3">
+      {/* ========================================================================
+          GRÁFICO DE INGRESOS - NO CONECTADO AL BACKEND - COMENTADO
+          ======================================================================== */}
+      {/* ❌ Gráfico de Ingresos - NO CONECTADO
+          El backend NO calcula ingresos reales (no suma amount_value)
+          Endpoint inexistente para ingresos mensuales
+          Usa solo datos mock: getMockIngresos("mensual")
+      */}
+      {/* <Card className="col-span-1 xl:col-span-3">
         <CardHeader>
           <CardTitle>Evolución de Ingresos</CardTitle>
           <CardDescription>Últimos 6 meses</CardDescription>
@@ -83,16 +96,16 @@ export function KPICharts() {
             Descargar CSV
           </Button>
         </CardFooter>
-      </Card>
+      </Card> */}
 
-      {/* Gráfico de Tareas por Área - Pie */}
-      <Card className="col-span-1 xl:col-span-2">
+      {/* ✅ Gráfico de Tareas por Área - CONECTADO AL BACKEND */}
+      <Card className="col-span-1">
         <CardHeader>
           <CardTitle>Tareas Pendientes por Área</CardTitle>
           <CardDescription>Distribución actual</CardDescription>
         </CardHeader>
         <CardContent className="flex items-center justify-center">
-          <ChartContainer config={tareasChartConfig} className="h-52 w-full">
+          <ChartContainer config={tareasChartConfig} className="h-72 w-full">
             <PieChart>
               <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
               <Pie
@@ -148,14 +161,14 @@ export function KPICharts() {
         </CardContent>
       </Card>
 
-      {/* Gráfico de Ventas por Producto - Barras */}
-      <Card className="col-span-1 xl:col-span-3">
+      {/* ✅ Gráfico de Ventas por Producto - CONECTADO AL BACKEND */}
+      <Card className="col-span-1">
         <CardHeader>
           <CardTitle>Ventas por Tipo de Producto</CardTitle>
           <CardDescription>Desglose de ventas e ingresos</CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={ventasChartConfig} className="h-64 w-full">
+          <ChartContainer config={ventasChartConfig} className="h-72 w-full">
             <BarChart data={ventasProducto} layout="vertical" margin={{ top: 0, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid horizontal={false} strokeDasharray="3 3" />
               <YAxis
@@ -181,11 +194,12 @@ export function KPICharts() {
                   />
                 }
               />
-              <Bar dataKey="cantidad" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]}>
+              <Bar dataKey="cantidad" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]}>
                 <LabelList
                   dataKey="cantidad"
                   position="right"
-                  className="fill-foreground text-sm"
+                  className="text-sm"
+                  style={{ fill: "hsl(var(--primary))" }}
                   formatter={(value: number) => `${value} uds`}
                 />
               </Bar>
@@ -200,14 +214,14 @@ export function KPICharts() {
         </CardFooter>
       </Card>
 
-      {/* Resumen de Ingresos por Producto */}
-      <Card className="col-span-1 xl:col-span-2">
+      {/* ✅ Resumen de Ingresos por Producto - CONECTADO AL BACKEND */}
+      <Card className="col-span-1">
         <CardHeader>
           <CardTitle>Ingresos por Producto</CardTitle>
-          <CardDescription>Distribución de ingresos</CardDescription>
+          <CardDescription>Distribución de ingresos por tipo</CardDescription>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={ventasChartConfig} className="h-52 w-full">
+          <ChartContainer config={ventasChartConfig} className="h-72 w-full">
             <PieChart>
               <ChartTooltip
                 cursor={false}
@@ -217,21 +231,31 @@ export function KPICharts() {
                 data={ventasProducto}
                 dataKey="ingresos"
                 nameKey="tipo"
-                innerRadius={50}
-                outerRadius={80}
-                paddingAngle={2}
-                cornerRadius={4}
+                innerRadius={60}
+                outerRadius={100}
+                paddingAngle={3}
+                cornerRadius={6}
               >
                 <Label
                   content={({ viewBox }) => {
                     if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                       return (
                         <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" dominantBaseline="middle">
-                          <tspan x={viewBox.cx} y={viewBox.cy} className="fill-foreground text-lg font-bold">
+                          <tspan
+                            x={viewBox.cx}
+                            y={viewBox.cy}
+                            className="text-2xl font-bold tabular-nums"
+                            style={{ fill: "hsl(var(--primary))" }}
+                          >
                             {formatCurrency(totalIngresos)}
                           </tspan>
-                          <tspan x={viewBox.cx} y={(viewBox.cy ?? 0) + 20} className="fill-muted-foreground text-sm">
-                            Total
+                          <tspan
+                            x={viewBox.cx}
+                            y={(viewBox.cy ?? 0) + 24}
+                            className="text-sm font-medium"
+                            style={{ fill: "hsl(var(--muted-foreground))" }}
+                          >
+                            Total Ingresos
                           </tspan>
                         </text>
                       );
@@ -239,24 +263,29 @@ export function KPICharts() {
                   }}
                 />
               </Pie>
-              <ChartLegend
-                layout="horizontal"
-                verticalAlign="bottom"
-                align="center"
-                content={() => (
-                  <ul className="mt-4 flex flex-wrap justify-center gap-3">
-                    {ventasProducto.map((item) => (
-                      <li key={item.tipo} className="flex items-center gap-1.5 text-xs">
-                        <span className="size-2.5 rounded-full" style={{ background: item.fill }} />
-                        <span className="capitalize">{ventasChartConfig[item.tipo]?.label}</span>
-                        <span className="text-muted-foreground">{item.porcentaje}%</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              />
             </PieChart>
           </ChartContainer>
+          <div className="mt-4 grid w-full grid-cols-2 gap-3 sm:grid-cols-4">
+            {ventasProducto.map((item) => (
+              <div
+                key={item.tipo}
+                className="bg-card flex flex-col items-center gap-1.5 rounded-lg border p-2 shadow-sm"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="size-3 rounded-full shadow-sm" style={{ background: item.fill }} />
+                  <span className="text-foreground text-xs font-semibold capitalize">
+                    {ventasChartConfig[item.tipo]?.label}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center gap-0.5">
+                  <span className="text-foreground text-sm font-bold tabular-nums">
+                    {formatCurrency(item.ingresos)}
+                  </span>
+                  <span className="text-muted-foreground text-xs">{item.porcentaje.toFixed(1)}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>

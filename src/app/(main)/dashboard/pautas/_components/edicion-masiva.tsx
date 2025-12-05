@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable max-lines */
 
 import { useState, useMemo } from "react";
 
@@ -725,9 +726,17 @@ export function EdicionMasiva() {
   };
 
   const handleAplicarTodosCambios = () => {
-    // TODO: Integrar con API
-    console.log("Aplicando cambios:", cambiosPendientes);
+    // ⚠️ FUNCIONALIDAD NO DISPONIBLE EN BACKEND
+    // El backend NO tiene endpoint para edición masiva de pautas nutricionales
+    // Solo están disponibles endpoints para:
+    // - IMC: POST /api/v1/calculator/imc
+    // - Recetas: POST /api/v1/recipe/create
+    // - Comidas: POST /api/v1/recipe/meal
+    //
+    // Por ahora, los cambios se mantienen solo en el frontend (datos mock)
+    console.log("Aplicando cambios (solo local):", cambiosPendientes);
     setCambiosPendientes([]);
+    // TODO: Cuando el backend implemente endpoints de edición masiva, integrar aquí
   };
 
   const handleDescartarCambios = () => {
@@ -745,11 +754,20 @@ export function EdicionMasiva() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          {/* ⚠️ FUNCIONALIDAD NO DISPONIBLE: Exportar requiere datos del backend */}
+          <Button variant="outline" size="sm" disabled title="Funcionalidad no disponible">
             <Download className="mr-2 size-4" />
             Exportar Todo
           </Button>
-          <Button variant="outline" size="sm">
+          {/* Botón de actualizar - refresca datos del backend si están disponibles */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // TODO: Refrescar datos del backend cuando estén disponibles
+              window.location.reload();
+            }}
+          >
             <RefreshCcw className="mr-2 size-4" />
             Actualizar
           </Button>

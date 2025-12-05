@@ -1,5 +1,28 @@
 "use client";
 
+/**
+ * ============================================================================
+ * PÁGINA: Trainer - Módulo Principal de Trainer
+ * ============================================================================
+ *
+ * ESTADO DE CONEXIÓN AL BACKEND:
+ *
+ * ✅ COMPONENTES CONECTADOS:
+ * - TrainerCards: Conectado parcialmente
+ *   → Tareas: GET /api/v1/admin-panel/tasks/assigned-to-me ✅
+ *   → Clientes: GET /api/v1/admin-panel/advices ✅
+ *   → Métricas de sesiones/series/volumen/RPE: Mock data ❌
+ *
+ * ❌ COMPONENTES SIN CONEXIÓN (MOCK DATA):
+ * - BibliotecaEjercicios: Sin endpoints disponibles
+ * - EdicionMasiva: Sin endpoints disponibles
+ * - RenovarSemana: Sin endpoints disponibles
+ * - LesionesRestricciones: Sin endpoints disponibles
+ *
+ * VER DETALLES EN CADA COMPONENTE INDIVIDUAL
+ * ============================================================================
+ */
+
 import { useState } from "react";
 
 import { Dumbbell, Table2, CalendarPlus, Shield, Activity } from "lucide-react";

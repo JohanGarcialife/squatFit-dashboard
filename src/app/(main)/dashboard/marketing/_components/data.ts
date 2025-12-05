@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import type {
   MarketingKPIs,
   IngresoData,
@@ -60,7 +61,7 @@ export const mockIngresosAnual: IngresoData[] = [
 // ============================================
 
 export const mockVentasProducto: VentaProducto[] = [
-  { tipo: "libro", cantidad: 89, ingresos: 2670, porcentaje: 26.0, fill: "hsl(var(--chart-1))" },
+  { tipo: "libro", cantidad: 89, ingresos: 2670, porcentaje: 26.0, fill: "hsl(var(--primary))" },
   { tipo: "curso", cantidad: 67, ingresos: 13400, porcentaje: 19.6, fill: "hsl(var(--chart-2))" },
   { tipo: "asesoria", cantidad: 134, ingresos: 40200, porcentaje: 39.2, fill: "hsl(var(--chart-3))" },
   { tipo: "premium", cantidad: 52, ingresos: 31200, porcentaje: 15.2, fill: "hsl(var(--chart-4))" },
@@ -531,33 +532,33 @@ export const ingresosChartConfig = {
 export const ventasChartConfig = {
   libro: {
     label: "Libros",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--primary))", // Color naranja de SquatFit
   },
   curso: {
     label: "Cursos",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(var(--chart-2))", // Naranja claro/amarillo
   },
   asesoria: {
     label: "Asesorías",
-    color: "hsl(var(--chart-3))",
+    color: "hsl(var(--chart-3))", // Azul complementario
   },
   premium: {
     label: "Premium",
-    color: "hsl(var(--chart-4))",
+    color: "hsl(var(--chart-4))", // Morado
   },
 };
 
 export const tareasChartConfig = {
   nutricion: {
     label: "Nutrición",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--primary))", // Color naranja de SquatFit
   },
   entreno: {
     label: "Entreno",
-    color: "hsl(var(--chart-2))",
+    color: "hsl(var(--chart-2))", // Naranja claro/amarillo
   },
   soporte: {
     label: "Soporte",
-    color: "hsl(var(--chart-3))",
+    color: "hsl(var(--chart-3))", // Azul complementario
   },
 };

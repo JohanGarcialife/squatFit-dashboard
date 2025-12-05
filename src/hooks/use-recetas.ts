@@ -1,26 +1,83 @@
 /**
- * Hooks para gestión de Recetas
+ * Hooks para gestión de Recetas con React Query
+ * Conectado al backend según ANALISIS_FUNCIONALIDADES_BACKEND.md
  */
 
-import { useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
-import { recetasData } from "@/app/(main)/dashboard/dieta/_components/data";
-import { Receta, FiltrosRecetas } from "@/app/(main)/dashboard/dieta/_components/schema";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+import type { Receta, FiltrosRecetas } from "@/app/(main)/dashboard/dieta/_components/schema";
+import {
+  getAllRecipes,
+  getUserRecipes,
+  createRecipe,
+  uploadRecipeImage,
+  duplicateRecipe,
+} from "@/lib/services/recipe-service";
+import { transformBackendToUI, transformUIToBackend } from "@/lib/services/recipe-types";
+
+// Query keys para React Query
+export const recipeKeys = {
+  all: ["recipes"] as const,
+  allRecipes: () => [...recipeKeys.all, "all"] as const,
+  userRecipes: () => [...recipeKeys.all, "user"] as const,
+  recipe: (id: string) => [...recipeKeys.all, "detail", id] as const,
+};
 
 /**
- * Hook para obtener todas las recetas
+ * Hook para obtener todas las recetas del sistema
+ * Endpoint: GET /api/v1/recipe/all
  */
 export function useRecetas() {
-  const data = recetasData;
-  const isLoading = false;
-  const isError = false;
-  const error = null;
+  const query = useQuery({
+    queryKey: recipeKeys.allRecipes(),
+    queryFn: async () => {
+      const backendRecipes = await getAllRecipes();
+      // Transformar recetas del backend al formato de la UI
+      return backendRecipes.map((recipe) => transformBackendToUI(recipe));
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    retry: 2,
+  });
 
-  return { data: data ?? [], isLoading, isError, error };
+  return {
+    data: query.data ?? [],
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+  };
+}
+
+/**
+ * Hook para obtener las recetas del usuario autenticado
+ * Endpoint: GET /api/v1/recipe/by-user
+ */
+export function useRecetasUsuario() {
+  const query = useQuery({
+    queryKey: recipeKeys.userRecipes(),
+    queryFn: async () => {
+      const backendRecipes = await getUserRecipes();
+      return backendRecipes.map((recipe) => transformBackendToUI(recipe));
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: 2,
+  });
+
+  return {
+    data: query.data ?? [],
+    isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
 
 /**
  * Hook para obtener una receta por ID
+ * Nota: Como no existe endpoint GET /api/v1/recipe/:id, se busca en la lista de todas las recetas
  */
 export function useReceta(id: string | null) {
   const { data: recetas } = useRecetas();
@@ -32,7 +89,8 @@ export function useReceta(id: string | null) {
 }
 
 /**
- * Hook para buscar recetas con filtros
+ * Hook para buscar recetas con filtros (lado cliente)
+ * Aplica filtros sobre las recetas obtenidas del backend
  */
 export function useRecetasFiltradas(filtros: FiltrosRecetas) {
   const { data: recetas } = useRecetas();
@@ -90,52 +148,98 @@ export function useRecetasFiltradas(filtros: FiltrosRecetas) {
 
 /**
  * Hook para crear una receta
+ * Endpoint: POST /api/v1/recipe/create
  */
 export function useCrearReceta() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const crearReceta = useCallback(async (receta: Omit<Receta, "id" | "createdAt">) => {
-    setIsLoading(true);
-    setError(null);
+  const mutation = useMutation({
+    mutationFn: async (receta: Partial<Receta>) => {
+      const payload = transformUIToBackend(receta);
+      const backendRecipe = await createRecipe(payload);
+      return transformBackendToUI(backendRecipe);
+    },
+    onSuccess: () => {
+      // Invalidar las queries para refrescar la lista
+      queryClient.invalidateQueries({ queryKey: recipeKeys.all });
+      toast.success("Receta creada exitosamente");
+    },
+    onError: (error: Error) => {
+      toast.error(`Error al crear receta: ${error.message}`);
+    },
+  });
 
-    try {
-      console.log("Creando receta:", receta);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+  return {
+    crearReceta: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error,
+  };
+}
 
-      return {
-        ...receta,
-        id: `rec-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-      };
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+/**
+ * Hook para subir imagen de una receta
+ * Endpoint: PUT /api/v1/recipe/upload-receipe-image
+ */
+export function useSubirImagenReceta() {
+  const queryClient = useQueryClient();
 
-  return { crearReceta, isLoading, error };
+  const mutation = useMutation({
+    mutationFn: async ({ recipeId, file }: { recipeId: string; file: File }) => {
+      const backendRecipe = await uploadRecipeImage(recipeId, file);
+      return transformBackendToUI(backendRecipe);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: recipeKeys.all });
+      toast.success("Imagen subida exitosamente");
+    },
+    onError: (error: Error) => {
+      toast.error(`Error al subir imagen: ${error.message}`);
+    },
+  });
+
+  return {
+    subirImagen: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error,
+  };
 }
 
 /**
  * Hook para duplicar una receta
+ * Usa el endpoint de crear con datos modificados
  */
 export function useDuplicarReceta() {
-  const { crearReceta, isLoading, error } = useCrearReceta();
+  const queryClient = useQueryClient();
 
-  const duplicarReceta = useCallback(
-    async (recetaOriginal: Receta) => {
-      const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...datos } = recetaOriginal;
-      return crearReceta({
-        ...datos,
-        nombre: `${datos.nombre} (copia)`,
-        estado: "borrador",
-      });
+  const mutation = useMutation({
+    mutationFn: async (recetaOriginal: Receta) => {
+      // Transformar a formato backend
+      const backendRecipe = {
+        id: recetaOriginal.id,
+        name: recetaOriginal.nombre,
+        description: recetaOriginal.descripcion,
+        kcal: recetaOriginal.caloriasTotal,
+        carbohydrates: recetaOriginal.carbohidratosTotal,
+        proteins: recetaOriginal.proteinasTotal,
+        fats: recetaOriginal.grasasTotal,
+        image: recetaOriginal.imagen,
+      };
+
+      const duplicated = await duplicateRecipe(backendRecipe);
+      return transformBackendToUI(duplicated);
     },
-    [crearReceta],
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: recipeKeys.all });
+      toast.success("Receta duplicada exitosamente");
+    },
+    onError: (error: Error) => {
+      toast.error(`Error al duplicar receta: ${error.message}`);
+    },
+  });
 
-  return { duplicarReceta, isLoading, error };
+  return {
+    duplicarReceta: mutation.mutateAsync,
+    isLoading: mutation.isPending,
+    error: mutation.error,
+  };
 }

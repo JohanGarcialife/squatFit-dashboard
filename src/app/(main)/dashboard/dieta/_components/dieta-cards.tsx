@@ -1,16 +1,32 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { Apple, ChefHat, CalendarDays, ArrowLeftRight, TrendingUp, Database } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { getDietaStats } from "./data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useDietaStats } from "@/hooks/use-dieta";
 
 export function DietaCards() {
-  const stats = useMemo(() => getDietaStats(), []);
+  const { stats, isLoading } = useDietaStats();
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="@container/card">
+            <CardHeader>
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-8 w-16" />
+            </CardHeader>
+            <CardFooter>
+              <Skeleton className="h-4 w-full" />
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">

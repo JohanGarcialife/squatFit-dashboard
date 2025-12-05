@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import type { PautaNutricional, PautasStats, Suplemento, CondicionMedica, Alergia, Bebida } from "./schema";
 
 // =============================================

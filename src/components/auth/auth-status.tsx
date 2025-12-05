@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/auth-context";
 
 export function AuthStatus() {
   const { user, loading, logout } = useAuth();
-//Actualizacion
+
   if (loading) {
     return (
       <Card className="w-full max-w-md">

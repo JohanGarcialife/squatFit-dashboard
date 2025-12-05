@@ -1,4 +1,46 @@
 "use client";
+/* eslint-disable max-lines */
+
+/**
+ * ============================================================================
+ * COMPONENTE: EdicionMasiva - Edición Masiva de Rutinas y Sesiones
+ * ============================================================================
+ *
+ * ESTADO DE CONEXIÓN AL BACKEND:
+ *
+ * ❌ SIN CONEXIÓN AL BACKEND (MOCK DATA):
+ *
+ * Este componente NO está conectado al backend. Todos los datos provienen
+ * de archivos estáticos (data.ts) y funciones de generación mock.
+ *
+ * ENDPOINTS NECESARIOS (NO IMPLEMENTADOS EN BACKEND):
+ * - GET    /api/v1/rutinas                - Listar rutinas
+ * - GET    /api/v1/rutinas/:id            - Obtener rutina específica
+ * - POST   /api/v1/rutinas                - Crear rutina
+ * - PUT    /api/v1/rutinas/:id            - Actualizar rutina
+ * - PATCH  /api/v1/sesiones/bulk          - Actualización masiva de sesiones
+ * - DELETE /api/v1/rutinas/:id            - Eliminar rutina
+ *
+ * DATOS ACTUALES:
+ * - clientesEntrenamientoData: Array estático de clientes de ejemplo
+ * - sesionesData: Array estático de sesiones de ejemplo
+ * - ejerciciosData: Array estático de ejercicios de ejemplo
+ * - plantillasEntrenamiento: Array estático de plantillas
+ *
+ * FUNCIONALIDADES ACTUALES (MOCK):
+ * - ✅ Visualización de semanas de entrenamiento por cliente
+ * - ✅ Edición de sesiones individuales
+ * - ✅ Selección múltiple de sesiones
+ * - ✅ Edición masiva (solo en memoria local)
+ * - ✅ Copiar sesiones entre semanas
+ * - ✅ Eliminar sesiones (solo en memoria local)
+ * - ❌ No persiste cambios (se pierden al recargar)
+ *
+ * LÍNEA 425: TODO: Integrar con API - POST /api/sesiones/bulk
+ *
+ * REFERENCIA: ANALISIS_FUNCIONALIDADES_BACKEND.md - Sección 2: Biblioteca de Ejercicios
+ * ============================================================================
+ */
 
 import { useState, useMemo } from "react";
 

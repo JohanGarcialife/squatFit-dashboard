@@ -8,9 +8,7 @@ import {
   FileText,
   TrendingUp,
   Dumbbell,
-  ShoppingCart,
   BarChart3,
-  Headphones,
   type LucideIcon,
 } from "lucide-react";
 
@@ -75,11 +73,11 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/chat",
         icon: MessageSquare,
       },
-      {
-        title: "Soporte",
-        url: "/dashboard/support",
-        icon: Headphones,
-      },
+      // {
+      //   title: "Soporte",
+      //   url: "/dashboard/support",
+      //   icon: Headphones,
+      // },
     ],
   },
   {
@@ -119,11 +117,11 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/trainer",
         icon: Dumbbell,
       },
-      {
-        title: "Ventas",
-        url: "/dashboard/ventas",
-        icon: ShoppingCart,
-      },
+      // {
+      //   title: "Ventas",
+      //   url: "/dashboard/ventas",
+      //   icon: ShoppingCart,
+      // },
     ],
   },
   {

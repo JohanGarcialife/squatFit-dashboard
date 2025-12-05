@@ -1,7 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-
 import {
   DollarSign,
   TrendingUp,
@@ -13,6 +11,7 @@ import {
   MessageSquareOff,
   ClipboardList,
   Ticket,
+  Loader2,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -25,11 +24,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useMarketingKPIs } from "@/hooks/use-marketing";
 
 import { getMockKPIs } from "./data";
 
 export function KPIOverviewCards() {
-  const kpis = useMemo(() => getMockKPIs(), []);
+  const { data: kpis, isLoading, isError } = useMarketingKPIs();
+
+  // Fallback a datos mock si hay error o mientras carga
+  const kpisData = kpis || getMockKPIs();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("es-ES", {
@@ -47,17 +51,43 @@ export function KPIOverviewCards() {
     };
   };
 
-  const variacionMensual = formatVariation(kpis.variacionMensual);
-  const variacionAnual = formatVariation(kpis.variacionAnual);
+  const variacionMensual = formatVariation(kpisData.variacionMensual);
+  const variacionAnual = formatVariation(kpisData.variacionAnual);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2">
+        {/* Solo 2 cards: Asesorías y Ventas/Tareas (los que están conectados al backend) */}
+        {Array.from({ length: 2 }).map((_, i) => (
+          <Card key={i} className="@container/card">
+            <CardHeader>
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="mt-2 h-8 w-32" />
+            </CardHeader>
+            <CardFooter>
+              <Skeleton className="h-4 w-full" />
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      {/* Ingresos Mensual */}
-      <Card className="@container/card">
+    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2">
+      {/* ========================================================================
+          KPIS NO CONECTADOS AL BACKEND - COMENTADOS
+          ======================================================================== */}
+
+      {/* ❌ Ingresos Mensual - NO CONECTADO
+          El backend NO calcula ingresos reales (no suma amount_value)
+          Siempre muestra 0
+      */}
+      {/* <Card className="@container/card">
         <CardHeader>
           <CardDescription>Ingresos Mensual</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {formatCurrency(kpis.ingresosMensual)}
+            {formatCurrency(kpisData.ingresosMensual)}
           </CardTitle>
           <CardAction>
             <Badge
@@ -80,14 +110,17 @@ export function KPIOverviewCards() {
           </div>
           <div className="text-muted-foreground">Meta: {formatCurrency(25000)}</div>
         </CardFooter>
-      </Card>
+      </Card> */}
 
-      {/* Ingresos Anual */}
-      <Card className="@container/card">
+      {/* ❌ Ingresos Anual - NO CONECTADO
+          El backend NO calcula ingresos reales (no suma amount_value)
+          Siempre muestra 0
+      */}
+      {/* <Card className="@container/card">
         <CardHeader>
           <CardDescription>Ingresos Anual</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {formatCurrency(kpis.ingresosAnual)}
+            {formatCurrency(kpisData.ingresosAnual)}
           </CardTitle>
           <CardAction>
             <Badge
@@ -110,14 +143,14 @@ export function KPIOverviewCards() {
           </div>
           <div className="text-muted-foreground">Meta: {formatCurrency(300000)}</div>
         </CardFooter>
-      </Card>
+      </Card> */}
 
-      {/* Asesorías */}
+      {/* ✅ Asesorías - CONECTADO AL BACKEND */}
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Asesorías</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {kpis.asesoriasActivas}
+            {kpisData.asesoriasActivas}
             <span className="text-muted-foreground text-lg font-normal"> activas</span>
           </CardTitle>
           <CardAction>
@@ -126,25 +159,25 @@ export function KPIOverviewCards() {
               className="border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-400"
             >
               <Users className="size-4" />
-              Total: {kpis.asesoriasActivas + kpis.asesoriasPausa + kpis.asesoriasFinalizadas}
+              Total: {kpisData.asesoriasActivas + kpisData.asesoriasPausa + kpisData.asesoriasFinalizadas}
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="flex gap-4 font-medium">
-            <span className="text-amber-600">{kpis.asesoriasPausa} en pausa</span>
-            <span className="text-muted-foreground">{kpis.asesoriasFinalizadas} finalizadas</span>
+            <span className="text-amber-600">{kpisData.asesoriasPausa} en pausa</span>
+            <span className="text-muted-foreground">{kpisData.asesoriasFinalizadas} finalizadas</span>
           </div>
-          <div className="text-muted-foreground">{kpis.totalVentas} ventas totales</div>
+          <div className="text-muted-foreground">{kpisData.totalVentas} ventas totales</div>
         </CardFooter>
       </Card>
 
-      {/* Ventas por Producto */}
+      {/* ✅ Ventas Totales - CONECTADO AL BACKEND */}
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Ventas Totales</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {kpis.totalVentas}
+            {kpisData.totalVentas}
           </CardTitle>
           <CardAction>
             <Badge
@@ -162,12 +195,15 @@ export function KPIOverviewCards() {
         </CardFooter>
       </Card>
 
-      {/* Renovación Próxima */}
-      <Card className="@container/card">
+      {/* ❌ Renovación Próxima - NO CONECTADO
+          Endpoint inexistente: GET /api/v1/admin-panel/marketing/clientes-renovacion
+          Siempre muestra 0
+      */}
+      {/* <Card className="@container/card">
         <CardHeader>
           <CardDescription>Renovación Próxima (7 días)</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {kpis.clientesRenovacionProxima}
+            {kpisData.clientesRenovacionProxima}
           </CardTitle>
           <CardAction>
             <Badge
@@ -186,32 +222,35 @@ export function KPIOverviewCards() {
           </div>
           <div className="text-muted-foreground">Contactar antes de vencimiento</div>
         </CardFooter>
-      </Card>
+      </Card> */}
 
-      {/* Falta Pago */}
-      <Card className="@container/card">
+      {/* ❌ Falta Pago - NO CONECTADO
+          Endpoint inexistente: GET /api/v1/admin-panel/marketing/clientes-falta-pago
+          Siempre muestra 0
+      */}
+      {/* <Card className="@container/card">
         <CardHeader>
           <CardDescription>Clientes Falta Pago</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {kpis.clientesFaltaPago}
+            {kpisData.clientesFaltaPago}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
               className={
-                kpis.clientesFaltaPago > 5
+                kpisData.clientesFaltaPago > 5
                   ? "border-red-200 bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400"
                   : "border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
               }
             >
               <CreditCard className="size-4" />
-              {kpis.clientesFaltaPago > 5 ? "Crítico" : "Pendiente"}
+              {kpisData.clientesFaltaPago > 5 ? "Crítico" : "Pendiente"}
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            {kpis.clientesFaltaPago > 0 ? (
+            {kpisData.clientesFaltaPago > 0 ? (
               <span className="text-red-600">Gestión de cobros pendiente</span>
             ) : (
               "Todos los pagos al día"
@@ -219,20 +258,23 @@ export function KPIOverviewCards() {
           </div>
           <div className="text-muted-foreground">Ver detalle de deudas</div>
         </CardFooter>
-      </Card>
+      </Card> */}
 
-      {/* Sin Contacto */}
-      <Card className="@container/card">
+      {/* ❌ Sin Contacto - NO CONECTADO
+          Endpoint inexistente: GET /api/v1/admin-panel/marketing/clientes-sin-contacto
+          Siempre muestra 0
+      */}
+      {/* <Card className="@container/card">
         <CardHeader>
           <CardDescription>Sin Contacto {">"}7 días</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {kpis.clientesSinContacto}
+            {kpisData.clientesSinContacto}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
               className={
-                kpis.clientesSinContacto > 10
+                kpisData.clientesSinContacto > 10
                   ? "border-red-200 bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-400"
                   : "border-amber-200 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
               }
@@ -244,7 +286,7 @@ export function KPIOverviewCards() {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="line-clamp-1 flex gap-2 font-medium">
-            {kpis.clientesSinContacto > 0 ? (
+            {kpisData.clientesSinContacto > 0 ? (
               <span className="text-amber-600">Requieren contacto</span>
             ) : (
               "Todos contactados"
@@ -252,15 +294,15 @@ export function KPIOverviewCards() {
           </div>
           <div className="text-muted-foreground">Riesgo de abandono</div>
         </CardFooter>
-      </Card>
+      </Card> */}
 
-      {/* Tareas y Tickets */}
+      {/* ✅ Tareas y Tickets - CONECTADO AL BACKEND */}
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Tareas Pendientes / Tickets</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {kpis.tareasPendientesTotal}
-            <span className="text-muted-foreground text-lg font-normal"> / {kpis.ticketsRecibidos}</span>
+            {kpisData.tareasPendientesTotal}
+            <span className="text-muted-foreground text-lg font-normal"> / {kpisData.ticketsRecibidos}</span>
           </CardTitle>
           <CardAction>
             <Badge

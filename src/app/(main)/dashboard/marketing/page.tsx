@@ -9,10 +9,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   KPIOverviewCards,
   KPICharts,
-  AlertsPanel,
+  // AlertsPanel, // ❌ NO CONECTADO - Comentado
   TicketsCauses,
-  NotificationsList,
-  XPTable,
+  // NotificationsList, // ❌ NO CONECTADO - Comentado
+  // XPTable, // ❌ NO CONECTADO - Comentado
   FiltersBar,
   ExportActions,
 } from "./_components";
@@ -58,14 +58,28 @@ export default function MarketingPage() {
         <KPICharts />
       </section>
 
-      {/* Alertas y Tickets */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <AlertsPanel />
+      {/* Tickets - Solo este componente está conectado al backend */}
+      <div className="grid grid-cols-1 gap-6">
         <TicketsCauses />
       </div>
 
-      {/* Tabs: Notificaciones y Sistema XP */}
-      <Tabs defaultValue="notificaciones" className="w-full">
+      {/* ========================================================================
+          COMPONENTES NO CONECTADOS AL BACKEND - COMENTADOS
+          ======================================================================== */}
+
+      {/* ❌ AlertsPanel - NO CONECTADO
+          Endpoint inexistente: GET /api/v1/admin-panel/marketing/alertas
+          Usa solo datos mock: getMockAlertasCriticas()
+      */}
+      {/* <AlertsPanel /> */}
+
+      {/* ❌ Tabs: Notificaciones y Sistema XP - NO CONECTADOS
+          - NotificationsList: Endpoint inexistente GET /api/v1/admin-panel/marketing/notificaciones
+          - XPTable: Endpoints inexistentes GET /api/v1/admin-panel/marketing/tabla-xp
+                     y GET /api/v1/admin-panel/marketing/creditos-mensuales
+          Usan solo datos mock
+      */}
+      {/* <Tabs defaultValue="notificaciones" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="notificaciones">Notificaciones</TabsTrigger>
           <TabsTrigger value="xp">Sistema XP</TabsTrigger>
@@ -76,7 +90,7 @@ export default function MarketingPage() {
         <TabsContent value="xp" className="mt-4">
           <XPTable />
         </TabsContent>
-      </Tabs>
+      </Tabs> */}
     </div>
   );
 }

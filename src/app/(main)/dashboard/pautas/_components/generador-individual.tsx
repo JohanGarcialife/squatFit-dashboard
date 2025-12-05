@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable max-lines */
 
 import { useState, useMemo } from "react";
 
@@ -68,6 +69,7 @@ import {
   calcularTDEE,
   calcularMacrosRecomendados,
 } from "./data";
+import { IMCCalculator } from "./imc-calculator";
 import type { PautaNutricional, Suplemento } from "./schema";
 
 // =============================================
@@ -1201,9 +1203,18 @@ export function GeneradorIndividual() {
 
   const handleGuardar = async () => {
     setIsSaving(true);
-    // TODO: Integrar con API
+    // ⚠️ FUNCIONALIDAD NO DISPONIBLE EN BACKEND
+    // El backend NO tiene endpoint para guardar pautas nutricionales completas
+    // Solo están disponibles endpoints para:
+    // - IMC: POST /api/v1/calculator/imc
+    // - Recetas: POST /api/v1/recipe/create
+    // - Comidas: POST /api/v1/recipe/meal
+    // - Formularios: GET /api/v1/admin-panel/form-types
+    //
+    // Por ahora, los datos se mantienen solo en el frontend (datos mock)
     await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsSaving(false);
+    // TODO: Cuando el backend implemente endpoints de pautas, integrar aquí
   };
 
   return (
@@ -1216,13 +1227,15 @@ export function GeneradorIndividual() {
         </div>
         {pautaEditada && (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            {/* ⚠️ FUNCIONALIDAD NO DISPONIBLE: Exportar PDF requiere datos del backend */}
+            <Button variant="outline" size="sm" disabled title="Funcionalidad no disponible">
               <Download className="mr-2 size-4" />
               Exportar PDF
             </Button>
+            {/* ⚠️ FUNCIONALIDAD PARCIALMENTE DISPONIBLE: Solo guarda datos locales */}
             <Button size="sm" onClick={handleGuardar} disabled={isSaving}>
               <Save className="mr-2 size-4" />
-              {isSaving ? "Guardando..." : "Guardar Cambios"}
+              {isSaving ? "Guardando..." : "Guardar Cambios (Local)"}
             </Button>
           </div>
         )}
@@ -1234,6 +1247,25 @@ export function GeneradorIndividual() {
       {/* Secciones de edición */}
       {pautaEditada && (
         <div className="space-y-4">
+          {/* Calculadora de IMC - Conectada al backend */}
+          <IMCCalculator
+            initialWeight={pautaEditada.fichaRapida.pesoActual}
+            initialHeight={pautaEditada.fichaRapida.altura}
+            currentIMC={pautaEditada.evaluacionGeneral?.imc}
+            showHistory={true}
+            onCalculated={(result) => {
+              // Actualizar IMC en la pauta cuando se calcula
+              if (pautaEditada.evaluacionGeneral) {
+                handleUpdatePauta({
+                  ...pautaEditada,
+                  evaluacionGeneral: {
+                    ...pautaEditada.evaluacionGeneral,
+                    imc: result.imc,
+                  },
+                });
+              }
+            }}
+          />
           <MacrosFichaRapida pauta={pautaEditada} onUpdate={handleUpdatePauta} />
           <HistorialMedicoSection pauta={pautaEditada} onUpdate={handleUpdatePauta} />
           <BebidasComidasSection pauta={pautaEditada} onUpdate={handleUpdatePauta} />

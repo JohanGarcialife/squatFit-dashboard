@@ -14,7 +14,7 @@ import { ListaAlimentos } from "./_components/lista-alimentos";
 import { SustitucionesRestricciones } from "./_components/sustituciones-restricciones";
 
 export default function DietaPage() {
-  const [activeTab, setActiveTab] = useState("generador");
+  const [activeTab, setActiveTab] = useState("recetas");
 
   return (
     <div className="@container/main flex flex-col gap-6">
@@ -33,6 +33,7 @@ export default function DietaPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="border-b">
           <TabsList className="h-auto flex-wrap justify-start gap-1 rounded-none bg-transparent p-0">
+            {/* TODO: Generador de Menús - Pendiente de implementación backend
             <TabsTrigger
               value="generador"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
@@ -40,6 +41,7 @@ export default function DietaPage() {
               <CalendarDays className="mr-2 size-4" />
               Generador de Menús
             </TabsTrigger>
+            */}
             <TabsTrigger
               value="alimentos"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
@@ -54,6 +56,7 @@ export default function DietaPage() {
               <ChefHat className="mr-2 size-4" />
               Banco de Recetas
             </TabsTrigger>
+            {/* TODO: Carga Masiva - Pendiente de implementación backend
             <TabsTrigger
               value="carga-masiva"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
@@ -61,6 +64,7 @@ export default function DietaPage() {
               <Upload className="mr-2 size-4" />
               Carga Masiva
             </TabsTrigger>
+            */}
             <TabsTrigger
               value="sustituciones"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
@@ -71,9 +75,11 @@ export default function DietaPage() {
           </TabsList>
         </div>
 
+        {/* TODO: Generador de Menús - Pendiente de implementación backend
         <TabsContent value="generador" className="mt-6">
           <GeneradorMenus />
         </TabsContent>
+        */}
 
         <TabsContent value="alimentos" className="mt-6">
           <ListaAlimentos />
@@ -83,9 +89,11 @@ export default function DietaPage() {
           <BancoRecetas />
         </TabsContent>
 
+        {/* TODO: Carga Masiva - Pendiente de implementación backend
         <TabsContent value="carga-masiva" className="mt-6">
           <CargaMasiva />
         </TabsContent>
+        */}
 
         <TabsContent value="sustituciones" className="mt-6">
           <SustitucionesRestricciones />
