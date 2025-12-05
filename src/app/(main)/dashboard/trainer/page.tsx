@@ -25,14 +25,15 @@
 
 import { useState } from "react";
 
-import { Dumbbell, Table2, CalendarPlus, Shield, Activity } from "lucide-react";
+import { Dumbbell, Shield } from "lucide-react";
+// import { Table2, CalendarPlus, Activity } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { BibliotecaEjercicios } from "./_components/biblioteca-ejercicios";
-import { EdicionMasiva } from "./_components/edicion-masiva";
+// import { EdicionMasiva } from "./_components/edicion-masiva";
 import { LesionesRestricciones } from "./_components/lesiones-restricciones";
-import { RenovarSemana } from "./_components/renovar-semana";
+// import { RenovarSemana } from "./_components/renovar-semana";
 import { TrainerCards } from "./_components/trainer-cards";
 
 export default function TrainerPage() {
@@ -62,20 +63,20 @@ export default function TrainerPage() {
               <Dumbbell className="mr-2 size-4" />
               Biblioteca de Ejercicios
             </TabsTrigger>
-            <TabsTrigger
+            {/* <TabsTrigger
               value="edicion"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               <Table2 className="mr-2 size-4" />
               Edición Masiva
-            </TabsTrigger>
-            <TabsTrigger
+            </TabsTrigger> */}
+            {/* <TabsTrigger
               value="renovar"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               <CalendarPlus className="mr-2 size-4" />
               Renovar Semana
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger
               value="restricciones"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
@@ -90,13 +91,13 @@ export default function TrainerPage() {
           <BibliotecaEjercicios />
         </TabsContent>
 
-        <TabsContent value="edicion" className="mt-6">
+        {/* <TabsContent value="edicion" className="mt-6">
           <EdicionMasiva />
-        </TabsContent>
+        </TabsContent> */}
 
-        <TabsContent value="renovar" className="mt-6">
+        {/* <TabsContent value="renovar" className="mt-6">
           <RenovarSemana />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="restricciones" className="mt-6">
           <LesionesRestricciones />
