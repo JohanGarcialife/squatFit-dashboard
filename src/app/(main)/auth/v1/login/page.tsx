@@ -12,7 +12,7 @@ export default async function LoginV1() {
   if (isAuthenticated) {
     redirect("/dashboard");
   }
-
+  // Auth
   return (
     <div className="flex h-dvh">
       <div className="bg-primary hidden lg:block lg:w-1/3">

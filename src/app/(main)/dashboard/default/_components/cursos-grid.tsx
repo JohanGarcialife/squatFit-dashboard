@@ -45,98 +45,22 @@ function getLevelBadgeVariant(level: string): "default" | "secondary" | "outline
   }
 }
 
-/**
- * Lista de URLs de imágenes inválidas conocidas que deben ser filtradas
- */
-const INVALID_IMAGE_URLS = [
-  "image.jpg",
-  "/image.jpg",
-  "https://storage.googleapis.com/course-images/image.jpg",
-  "storage.googleapis.com/course-images/image.jpg",
-  "fitness-fundamentals.jpg",
-  "/fitness-fundamentals.jpg",
-];
-
-/**
- * Valida si una URL de imagen es válida o es un placeholder genérico
- */
-function isValidImageUrl(url: string): boolean {
-  if (!url || typeof url !== "string" || url.trim() === "") {
-    return false;
-  }
-
-  const trimmedUrl = url.trim();
-
-  // Filtrar URLs inválidas conocidas
-  if (INVALID_IMAGE_URLS.includes(trimmedUrl)) {
-    return false;
-  }
-
-  // Filtrar URLs que contengan "image.jpg" genérico
-  if (trimmedUrl.toLowerCase().includes("/image.jpg") || trimmedUrl.toLowerCase().endsWith("image.jpg")) {
-    return false;
-  }
-
-  // Filtrar URLs de Google Storage que sean genéricas o inválidas
-  if (trimmedUrl.includes("storage.googleapis.com") && trimmedUrl.includes("/image.jpg")) {
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Normaliza una URL de imagen para que sea compatible con next/image
- * - Filtra URLs inválidas conocidas
- * - Si es una URL absoluta (http:// o https://), la devuelve tal cual (si es válida)
- * - Si es una ruta relativa sin slash inicial, agrega el slash
- * - Si ya tiene slash inicial, la devuelve tal cual
- */
-function normalizeImageUrl(url: string | undefined | null): string | undefined {
-  if (!url || typeof url !== "string" || url.trim() === "") {
-    return undefined;
-  }
-
-  const trimmedUrl = url.trim();
-
-  // Validar si la URL es válida antes de procesarla
-  if (!isValidImageUrl(trimmedUrl)) {
-    return undefined;
-  }
-
-  // Si es una URL absoluta (http:// o https://), devolverla tal cual
-  if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
-    return trimmedUrl;
-  }
-
-  // Si es una ruta relativa sin slash inicial, agregarlo
-  if (!trimmedUrl.startsWith("/")) {
-    return `/${trimmedUrl}`;
-  }
-
-  // Si ya tiene slash inicial, devolverla tal cual
-  return trimmedUrl;
-}
-
 // ============================================================================
 // COMPONENTE: CARD DE CURSO
 // ============================================================================
 
 function CursoCard({ curso }: { curso: Curso }) {
-  const normalizedThumbnail = normalizeImageUrl(curso.thumbnail);
-
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-lg">
       {/* Imagen del curso */}
       <div className="bg-muted relative h-40 w-full overflow-hidden">
-        {normalizedThumbnail ? (
+        {curso.thumbnail ? (
           <Image
-            src={normalizedThumbnail}
+            src={curso.thumbnail}
             alt={curso.name}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            unoptimized={normalizedThumbnail.startsWith("https://storage.googleapis.com")}
           />
         ) : (
           <div className="flex h-full items-center justify-center">
