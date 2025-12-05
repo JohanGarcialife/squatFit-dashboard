@@ -100,6 +100,7 @@ export class TrainerService {
 
   /**
    * Manejar errores de conexión
+   * @deprecated Este método ya no se usa, el manejo de errores se hace directamente en makeRequest
    */
   private static handleRequestError(error: unknown, timeoutId: NodeJS.Timeout): never {
     clearTimeout(timeoutId);
@@ -151,8 +152,12 @@ export class TrainerService {
 
       return data;
     } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("Tiempo de espera agotado. Por favor, intenta nuevamente.");
+      }
       console.error("❌ TrainerService: Error en petición:", error);
-      this.handleRequestError(error, timeoutId);
+      throw new Error("Error de conexión con el servidor");
     }
   }
 
@@ -351,10 +356,12 @@ export class TrainerService {
       console.log("💪 TrainerService: Obteniendo clientes activos...");
 
       const queryParams = new URLSearchParams();
-      if (params?.page) {
+      // Validar que page sea un número válido y mayor que 0
+      if (params?.page !== undefined && typeof params.page === "number" && params.page > 0) {
         queryParams.append("page", params.page.toString());
       }
-      if (params?.limit) {
+      // Validar que limit sea un número válido y mayor que 0
+      if (params?.limit !== undefined && typeof params.limit === "number" && params.limit > 0) {
         queryParams.append("limit", params.limit.toString());
       }
 
