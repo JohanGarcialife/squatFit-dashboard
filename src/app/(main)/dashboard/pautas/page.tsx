@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 
-import { User, Users } from "lucide-react";
+import { User } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { EdicionMasiva } from "./_components/edicion-masiva";
+// import { EdicionMasiva } from "./_components/edicion-masiva";
 import { GeneradorIndividual } from "./_components/generador-individual";
 import { PautasCards } from "./_components/pautas-cards";
 
@@ -35,13 +35,13 @@ export default function PautasPage() {
               <User className="mr-2 size-4" />
               Generador Individual
             </TabsTrigger>
-            <TabsTrigger
+            {/* <TabsTrigger
               value="masiva"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               <Users className="mr-2 size-4" />
               Edición Masiva
-            </TabsTrigger>
+            </TabsTrigger> */}
           </TabsList>
         </div>
 
@@ -49,9 +49,9 @@ export default function PautasPage() {
           <GeneradorIndividual />
         </TabsContent>
 
-        <TabsContent value="masiva" className="mt-6">
+        {/* <TabsContent value="masiva" className="mt-6">
           <EdicionMasiva />
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   );

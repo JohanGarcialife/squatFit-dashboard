@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 
-import { Users, CalendarCheck, AlertTriangle, TrendingUp } from "lucide-react";
+import { Users, AlertTriangle } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { AgendaRevisiones } from "./_components/agenda-revisiones";
+// import { AgendaRevisiones } from "./_components/agenda-revisiones";
 import { AlertasCumplimiento } from "./_components/alertas-cumplimiento";
 import { PanelClientes } from "./_components/panel-clientes";
 import { SeguimientoCards } from "./_components/seguimiento-cards";
@@ -38,13 +38,13 @@ export default function SeguimientoPage() {
               <Users className="mr-2 size-4" />
               Panel de Clientes
             </TabsTrigger>
-            <TabsTrigger
+            {/* <TabsTrigger
               value="agenda"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               <CalendarCheck className="mr-2 size-4" />
               Agenda de Revisiones
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger
               value="alertas"
               className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
@@ -59,9 +59,9 @@ export default function SeguimientoPage() {
           <PanelClientes />
         </TabsContent>
 
-        <TabsContent value="agenda" className="mt-6">
+        {/* <TabsContent value="agenda" className="mt-6">
           <AgendaRevisiones />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="alertas" className="mt-6">
           <AlertasCumplimiento />
