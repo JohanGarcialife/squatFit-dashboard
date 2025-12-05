@@ -3,11 +3,11 @@ import { z } from "zod";
 // Schema basado en la respuesta del API
 export const entrenadorSchema = z.object({
   id: z.string(),
-  firstName: z.string().nullable().optional(),
-  lastName: z.string().nullable().optional(),
-  profile_picture: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
-  phone: z.string().nullable().optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  profile_picture: z.string().optional(),
+  description: z.string().optional(),
+  phone: z.string().optional(),
   email: z.string().email(),
   user_id: z.string(),
   user_status: z.number(), // 0 = Inactivo, 1 = Activo

@@ -213,7 +213,7 @@ export class CursosService {
     const priceNumber = parseFloat(apiCurso.price) || 0;
 
     // Validar y filtrar imágenes inválidas antes de asignarlas
-    const validThumbnail = this.isValidImageUrl(apiCurso.image) ? apiCurso.image : undefined;
+    const validThumbnail = apiCurso.image && this.isValidImageUrl(apiCurso.image) ? apiCurso.image : undefined;
 
     return {
       id: apiCurso.id,
