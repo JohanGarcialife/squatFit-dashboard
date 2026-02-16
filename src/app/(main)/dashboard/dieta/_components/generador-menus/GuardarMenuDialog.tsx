@@ -11,7 +11,13 @@ import { Label } from "@/components/ui/label";
 
 import { GuardarMenuDialogProps } from "./types";
 
-export function GuardarMenuDialog({ onOpenChange, nombreMenu, setNombreMenu, onGuardar }: GuardarMenuDialogProps) {
+export function GuardarMenuDialog({
+  isOpen,
+  onOpenChange,
+  nombreMenu,
+  setNombreMenu,
+  onGuardar,
+}: GuardarMenuDialogProps) {
   const [clienteBusqueda, setClienteBusqueda] = useState("");
 
   return (

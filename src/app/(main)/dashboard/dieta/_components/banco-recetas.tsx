@@ -28,7 +28,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   DropdownMenu,
@@ -53,7 +55,7 @@ import { useRecetas, useDuplicarReceta } from "@/hooks/use-recetas";
 
 import { CreateRecipeModal } from "./create-recipe-modal";
 import { tiposComida, etiquetasComunes, estadosReceta } from "./data";
-import { Receta } from "./schema";
+import { Receta, FiltrosRecetas } from "./schema";
 
 // Custom hook para debounce
 function useDebounce<T>(value: T, delay: number): T {
@@ -346,7 +348,7 @@ export function BancoRecetas() {
     }
   };
 
-  const handleEliminarReceta = () => {
+  const handleEliminarReceta = (_receta: Receta) => {
     // ❌ NO DISPONIBLE: El backend no tiene endpoint DELETE /api/v1/recipe/:id
     console.warn("La eliminación de recetas no está disponible en el backend actual");
   };
