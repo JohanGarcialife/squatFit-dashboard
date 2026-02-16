@@ -340,17 +340,6 @@ export default function Chat() {
           {groupedConversations.adminChats.map((chat) => renderConversationItem(chat))}
         </>
       )}
-
-      {/* Mensaje cuando no hay resultados de búsqueda */}
-      {searchQuery && sortedConversations.length === 0 && (
-        <div className="flex flex-col items-center justify-center p-4 text-center">
-          <div className="mb-2 text-gray-400">
-            <User size={24} />
-          </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">No se encontraron conversaciones</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">Intenta con otros términos de búsqueda</p>
-        </div>
-      )}
     </div>
   );
 }

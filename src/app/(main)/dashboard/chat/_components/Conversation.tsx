@@ -285,7 +285,7 @@ export default function Conversation() {
     }
 
     let isMounted = true;
-    const timeoutId: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout;
 
     const loadParticipants = async (forceRefresh = false) => {
       try {
