@@ -1,9 +1,10 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash2, Eye, Mail, Activity, UserCircle } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Eye, Mail, Activity } from "lucide-react";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { AlumnoUI } from "./schema";
 
@@ -66,8 +66,8 @@ const getRoleBadge = (role: string | null | undefined) => {
 };
 
 const getInitials = (firstName: string | null, lastName: string | null) => {
-  const first = firstName?.charAt(0) || "";
-  const last = lastName?.charAt(0) || "";
+  const first = firstName?.charAt(0) ?? "";
+  const last = lastName?.charAt(0) ?? "";
   return `${first}${last}`.toUpperCase() || "??";
 };
 

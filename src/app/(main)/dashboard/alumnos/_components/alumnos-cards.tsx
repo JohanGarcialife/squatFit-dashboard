@@ -1,11 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { Users, UserCheck, Activity } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAlumnos } from "@/hooks/use-alumnos";
-import { useMemo } from "react";
 
 export function AlumnosCards() {
   const { data: alumnosData } = useAlumnos({ page: 1, limit: 1000 });

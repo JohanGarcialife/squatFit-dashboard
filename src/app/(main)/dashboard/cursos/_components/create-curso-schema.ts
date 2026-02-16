@@ -15,10 +15,7 @@ export const createCursoFormSchema = z.object({
     .min(10, "La descripción debe tener al menos 10 caracteres")
     .max(500, "La descripción no puede exceder 500 caracteres"),
 
-  instructor: z
-    .string()
-    .min(3, "El nombre del instructor debe tener al menos 3 caracteres")
-    .max(100, "El nombre del instructor no puede exceder 100 caracteres"),
+  instructor: z.string().min(1, "Debes seleccionar un instructor"),
 
   price: z
     .number({
@@ -42,6 +39,9 @@ export const createCursoFormSchema = z.object({
     .string()
     .min(3, "La categoría debe tener al menos 3 caracteres")
     .max(50, "La categoría no puede exceder 50 caracteres"),
+
+  image: z.union([z.string().url("Introduce una URL válida"), z.literal("")]).optional(),
+  video_presentation: z.union([z.string().url("Introduce una URL válida"), z.literal("")]).optional(),
 });
 
 export type CreateCursoFormValues = z.infer<typeof createCursoFormSchema>;
@@ -61,6 +61,8 @@ export const createCursoDefaultValues: CreateCursoFormValues = {
   duration: "",
   status: "En Desarrollo",
   currency: "€",
+  image: "",
+  video_presentation: "",
 };
 
 /**

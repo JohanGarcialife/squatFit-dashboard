@@ -1,5 +1,5 @@
-import { getAuthToken } from "@/lib/auth/auth-utils";
 import { Entrenador } from "@/app/(main)/dashboard/entrenadores/_components/schema";
+import { getAuthToken } from "@/lib/auth/auth-utils";
 
 // ============================================================================
 // CONFIGURACIÓN DEL SERVICIO
@@ -46,6 +46,8 @@ export interface GetEntrenadoresParams {
   status?: "Activo" | "Inactivo" | "Vacaciones" | "Pendiente";
   specialty?: string;
   availability?: "Disponible" | "Ocupado" | "No Disponible";
+  /** Si es true, incluye coaches inactivos. Útil para selectores de asignación. */
+  include_inactive?: boolean;
 }
 
 // ============================================================================
@@ -164,6 +166,8 @@ export class EntrenadoresService {
       if (params?.status) queryParams.append("status", params.status);
       if (params?.specialty) queryParams.append("specialty", params.specialty);
       if (params?.availability) queryParams.append("availability", params.availability);
+      if (params?.include_inactive !== undefined)
+        queryParams.append("include_inactive", String(params.include_inactive));
 
       const queryString = queryParams.toString();
       const endpoint = `/api/v1/admin-panel/coaches${queryString ? `?${queryString}` : ""}`;

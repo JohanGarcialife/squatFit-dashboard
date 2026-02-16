@@ -145,7 +145,7 @@ export function ChartAreaInteractive() {
   });
 
   return (
-    <Card className="@container/card">
+    <Card className="border-primary @container/card">
       <CardHeader>
         <CardTitle>Total de Visitantes</CardTitle>
         <CardDescription>

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { Plus, Search } from "lucide-react";
+
 import { ColumnDef } from "@tanstack/react-table";
+import { Plus, Search } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
@@ -10,14 +11,14 @@ import { DataTableViewOptions } from "@/components/data-table/data-table-view-op
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { useCursos, useToggleCursoStatus } from "@/hooks/use-cursos";
+import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 
-import { cursosColumns } from "./columns.cursos";
 import { CursoActions } from "./columns-actions";
+import { cursosColumns } from "./columns.cursos";
 import { CreateCursoModal } from "./create-curso-modal";
-import { EditCursoModal } from "./edit-curso-modal";
 import { DeleteCursoDialog } from "./delete-curso-dialog";
+import { EditCursoModal } from "./edit-curso-modal";
 import { Curso } from "./schema";
 
 export function CursosTable() {
@@ -102,7 +103,7 @@ export function CursosTable() {
               <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
               <Input
                 placeholder="Buscar cursos..."
-                value={globalFilter ?? ""}
+                value={globalFilter}
                 onChange={(event) => setGlobalFilter(event.target.value)}
                 className="pl-8"
               />

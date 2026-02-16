@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { CursosService, CreateCursoDto, GetCursosParams } from "@/lib/services/cursos-service";
 import { Curso } from "@/app/(main)/dashboard/cursos/_components/schema";
+import { CursosService, CreateCursoDto, GetCursosParams } from "@/lib/services/cursos-service";
 
 // ============================================================================
 // QUERY KEYS

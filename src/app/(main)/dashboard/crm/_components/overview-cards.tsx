@@ -21,7 +21,7 @@ const lastMonth = format(subMonths(new Date(), 1), "LLLL");
 export function OverviewCards() {
   return (
     <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      <Card>
+      <Card className="border-primary">
         <CardHeader>
           <CardTitle>New Leads</CardTitle>
           <CardDescription>Last Month</CardDescription>
@@ -48,7 +48,7 @@ export function OverviewCards() {
         </CardFooter>
       </Card>
 
-      <Card className="overflow-hidden pb-0">
+      <Card className="border-primary overflow-hidden pb-0">
         <CardHeader>
           <CardTitle>Proposals Sent</CardTitle>
           <CardDescription>Last Month</CardDescription>
@@ -80,7 +80,7 @@ export function OverviewCards() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-primary">
         <CardHeader>
           <div className="w-fit rounded-lg bg-green-500/10 p-2">
             <Wallet className="size-5 text-green-500" />
@@ -96,7 +96,7 @@ export function OverviewCards() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-primary">
         <CardHeader>
           <div className="bg-destructive/10 w-fit rounded-lg p-2">
             <BadgeDollarSign className="text-destructive size-5" />
@@ -112,7 +112,7 @@ export function OverviewCards() {
         </CardContent>
       </Card>
 
-      <Card className="col-span-1 xl:col-span-2">
+      <Card className="border-primary col-span-1 xl:col-span-2">
         <CardHeader>
           <CardTitle>Revenue Growth</CardTitle>
           <CardDescription>Year to Date (YTD)</CardDescription>

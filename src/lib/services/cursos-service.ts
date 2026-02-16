@@ -1,5 +1,5 @@
-import { getAuthToken } from "@/lib/auth/auth-utils";
 import { Curso, CursoApi } from "@/app/(main)/dashboard/cursos/_components/schema";
+import { getAuthToken } from "@/lib/auth/auth-utils";
 
 // ============================================================================
 // CONFIGURACIÓN DEL SERVICIO
@@ -23,6 +23,8 @@ export interface CreateCursoDto {
   duration: string;
   level: "Principiante" | "Intermedio" | "Avanzado";
   category: string;
+  image?: string;
+  video_presentation?: string;
 }
 
 // DTO que espera la API (formato real del backend)
@@ -164,6 +166,44 @@ export class CursosService {
   // ========================================================================
 
   /**
+   * Valida si una URL de imagen es válida o es un placeholder genérico
+   */
+  private static isValidImageUrl(url: string | null | undefined): boolean {
+    if (!url || typeof url !== "string" || url.trim() === "") {
+      return false;
+    }
+
+    const trimmedUrl = url.trim();
+
+    // Lista de URLs inválidas conocidas
+    const invalidUrls = [
+      "image.jpg",
+      "/image.jpg",
+      "https://storage.googleapis.com/course-images/image.jpg",
+      "storage.googleapis.com/course-images/image.jpg",
+      "fitness-fundamentals.jpg",
+      "/fitness-fundamentals.jpg",
+    ];
+
+    // Filtrar URLs inválidas conocidas
+    if (invalidUrls.includes(trimmedUrl)) {
+      return false;
+    }
+
+    // Filtrar URLs que contengan "image.jpg" genérico
+    if (trimmedUrl.toLowerCase().includes("/image.jpg") || trimmedUrl.toLowerCase().endsWith("image.jpg")) {
+      return false;
+    }
+
+    // Filtrar URLs de Google Storage que sean genéricas o inválidas
+    if (trimmedUrl.includes("storage.googleapis.com") && trimmedUrl.includes("/image.jpg")) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Transforma los datos de la API al formato esperado por la UI
    */
   private static transformCursoFromApi(apiCurso: CursoApi): Curso {
@@ -174,6 +214,13 @@ export class CursosService {
 
     const priceNumber = parseFloat(apiCurso.price) || 0;
 
+    // Convertir students a número: el back puede enviar string; si no convertimos, al sumar se concatenan ("0"+"1"+"0" → "010").
+    const rawStudents = (apiCurso as { students?: unknown }).students;
+    const students = Number(rawStudents) || 0;
+
+    // Validar y filtrar imágenes inválidas antes de asignarlas
+    const validThumbnail = apiCurso.image && this.isValidImageUrl(apiCurso.image) ? apiCurso.image : undefined;
+
     return {
       id: apiCurso.id,
       name: apiCurso.title,
@@ -182,11 +229,11 @@ export class CursosService {
       price: priceNumber,
       currency: "€",
       status: "Activo",
-      students: apiCurso.students || 0,
+      students,
       duration: "8 semanas", // Valor por defecto
       level: "Principiante", // Valor por defecto
       category: "General", // Valor por defecto
-      thumbnail: apiCurso.image || undefined,
+      thumbnail: validThumbnail,
       tutorId: apiCurso.tutor?.id,
       tutorFirstName: apiCurso.tutor?.firstName,
       tutorLastName: apiCurso.tutor?.lastName,
@@ -220,8 +267,23 @@ export class CursosService {
 
       const response = await this.makeRequest<any>(endpoint);
 
-      // Log para debugging - ver estructura de respuesta
-      console.log("📦 CursosService: Respuesta de la API:", response);
+      // Log: datos crudos enviados por el backend
+      console.log("📦 CursosService: Respuesta completa del back:", response);
+      if (typeof response === "object" && response !== null) {
+        const arr = Array.isArray(response) ? response : (response?.data ?? response?.courses ?? []);
+        if (Array.isArray(arr) && arr.length > 0) {
+          console.log("📋 CursosService: Datos por curso (tal como los envía el back):", {
+            totalCursos: arr.length,
+            cursos: arr.map((c: Record<string, unknown>, i: number) => ({
+              index: i + 1,
+              id: c.id,
+              title: c.title,
+              students: c.students,
+              studentsType: typeof c.students,
+            })),
+          });
+        }
+      }
 
       // Manejar diferentes estructuras de respuesta
       let cursosApi: CursoApi[] = [];
@@ -276,11 +338,10 @@ export class CursosService {
     return {
       title: data.name,
       subtitle: data.description,
-      price: data.price.toString(), // Convertir number a string
-      tutor_id: data.instructor, // Por ahora, usar el nombre del instructor como ID
-      // TODO: Necesitamos un selector de tutores que devuelva el ID real
-      image: "", // Valor por defecto
-      video_presentation: "", // Valor por defecto
+      price: data.price.toString(),
+      tutor_id: data.instructor,
+      image: data.image ?? "",
+      video_presentation: data.video_presentation ?? "",
     };
   }
 
@@ -361,7 +422,8 @@ export class CursosService {
 
   /**
    * Elimina un curso
-   * Endpoint: DELETE /api/v1/courses/{id}
+   * Endpoint: DELETE /api/v1/admin-panel/courses?course_id={id}
+   * Elimina permanentemente un curso de la plataforma.
    */
   static async deleteCurso(id: string): Promise<void> {
     if (!id) {
@@ -371,7 +433,7 @@ export class CursosService {
     try {
       console.log("🗑️ CursosService: Eliminando curso:", id);
 
-      await this.makeRequest<{ success: boolean; message: string }>(`/api/v1/courses/${id}`, {
+      await this.makeRequest<{ success?: boolean; message?: string }>(`/api/v1/admin-panel/courses?course_id=${id}`, {
         method: "DELETE",
       });
 

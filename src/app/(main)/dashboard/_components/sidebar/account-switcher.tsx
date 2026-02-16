@@ -68,7 +68,7 @@ export function AccountSwitcher({
           // Mostrar usuario autenticado
           <DropdownMenuItem className="bg-accent/50 border-l-primary border-l-2 p-0">
             <div className="flex w-full items-center justify-between gap-2 px-1 py-1.5">
-              <Avatar className="size-9 rounded-lg">
+              <Avatar className="size-10 rounded-lg">
                 <AvatarImage src={activeUser.avatar || undefined} alt={activeUser.name} />
                 <AvatarFallback className="rounded-lg">{getInitials(activeUser.name)}</AvatarFallback>
               </Avatar>
@@ -86,7 +86,7 @@ export function AccountSwitcher({
               className={cn("p-0", user.id === activeUser.id && "bg-accent/50 border-l-primary border-l-2")}
             >
               <div className="flex w-full items-center justify-between gap-2 px-1 py-1.5">
-                <Avatar className="size-9 rounded-lg">
+                <Avatar className="size-10 rounded-lg">
                   <AvatarImage src={user.avatar || undefined} alt={user.name} />
                   <AvatarFallback className="rounded-lg">{getInitials(user.name)}</AvatarFallback>
                 </Avatar>

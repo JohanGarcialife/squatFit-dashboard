@@ -1,16 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import { Search } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
+import { EditUserModal } from "@/components/modals/edit-user-modal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { useAlumnos } from "@/hooks/use-alumnos";
-import { EditUserModal } from "@/components/modals/edit-user-modal";
+import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 
 import { getAlumnosColumns } from "./columns.alumnos";
 import { AlumnoUI } from "./schema";
@@ -41,7 +42,7 @@ export function AlumnosTable() {
 
     return alumnosData.map((alumno) => ({
       ...alumno,
-      fullName: `${alumno.firstName} ${alumno.lastName || ""}`.trim() || "Sin nombre",
+      fullName: `${alumno.firstName} ${alumno.lastName ?? ""}`.trim() || "Sin nombre",
       statusDisplay: alumno.status.toLowerCase() === "active" ? ("Activo" as const) : ("Inactivo" as const),
     }));
   }, [alumnosData]);
@@ -86,7 +87,7 @@ export function AlumnosTable() {
             <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
             <Input
               placeholder="Buscar alumnos por nombre, email, usuario..."
-              value={globalFilter ?? ""}
+              value={globalFilter}
               onChange={(event) => setGlobalFilter(event.target.value)}
               className="pl-8"
             />
@@ -129,9 +130,9 @@ export function AlumnosTable() {
           userType="alumno"
           defaultValues={{
             firstName: editingUser.firstName,
-            lastName: editingUser.lastName || undefined,
+            lastName: editingUser.lastName ?? undefined,
             email: editingUser.email,
-            birth: editingUser.birth || undefined,
+            birth: editingUser.birth ?? undefined,
           }}
         />
       )}

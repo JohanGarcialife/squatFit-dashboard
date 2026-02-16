@@ -2,5 +2,5 @@
  * Índice de componentes de formularios reutilizables
  */
 
-export { EditUserForm } from "./edit-user-form";
-export type { EditUserFormProps, EditUserFormData } from "./edit-user-form";
+export { EditUserForm, type EditUserFormProps, type EditUserFormData } from "./edit-user-form";
+export { InstructorSelect, type InstructorSelectProps } from "./instructor-select";

@@ -105,6 +105,39 @@ const NavItemCollapsed = ({
 }) => {
   console.log(item);
 
+  // Si tiene subItems, mostrar un dropdown menu
+  if (item.subItems && item.subItems.length > 0) {
+    return (
+      <SidebarMenuItem key={item.title}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              disabled={item.comingSoon}
+              tooltip={item.title}
+              isActive={isActive(item.url, item.subItems)}
+            >
+              {item.icon && <item.icon />}
+              <span>{item.title}</span>
+              <ChevronRight />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="right" align="start" className="w-48">
+            {item.subItems.map((subItem) => (
+              <DropdownMenuItem key={subItem.title} asChild>
+                <Link href={subItem.url} target={subItem.newTab ? "_blank" : undefined}>
+                  {subItem.icon && <subItem.icon className="mr-2 size-6" />}
+                  <span>{subItem.title}</span>
+                  {subItem.comingSoon && <IsComingSoon />}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    );
+  }
+
+  // Si no tiene subItems, navegar normalmente
   return (
     <SidebarMenuItem key={item.title}>
       <Link href={item.url}>

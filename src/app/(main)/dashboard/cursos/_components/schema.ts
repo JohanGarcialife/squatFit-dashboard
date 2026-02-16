@@ -12,11 +12,11 @@ export const tutorSchema = z.object({
 export const cursoApiSchema = z.object({
   id: z.string(),
   title: z.string(),
-  subtitle: z.string().optional().nullable(),
+  subtitle: z.string().nullable().optional(),
   price: z.string(), // La API devuelve string, no number
   tutor: tutorSchema.optional(), // Opcional: algunos endpoints no lo incluyen
-  image: z.string().optional().nullable(),
-  video_presentation: z.string().optional().nullable(),
+  image: z.string().nullable().optional(),
+  video_presentation: z.string().nullable().optional(),
   students: z.number().default(0),
 });
 

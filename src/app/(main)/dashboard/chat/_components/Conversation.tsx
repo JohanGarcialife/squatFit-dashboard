@@ -1,14 +1,33 @@
 "use client";
+/* eslint-disable max-lines */
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+
 import clsx from "clsx";
-import { MoreHorizontal, Paperclip, Send, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  MoreHorizontal,
+  Paperclip,
+  Send,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  MessageSquare,
+  Search,
+  X,
+  Reply,
+  AlertCircle,
+  User,
+  UserCircle,
+} from "lucide-react";
+
+import SavedResponsesPanel from "@/components/chat/SavedResponsesPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@/contexts/chat-context";
 import { getAuthTokenFromClient, getAuthTokenFromStorage } from "@/lib/auth/cookie-utils";
 import { decodeToken } from "@/lib/auth/jwt-utils";
-import { formatMessageTime, isRecentMessage, ChatService } from "@/lib/services/chat-service";
+import { formatMessageTime, isRecentMessage, ChatService, getRoleDisplayName } from "@/lib/services/chat-service";
+import { type SavedResponse } from "@/lib/services/saved-responses.service";
 
 // Componente MessageInput separado para evitar re-renders
 const MessageInput = React.memo(
@@ -18,12 +37,22 @@ const MessageInput = React.memo(
     loading,
     isConnected,
     inputRef,
+    markAsRead,
+    replyingTo,
+    onCancelReply,
+    isCurrentUserParticipant,
+    participantCheckError,
   }: {
     selectedConversation: any;
     sendMessage: any;
     loading: boolean;
     isConnected: boolean;
     inputRef: React.RefObject<HTMLInputElement>;
+    markAsRead?: () => Promise<void>;
+    replyingTo?: any;
+    onCancelReply?: () => void;
+    isCurrentUserParticipant?: boolean | null;
+    participantCheckError?: string | null;
   }) => {
     const [messageText, setMessageText] = useState("");
     const [, setIsTyping] = useState(false);
@@ -39,12 +68,14 @@ const MessageInput = React.memo(
         setIsTyping(false);
 
         try {
-          await sendMessage(content);
+          const replyToMessageId = replyingTo?.id;
+          await sendMessage(content, "text", replyToMessageId);
+          if (onCancelReply) onCancelReply();
         } catch (error) {
           console.error("Error enviando mensaje:", error);
         }
       },
-      [messageText, selectedConversation, loading, sendMessage],
+      [messageText, selectedConversation, loading, sendMessage, replyingTo, onCancelReply],
     );
 
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +96,21 @@ const MessageInput = React.memo(
       [handleSendMessage],
     );
 
+    // âœ… PRIORIDAD 2: Marcar como leÃ­do al hacer foco en el input (fallback)
+    // NOTA: Este handler solo se ejecuta si el useEffect no marcÃ³ los mensajes
+    // El debounce en markAsRead evitarÃ¡ llamadas duplicadas
+    const handleInputFocus = useCallback(() => {
+      // Solo marcar si hay mensajes no leÃ­dos
+      // El debounce interno de markAsRead evitarÃ¡ llamadas duplicadas
+      if (selectedConversation && selectedConversation.unread > 0 && markAsRead) {
+        console.log("ðŸ“ MessageInput: Foco en input - intentando marcar como leÃ­do (fallback)");
+        // Usar setTimeout para dar prioridad al useEffect si se ejecuta al mismo tiempo
+        setTimeout(() => {
+          markAsRead();
+        }, 100);
+      }
+    }, [selectedConversation, markAsRead]);
+
     useEffect(
       () => () => {
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -72,29 +118,59 @@ const MessageInput = React.memo(
       [],
     );
 
+    const isInputDisabled = loading || !isConnected || isCurrentUserParticipant === false;
+
     return (
-      <form onSubmit={handleSendMessage} className="flex items-center gap-2 border-t p-4">
-        <Button type="button" variant="ghost" size="icon" className="h-10 w-10">
-          <Paperclip className="h-4 w-4" />
-        </Button>
-        <Input
-          ref={inputRef}
-          value={messageText}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-          placeholder="Escribe un mensaje..."
-          className="flex-1"
-          disabled={loading || !isConnected}
-        />
-        <Button
-          type="submit"
-          size="icon"
-          className="bg-primary h-10 w-10 rounded-full"
-          disabled={!messageText.trim() || loading || !isConnected}
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-        </Button>
-      </form>
+      <div className="border-t">
+        {replyingTo && (
+          <div className="flex items-center justify-between bg-gray-50 px-4 py-2 dark:bg-gray-800">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <Reply className="h-4 w-4 text-gray-500" />
+                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Respondiendo a:</span>
+              </div>
+              <p className="ml-6 truncate text-xs text-gray-600 dark:text-gray-400">
+                {replyingTo.content?.substring(0, 50)}
+                {replyingTo.content && replyingTo.content.length > 50 ? "..." : ""}
+              </p>
+            </div>
+            <Button type="button" variant="ghost" size="sm" onClick={onCancelReply} className="h-6 w-6 p-0">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+        {participantCheckError && (
+          <div className="mx-4 my-2 border-l-4 border-yellow-400 bg-yellow-50 p-3 dark:border-yellow-500 dark:bg-yellow-900/20">
+            <div className="flex items-center">
+              <AlertCircle className="mr-2 h-5 w-5 flex-shrink-0 text-yellow-400" />
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">{participantCheckError}</p>
+            </div>
+          </div>
+        )}
+        <form onSubmit={handleSendMessage} className="flex items-center gap-2 p-4">
+          <Button type="button" variant="ghost" size="icon" className="h-10 w-10" disabled={isInputDisabled}>
+            <Paperclip className="h-4 w-4" />
+          </Button>
+          <Input
+            ref={inputRef}
+            value={messageText}
+            onChange={handleInputChange}
+            onKeyPress={handleKeyPress}
+            onFocus={handleInputFocus}
+            placeholder={replyingTo ? "Escribe tu respuesta..." : "Escribe un mensaje..."}
+            className="flex-1"
+            disabled={isInputDisabled}
+          />
+          <Button
+            type="submit"
+            size="icon"
+            className="bg-primary h-10 w-10 rounded-full"
+            disabled={!messageText.trim() || loading || !isConnected || isCurrentUserParticipant === false}
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </form>
+      </div>
     );
   },
 );
@@ -102,11 +178,48 @@ const MessageInput = React.memo(
 MessageInput.displayName = "MessageInput";
 
 // Componente Conversation - Muestra conversación seleccionada y permite enviar mensajes
+// Función para generar un color consistente basado en un ID
+const generateColorFromId = (id: string): string => {
+  if (!id) return "bg-gray-400";
+
+  // Generar hash simple del ID
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  // Paleta de colores profesionales (evitando gris y naranja que ya usamos)
+  const colors = [
+    "bg-blue-500",
+    "bg-purple-500",
+    "bg-green-500",
+    "bg-indigo-500",
+    "bg-pink-500",
+    "bg-teal-500",
+    "bg-cyan-500",
+    "bg-violet-500",
+    "bg-fuchsia-500",
+    "bg-emerald-500",
+  ];
+
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+};
+
 export default function Conversation() {
-  const { selectedConversation, messages, sendMessage, loading, error, isConnected } = useChat();
+  const { selectedConversation, messages, sendMessage, loading, error, isConnected, markAsRead } = useChat();
 
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isSavedResponsesPanelOpen, setIsSavedResponsesPanelOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<number[]>([]);
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
+  const [replyingTo, setReplyingTo] = useState<any>(null);
+  const [isCurrentUserParticipant, setIsCurrentUserParticipant] = useState<boolean | null>(null);
+  const [participantCheckError, setParticipantCheckError] = useState<string | null>(null);
+  const [participants, setParticipants] = useState<any[]>([]);
+  const messageInputRef = useRef<HTMLInputElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -115,7 +228,11 @@ export default function Conversation() {
   const toggleMessageExpansion = (messageId: string) => {
     setExpandedMessages((prev) => {
       const newSet = new Set(prev);
-      newSet.has(messageId) ? newSet.delete(messageId) : newSet.add(messageId);
+      if (newSet.has(messageId)) {
+        newSet.delete(messageId);
+      } else {
+        newSet.add(messageId);
+      }
       return newSet;
     });
   };
@@ -131,7 +248,14 @@ export default function Conversation() {
       token ??= getAuthTokenFromStorage();
       if (token) {
         const decoded = decodeToken(token);
-        if (decoded) return decoded.sub ?? null;
+        if (decoded) {
+          console.log("ðŸ‘¤ [Conversation] Usuario actual detectado:", {
+            id: decoded.sub,
+            email: decoded.email,
+            role: decoded.role,
+          });
+          return decoded.sub ?? null;
+        }
       }
     } catch (error) {
       console.error("Error obteniendo ID del usuario:", error);
@@ -139,38 +263,216 @@ export default function Conversation() {
     return null;
   }, []);
 
-  const scrollToBottom = () => {
-    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-  };
+  const currentUserRole = useMemo(() => {
+    try {
+      let token = getAuthTokenFromClient();
+      token ??= getAuthTokenFromStorage();
+      if (token) {
+        const decoded = decodeToken(token);
+        return decoded?.role ?? null;
+      }
+    } catch (error) {
+      console.error("Error obteniendo rol del usuario:", error);
+    }
+    return null;
+  }, []);
+
+  // Cargar participantes del chat con debounce
+  useEffect(() => {
+    if (!selectedConversation) {
+      setParticipants([]);
+      return;
+    }
+
+    let isMounted = true;
+    const timeoutId: NodeJS.Timeout;
+
+    const loadParticipants = async (forceRefresh = false) => {
+      try {
+        const { ChatParticipantsService } = await import("@/lib/services/chat-participants.service");
+        const data = await ChatParticipantsService.getChatParticipants(selectedConversation.id, forceRefresh);
+        if (isMounted) {
+          setParticipants(data);
+        }
+      } catch (error) {
+        console.error("Error cargando participantes:", error);
+        if (isMounted) {
+          setParticipants([]);
+        }
+      }
+    };
+
+    // Debounce: esperar 100ms antes de cargar para evitar peticiones múltiples
+    const loadTimeout = setTimeout(() => {
+      loadParticipants();
+    }, 100);
+
+    // Escuchar evento personalizado cuando se agrega un colaborador
+    const handleParticipantAdded = (event: CustomEvent) => {
+      if (event.detail?.chatId === selectedConversation.id) {
+        console.log("🔄 [Conversation] Participante agregado, recargando lista...");
+        clearTimeout(loadTimeout);
+        loadParticipants(true); // Forzar refresh
+      }
+    };
+
+    window.addEventListener("participantAdded" as unknown as string, handleParticipantAdded as EventListener);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(loadTimeout);
+      window.removeEventListener("participantAdded" as unknown as string, handleParticipantAdded as EventListener);
+    };
+  }, [selectedConversation]);
+
+  // Verificar si el usuario actual es participante del chat (solo para admin)
+  useEffect(() => {
+    const checkParticipantStatus = () => {
+      if (!selectedConversation || !currentUserId || currentUserRole !== "admin") {
+        setIsCurrentUserParticipant(null);
+        setParticipantCheckError(null);
+        return;
+      }
+
+      // Usar los participantes cargados para verificar
+      const isParticipant = participants.some((p) => p.participant_id === currentUserId && p.is_active);
+      setIsCurrentUserParticipant(isParticipant);
+
+      if (!isParticipant) {
+        setParticipantCheckError(
+          "Debes ser un participante del chat para poder enviar mensajes. Puedes agregarte como colaborador desde la ficha técnica.",
+        );
+      } else {
+        setParticipantCheckError(null);
+      }
+    };
+
+    checkParticipantStatus();
+  }, [selectedConversation, currentUserId, currentUserRole, participants]);
+
+  const scrollToBottom = useCallback((force: boolean = false) => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+
+      // Solo hacer scroll automático si está cerca del final o si se fuerza
+      if (isNearBottom || force) {
+        setTimeout(
+          () => {
+            if (messagesEndRef.current) {
+              messagesEndRef.current.scrollIntoView({ behavior: force ? "auto" : "smooth" });
+            } else if (messagesContainerRef.current) {
+              messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+            }
+          },
+          force ? 0 : 100,
+        );
+      }
+    }
+  }, []);
 
   const handleScroll = useCallback(() => {
     if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     scrollTimeoutRef.current = setTimeout(() => {
       if (messagesContainerRef.current) {
         const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
-        setShowScrollButton(scrollHeight - scrollTop - clientHeight >= 100);
+        const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+        setShowScrollButton(distanceFromBottom >= 100);
       }
     }, 100);
   }, []);
 
+  // Scroll automático cuando cambian los mensajes o la conversación
   useEffect(() => {
-    if (messages.length > 0 || selectedConversation) scrollToBottom();
-    if (selectedConversation && inputRef.current) inputRef.current.focus();
+    if (messages.length > 0) {
+      // Scroll suave cuando hay mensajes nuevos
+      scrollToBottom(false);
+    }
+    if (selectedConversation && inputRef.current) {
+      inputRef.current.focus();
+    }
     return () => {
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     };
-  }, [messages, selectedConversation]);
+  }, [messages.length, selectedConversation?.id, scrollToBottom]);
+
+  // Scroll forzado cuando se carga una nueva conversación
+  useEffect(() => {
+    if (selectedConversation) {
+      // Forzar scroll al final cuando se cambia de conversación
+      setTimeout(() => scrollToBottom(true), 200);
+    }
+  }, [selectedConversation?.id, scrollToBottom]);
 
   const processedMessages = useMemo(() => {
     if (!messages.length) return [];
-    return messages.map((message) => ({
-      ...message,
-      messageDate: new Date(message.created_at).toDateString(),
-      isFromMe: (message as any).sender_id === currentUserId,
-      isRecent: isRecentMessage(message.created_at),
-      stableKey: message.id ?? `msg-${message.created_at}-${message.content?.substring(0, 10)}`,
-    }));
-  }, [messages, currentUserId]);
+
+    const mainUserId = selectedConversation?.user_id; // Usuario principal (Telegram)
+
+    console.log("ðŸ” [Conversation] Procesando mensajes:", {
+      total: messages.length,
+      currentUserId,
+      mainUserId,
+      primerMensaje: messages[0]
+        ? {
+            id: messages[0].id,
+            sender_id: (messages[0] as any).sender_id,
+            content: messages[0].content?.substring(0, 30),
+          }
+        : null,
+    });
+
+    return messages.map((message) => {
+      const messageAny = message as any;
+      const senderIdFromMessage = messageAny.sender_id ?? messageAny.from;
+      const senderInfo = messageAny.sender ?? null;
+
+      const isFromMe = senderIdFromMessage === currentUserId;
+      const isFromMainUser = senderIdFromMessage === mainUserId;
+      const isFromOtherProfessional = !isFromMe && !isFromMainUser;
+
+      // Generar color dinámico para colaboradores
+      const dynamicColor = isFromOtherProfessional ? generateColorFromId(senderIdFromMessage) : null;
+
+      // Construir nombre del remitente
+      let senderName = "Usuario";
+      let senderRole = "Usuario";
+
+      if (senderInfo) {
+        const firstName = senderInfo.firstName ?? "";
+        const lastName = senderInfo.lastName ?? "";
+        senderName = (`${firstName} ${lastName}`.trim() || senderInfo.email) ?? "Usuario";
+        senderRole = senderInfo.role ?? "Usuario";
+      }
+
+      if (message.id) {
+        console.log(`ðŸ” [Conversation] Mensaje ${message.id.substring(0, 8)}:`, {
+          sender: senderIdFromMessage?.substring(0, 8),
+          senderName,
+          senderRole,
+          currentUser: currentUserId?.substring(0, 8),
+          mainUser: mainUserId?.substring(0, 8),
+          isFromMe,
+          isFromMainUser,
+          isFromOtherProfessional,
+          dynamicColor,
+        });
+      }
+
+      return {
+        ...message,
+        messageDate: new Date(message.created_at).toDateString(),
+        isFromMe,
+        isFromMainUser,
+        isFromOtherProfessional,
+        senderName,
+        senderRole,
+        dynamicColor,
+        isRecent: isRecentMessage(message.created_at),
+        stableKey: message.id ?? `msg-${message.created_at}-${message.content?.substring(0, 10)}`,
+      };
+    });
+  }, [messages, currentUserId, selectedConversation?.user_id]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "Fecha no disponible";
@@ -211,7 +513,11 @@ export default function Conversation() {
             {selectedConversation.isActive && <div className="h-2 w-2 rounded-full bg-green-500" />}
           </div>
           <p className="text-primary dark:text-primary-400 text-sm">
-            {selectedConversation.tags.length > 0 ? selectedConversation.tags.join(" | ") : "Sin etiquetas"}
+            {selectedConversation.tags.length > 0
+              ? selectedConversation.tags.join(" | ")
+              : selectedConversation.chat_type === "professional_professional" && selectedConversation.professionalRole
+                ? `Rol: ${getRoleDisplayName(selectedConversation.professionalRole)}`
+                : "Sin etiquetas"}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -240,11 +546,91 @@ export default function Conversation() {
           >
             Obtener Todos
           </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSavedResponsesPanelOpen(true)}
+            title="Respuestas guardadas"
+          >
+            <MessageSquare className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+          </Button>
           <Button variant="ghost" size="icon">
             <MoreHorizontal className="text-gray-500 dark:text-gray-400" />
           </Button>
         </div>
       </header>
+
+      {/* Barra de búsqueda */}
+      {searchQuery && (
+        <div className="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-2 dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex flex-1 items-center gap-2">
+            <Search className="h-4 w-4 text-gray-400" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+              }}
+              placeholder="Buscar en mensajes..."
+              className="flex-1"
+              autoFocus
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                setSearchResults([]);
+                setCurrentSearchIndex(-1);
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          {searchResults.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {currentSearchIndex + 1} de {searchResults.length}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  // Navigate search previous
+                }}
+                disabled={searchResults.length === 0}
+              >
+                <ChevronUp className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  // Navigate search next
+                }}
+                disabled={searchResults.length === 0}
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Panel de respuestas guardadas */}
+      <SavedResponsesPanel
+        isOpen={isSavedResponsesPanelOpen}
+        onClose={() => setIsSavedResponsesPanelOpen(false)}
+        onSelectResponse={(response: SavedResponse) => {
+          // Insertar respuesta en el input
+          if (messageInputRef.current) {
+            messageInputRef.current.value = response.content;
+            messageInputRef.current.focus();
+            // Disparar evento change para actualizar el estado
+            const event = new Event("input", { bubbles: true });
+            messageInputRef.current.dispatchEvent(event);
+          }
+        }}
+      />
 
       <main ref={messagesContainerRef} className="relative min-h-0 flex-1 overflow-y-auto p-4" onScroll={handleScroll}>
         {loading && messages.length === 0 ? (
@@ -265,6 +651,36 @@ export default function Conversation() {
               const showDateSeparator = message.messageDate !== lastDate;
               if (showDateSeparator) lastDate = message.messageDate;
 
+              // Log para debug de renderizado
+              const messageTyped = message as unknown as Record<string, unknown>;
+              const msgContent = message.content ?? "";
+              if (msgContent.includes("desde") || msgContent.includes("adviser") || msgContent.includes("dietista")) {
+                let bgClass = "bg-gray-200";
+                let messageType = "unknown";
+                if (message.isFromMe) {
+                  bgClass = "bg-orange-500";
+                  messageType = "Profesional actual";
+                } else if (messageTyped.isFromMainUser) {
+                  bgClass = "bg-gray-200";
+                  messageType = `${messageTyped.senderName as string} (${messageTyped.senderRole as string})`;
+                } else if (messageTyped.isFromOtherProfessional) {
+                  bgClass = (messageTyped.dynamicColor as string) ?? "bg-blue-500";
+                  messageType = `${messageTyped.senderName as string} (Colaborador)`;
+                }
+                const alignment = message.isFromMe ? "justify-end" : "justify-start";
+                console.log(
+                  `ðŸŽ¨ [Render] Mensaje "${msgContent.substring(0, 30)}": tipo=${messageType}, bgClass=${bgClass}, alignment=${alignment}`,
+                );
+              }
+
+              // Determinar clase de color para el mensaje
+              let messageColorClass = "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100";
+              if (message.isFromMe) {
+                messageColorClass = "bg-orange-500 text-white";
+              } else if (messageTyped.isFromOtherProfessional && messageTyped.dynamicColor) {
+                messageColorClass = `${messageTyped.dynamicColor as string} text-white`;
+              }
+
               return (
                 <React.Fragment key={message.stableKey}>
                   {showDateSeparator && (
@@ -275,29 +691,68 @@ export default function Conversation() {
                     </div>
                   )}
                   <div
-                    className={clsx("flex items-end gap-2", {
-                      "justify-end": message.isFromMe,
-                      "justify-start": !message.isFromMe,
-                    })}
+                    id={`message-${message.id}`}
+                    className={clsx("group flex items-end gap-2", message.isFromMe ? "justify-end" : "justify-start")}
+                    data-is-from-me={message.isFromMe}
                   >
                     <div
-                      className={clsx("max-w-2xl rounded-lg p-3 transition-all duration-200", {
-                        "bg-primary text-primary-foreground rounded-br-none": message.isFromMe,
-                        "bg-muted text-foreground rounded-bl-none": !message.isFromMe,
-                        "ring-2 ring-blue-300 dark:ring-blue-600": message.isRecent && !message.isFromMe,
-                        "opacity-90": !message.isRead && !message.isFromMe,
-                      })}
+                      className={clsx(
+                        "max-w-2xl rounded-lg p-3 transition-all duration-200",
+                        messageColorClass,
+                        message.isFromMe ? "rounded-br-none" : "rounded-bl-none",
+                        {
+                          "ring-2 ring-blue-300 dark:ring-blue-600": message.isRecent && !message.isFromMe,
+                          "opacity-90": !message.isRead && !message.isFromMe,
+                        },
+                      )}
                     >
+                      {/* Badge para identificar el remitente */}
+                      {messageTyped.isFromOtherProfessional && (
+                        <div className="mb-1 flex items-center gap-1 text-xs font-semibold opacity-90">
+                          <User className="h-3 w-3" />
+                          {messageTyped.senderName} (Colaborador)
+                        </div>
+                      )}
+                      {messageTyped.isFromMainUser && (
+                        <div className="mb-1 flex items-center gap-1 text-xs font-semibold opacity-80">
+                          <UserCircle className="h-3 w-3" />
+                          {messageTyped.senderName} ({messageTyped.senderRole})
+                        </div>
+                      )}
+                      {/* Mostrar mensaje citado si existe */}
+                      {message.reply_to_message && (
+                        <div className="mb-2 border-l-2 border-gray-300 pl-2 text-xs opacity-80 dark:border-gray-600">
+                          <div className="font-semibold">
+                            {((
+                              (message.reply_to_message as unknown as Record<string, unknown>)?.sender as Record<
+                                string,
+                                unknown
+                              >
+                            )?.firstName as string) ?? "Usuario"}
+                          </div>
+                          <div className="truncate">
+                            {(message.reply_to_message as typeof message).content?.substring(0, 100)}
+                            {(message.reply_to_message as typeof message).content &&
+                            (message.reply_to_message as typeof message).content &&
+                            (message.reply_to_message as typeof message).content.length > 100
+                              ? "..."
+                              : ""}
+                          </div>
+                        </div>
+                      )}
                       <div className="text-sm break-words whitespace-pre-wrap">
                         {(() => {
                           const isExpanded = expandedMessages.has(message.id);
                           const content = message.content ?? "";
                           const isLong = isLongMessage(content);
 
+                          // Aplicar resaltado si hay búsqueda activa
+                          const displayContent = content;
+
                           if (!isLong || isExpanded) {
                             return (
                               <div>
-                                {content}
+                                {displayContent}
                                 {isLong && isExpanded && (
                                   <div className="mt-2">
                                     <button
@@ -316,10 +771,11 @@ export default function Conversation() {
                           const lines = content.split("\n");
                           const preview = lines.slice(0, 3).join("\n");
                           const hasMore = lines.length > 3 || content.length > 200;
+                          const displayPreview = preview;
 
                           return (
                             <div>
-                              {preview}
+                              {displayPreview}
                               {hasMore && (
                                 <div className="mt-2">
                                   <button
@@ -334,9 +790,26 @@ export default function Conversation() {
                           );
                         })()}
                       </div>
-                      <div className="mt-1 flex items-center justify-end gap-1">
-                        <p className="text-xs opacity-70">{formatMessageTime(message.created_at)}</p>
-                        {message.isFromMe && <div className="text-xs opacity-70">{message.isRead ? "✓✓" : "✓"}</div>}
+                      <div className="mt-1 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1">
+                          {!message.isFromMe && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setReplyingTo(message)}
+                              className="h-6 px-2 text-xs opacity-0 transition-opacity group-hover:opacity-100"
+                              title="Responder"
+                            >
+                              <Reply className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <p className="text-xs opacity-70">{formatMessageTime(message.created_at)}</p>
+                          {message.isFromMe && (
+                            <div className="text-xs opacity-70">{message.isRead ? "âœ“âœ“" : "âœ“"}</div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -355,7 +828,7 @@ export default function Conversation() {
         )}
         {showScrollButton && (
           <button
-            onClick={scrollToBottom}
+            onClick={() => scrollToBottom(true)}
             className="bg-primary hover:bg-primary/90 fixed right-8 bottom-20 z-10 flex h-10 w-10 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200"
             title="Ir al final"
           >
@@ -369,7 +842,12 @@ export default function Conversation() {
         sendMessage={sendMessage}
         loading={loading}
         isConnected={isConnected}
-        inputRef={inputRef}
+        inputRef={messageInputRef}
+        markAsRead={markAsRead}
+        replyingTo={replyingTo}
+        onCancelReply={() => setReplyingTo(null)}
+        isCurrentUserParticipant={isCurrentUserParticipant}
+        participantCheckError={participantCheckError}
       />
     </div>
   );

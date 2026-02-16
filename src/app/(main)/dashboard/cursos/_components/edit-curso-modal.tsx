@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useUpdateCurso } from "@/hooks/use-cursos";
-import { Curso } from "./schema";
 
 import { CreateCursoForm } from "./create-curso-form";
 import { createCursoFormSchema, CreateCursoFormValues, createCursoDefaultValues } from "./create-curso-schema";
+import { Curso } from "./schema";
 
 interface EditCursoModalProps {
   curso: Curso | null;
@@ -31,9 +32,9 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
       form.reset({
         name: curso.name,
         description: curso.description,
-        instructor: curso.instructor,
+        instructor: curso.tutorId ?? curso.instructor ?? "",
         price: curso.price,
-        currency: curso.currency || "€",
+        currency: curso.currency ?? "€",
         status: curso.status,
         duration: curso.duration,
         level: curso.level,

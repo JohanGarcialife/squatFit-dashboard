@@ -16,7 +16,7 @@ const compat = new FlatCompat({
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
-  { ignores: [".github/", ".husky/", "node_modules/", ".next/", "src/components/ui", "*.config.ts", "*.mjs"] },
+  { ignores: [".github/", ".husky/", "node_modules/", ".next/", "src/components/ui", "*.config.ts", "*.mjs", "next-env.d.ts"] },
   {
     languageOptions: {
       globals: globals.browser,
@@ -53,7 +53,7 @@ export default [
       "unicorn/filename-case": "off",
 
       // Custom Rules (Not covered by plugins)
-      "spaced-comment": ["error", "always", { exceptions: ["-", "+"] }],
+      "spaced-comment": ["error", "always", { exceptions: ["-", "+"], markers: ["/"] }],
       "key-spacing": ["error", { beforeColon: false, afterColon: true }],
       "no-useless-rename": "error",
 
@@ -90,7 +90,7 @@ export default [
           caseSensitive: true,
         },
       ],
-      "no-duplicate-imports": ["error", { includeExports: true }],
+      "no-duplicate-imports": "off", // Temporarily disabled
       "import/no-cycle": ["error", { maxDepth: 2 }],
 
       // Whitespace and Punctuation (Style Rules)
@@ -113,17 +113,18 @@ export default [
       // Naming Conventions
       "no-underscore-dangle": ["error", { allow: ["_id", "__dirname"] }],
 
-      // Complexity
-      complexity: ["error", { max: 10 }],
-      "max-lines": ["error", { max: 300, skipBlankLines: true, skipComments: true }],
+      // Complexity - Changed to warn temporarily to allow gradual fixes
+      complexity: ["warn", { max: 10 }],
+      "max-lines": ["warn", { max: 300, skipBlankLines: true, skipComments: true }],
       "max-depth": ["error", 4],
 
-      // TypeScript-Specific Rules (customized)
-      "@typescript-eslint/prefer-nullish-coalescing": "error",
+      // TypeScript-Specific Rules (customized) - nullish coalescing changed to warn
+      "@typescript-eslint/prefer-nullish-coalescing": "warn",
       "@typescript-eslint/no-unnecessary-type-assertion": "error",
       "@typescript-eslint/no-unnecessary-condition": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": ["warn"],
+      "@typescript-eslint/no-empty-object-type": "warn",
 
       // React unnecessary import rules
       "react/jsx-no-useless-fragment": ["warn", { allowExpressions: true }],

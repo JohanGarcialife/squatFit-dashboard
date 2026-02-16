@@ -8,13 +8,10 @@ import { User, MoreHorizontal, Wifi, WifiOff, Loader2 } from "lucide-react";
 
 import { useChat } from "@/contexts/chat-context";
 import { getAuthToken } from "@/lib/auth/auth-utils";
-import { formatMessageTime, getInitials } from "@/lib/services/chat-service";
+import { formatMessageTime, getInitials, getRoleDisplayName } from "@/lib/services/chat-service";
 
 export default function Chat() {
-  const { conversations, selectedConversation, selectConversation, loading, error, isConnected, getTotalUnreadCount } =
-    useChat();
-
-  const [searchQuery, setSearchQuery] = useState("");
+  const { conversations, selectedConversation, selectConversation, loading, error, isConnected } = useChat();
 
   // Función para obtener el ID del usuario actual
   const getCurrentUserId = () => {
@@ -32,16 +29,8 @@ export default function Chat() {
 
   // Filtrar conversaciones por búsqueda
   const filteredConversations = useMemo(() => {
-    if (!searchQuery.trim()) return conversations;
-
-    const query = searchQuery.toLowerCase();
-    return conversations.filter(
-      (conv) =>
-        conv.name.toLowerCase().includes(query) ||
-        conv.tags.some((tag: string) => tag.toLowerCase().includes(query)) ||
-        conv.lastMessage?.content.toLowerCase().includes(query),
-    );
-  }, [conversations, searchQuery]);
+    return conversations;
+  }, [conversations]);
 
   // Ordenar conversaciones por última actividad
   const sortedConversations = useMemo(() => {
@@ -59,6 +48,32 @@ export default function Chat() {
 
     return sorted;
   }, [filteredConversations]);
+
+  // Agrupar conversaciones por tipo
+  const groupedConversations = useMemo(() => {
+    const groups = {
+      userProfessional: [] as typeof conversations, // Chats con usuarios (user_professional)
+      professionalProfessional: [] as typeof conversations, // Chats entre profesionales (professional_professional, otro NO es admin)
+      adminChats: [] as typeof conversations, // Chats con admins (professional_professional, otro ES admin)
+    };
+
+    sortedConversations.forEach((chat) => {
+      if (chat.chat_type === "professional_professional") {
+        // Verificar si el otro profesional es admin
+        // professionalRole contiene el rol del otro participante
+        if (chat.professionalRole === "admin") {
+          groups.adminChats.push(chat);
+        } else {
+          groups.professionalProfessional.push(chat);
+        }
+      } else {
+        // Es user_professional
+        groups.userProfessional.push(chat);
+      }
+    });
+
+    return groups;
+  }, [sortedConversations]);
 
   // Ref para debounce de selección de conversación
   const selectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -145,7 +160,7 @@ export default function Chat() {
   };
 
   // Renderizar avatar del chat
-  const renderChatAvatar = (chat: any) => (
+  const renderChatAvatar = (chat: unknown) => (
     <div className="relative flex-shrink-0">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white">
         {getInitials(chat.name)}
@@ -158,7 +173,7 @@ export default function Chat() {
   );
 
   // Renderizar información del chat
-  const renderChatInfo = (chat: any) => (
+  const renderChatInfo = (chat: unknown) => (
     <div className="min-w-0 flex-grow overflow-hidden">
       <div className="flex items-center justify-between">
         <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-100">{chat.name}</p>
@@ -169,9 +184,47 @@ export default function Chat() {
         )}
       </div>
 
-      <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-        {chat.tags.length > 0 ? chat.tags.join(" | ") : "Sin etiquetas"}
-      </p>
+      {/* Etiquetas como badges */}
+      {chat.tags && chat.tags.length > 0 ? (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {chat.tags.map((tag: string, index: number) => {
+            const getTagColor = () => {
+              switch (tag.toLowerCase()) {
+                case "nutrition":
+                case "nutrición":
+                  return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+                case "training":
+                case "entrenamiento":
+                  return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+                case "emotional":
+                case "emocional":
+                  return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+                case "support":
+                case "soporte":
+                  return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400";
+                case "sales":
+                case "ventas":
+                  return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+                default:
+                  return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400";
+              }
+            };
+
+            return (
+              <span key={index} className={`rounded-full px-2 py-0.5 text-xs font-medium ${getTagColor()}`}>
+                {tag}
+              </span>
+            );
+          })}
+        </div>
+      ) : (
+        // ✅ Mostrar rol del profesional si es professional_professional, sino "Sin etiquetas"
+        <p className="truncate text-xs text-gray-500 dark:text-gray-400">
+          {chat.chat_type === "professional_professional" && chat.professionalRole
+            ? `Rol: ${getRoleDisplayName(chat.professionalRole)}`
+            : "Sin etiquetas"}
+        </p>
+      )}
 
       {chat.lastMessage && (
         <p className="truncate text-xs text-gray-400 dark:text-gray-500">
@@ -183,7 +236,7 @@ export default function Chat() {
   );
 
   // Renderizar metadata y contadores
-  const renderChatMetadata = (chat: any) => (
+  const renderChatMetadata = (chat: unknown) => (
     <div className="ml-2 flex flex-shrink-0 flex-col items-end gap-y-1">
       {chat.name === "Nuevos Leads" ? (
         <MoreHorizontal size={16} className="text-gray-500 dark:text-gray-400" />
@@ -200,7 +253,7 @@ export default function Chat() {
   );
 
   // Renderizar un elemento de conversación individual
-  const renderConversationItem = (chat: any) => {
+  const renderConversationItem = (chat: unknown) => {
     // Validar que el chat tenga un ID válido
     if (!chat.id || typeof chat.id !== "string" || chat.id.trim() === "") {
       return null;
@@ -213,6 +266,11 @@ export default function Chat() {
           "bg-blue-100/70 shadow-sm dark:bg-blue-900/40": selectedConversation?.id === chat.id,
           "hover:bg-gray-100/80 dark:hover:bg-gray-800/60": selectedConversation?.id !== chat.id,
           "border-l-2 border-blue-500": chat.unread > 0,
+          // ✅ Color diferenciado para chats professional_professional
+          "bg-purple-50 dark:bg-purple-900/20":
+            chat.chat_type === "professional_professional" && selectedConversation?.id !== chat.id,
+          "hover:bg-purple-100/80 dark:hover:bg-purple-800/30":
+            chat.chat_type === "professional_professional" && selectedConversation?.id !== chat.id,
         })}
         onClick={() => handleSelectConversation(chat.id)}
       >
@@ -253,8 +311,35 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Lista de conversaciones */}
-      {sortedConversations.map((chat) => renderConversationItem(chat))}
+      {/* Sección: Chats con Usuarios */}
+      {groupedConversations.userProfessional.length > 0 && (
+        <>
+          <div className="border-b border-gray-200 px-2 py-2 text-xs font-semibold tracking-wide text-gray-600 uppercase dark:border-gray-700 dark:text-gray-400">
+            👤 Chats con Usuarios ({groupedConversations.userProfessional.length})
+          </div>
+          {groupedConversations.userProfessional.map((chat) => renderConversationItem(chat))}
+        </>
+      )}
+
+      {/* Sección: Chats entre Profesionales */}
+      {groupedConversations.professionalProfessional.length > 0 && (
+        <>
+          <div className="mt-2 border-b border-gray-200 px-2 py-2 text-xs font-semibold tracking-wide text-gray-600 uppercase dark:border-gray-700 dark:text-gray-400">
+            👥 Chats entre Profesionales ({groupedConversations.professionalProfessional.length})
+          </div>
+          {groupedConversations.professionalProfessional.map((chat) => renderConversationItem(chat))}
+        </>
+      )}
+
+      {/* Sección: Chats con Admins */}
+      {groupedConversations.adminChats.length > 0 && (
+        <>
+          <div className="mt-2 border-b border-gray-200 px-2 py-2 text-xs font-semibold tracking-wide text-gray-600 uppercase dark:border-gray-700 dark:text-gray-400">
+            🔐 Chats con Admins ({groupedConversations.adminChats.length})
+          </div>
+          {groupedConversations.adminChats.map((chat) => renderConversationItem(chat))}
+        </>
+      )}
 
       {/* Mensaje cuando no hay resultados de búsqueda */}
       {searchQuery && sortedConversations.length === 0 && (
