@@ -2,30 +2,30 @@
 
 import { useMemo } from "react";
 
-import { BookOpen, Package, Layers, BookMarked } from "lucide-react";
+import { Package, DollarSign, Layers, TrendingDown } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardAction, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLibros } from "@/hooks/use-libros";
+import { usePacks } from "@/hooks/use-packs";
 
-export function LibrosCards() {
-  const { data: libros = [], isLoading } = useLibros();
+export function PacksCards() {
+  const { data: packs = [], isLoading } = usePacks();
 
-  // Calcular estadísticas dinámicamente (el precio pertenece a las versiones, no a los libros)
   const stats = useMemo(() => {
-    const total = libros.length;
-    const conVersiones = libros.filter((l) => l.versions && l.versions.length > 0).length;
-    const sinVersiones = total - conVersiones;
-    const totalVersiones = libros.reduce((sum, l) => sum + (l.versions?.length || 0), 0);
+    const total = packs.length;
+    const totalVersiones = packs.reduce((sum, p) => sum + (p.versionsCount ?? p.versions?.length ?? 0), 0);
+    const precios = packs.map((p) => p.price).filter((n) => n > 0);
+    const precioPromedio = precios.length > 0 ? precios.reduce((a, b) => a + b, 0) / precios.length : 0;
+    const masEconomico = precios.length > 0 ? Math.min(...precios) : 0;
 
     return {
       total,
-      conVersiones,
-      sinVersiones,
       totalVersiones,
+      precioPromedio,
+      masEconomico,
     };
-  }, [libros]);
+  }, [packs]);
 
   if (isLoading) {
     return (
@@ -50,28 +50,26 @@ export function LibrosCards() {
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Libros Totales</CardDescription>
+          <CardDescription>Total Packs</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">{stats.total}</CardTitle>
           <CardAction>
             <Badge variant="outline">
-              <BookOpen className="size-4" />
-              Total
+              <Package className="size-4" />
+              Packs
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">Catálogo completo de libros</div>
-          <div className="text-muted-foreground">
-            {stats.conVersiones} con versiones, {stats.totalVersiones} versiones en total
-          </div>
+          <div className="line-clamp-1 font-medium">Packs disponibles</div>
+          <div className="text-muted-foreground">Combinaciones de versiones</div>
         </CardFooter>
       </Card>
 
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Libros con Versiones</CardDescription>
+          <CardDescription>Versiones en packs</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.conVersiones}
+            {stats.totalVersiones}
           </CardTitle>
           <CardAction>
             <Badge
@@ -79,57 +77,57 @@ export function LibrosCards() {
               className="border-green-200 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-400"
             >
               <Layers className="size-4" />
-              Con versiones
+              Versiones
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">Libros con ediciones disponibles</div>
-          <div className="text-muted-foreground">{stats.totalVersiones} versiones en el catálogo</div>
+          <div className="line-clamp-1 font-medium">Total de versiones incluidas</div>
+          <div className="text-muted-foreground">En todos los packs</div>
         </CardFooter>
       </Card>
 
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Versiones</CardDescription>
+          <CardDescription>Precio promedio</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.totalVersiones}
+            €{stats.precioPromedio.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
               className="border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-400"
             >
-              <Package className="size-4" />
-              Versiones
+              <DollarSign className="size-4" />
+              Promedio
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">Ediciones en el catálogo</div>
-          <div className="text-muted-foreground">Suma de todas las versiones de libros</div>
+          <div className="line-clamp-1 font-medium">Precio medio por pack</div>
+          <div className="text-muted-foreground">Valor promedio</div>
         </CardFooter>
       </Card>
 
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Libros sin versiones</CardDescription>
+          <CardDescription>Pack más económico</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats.sinVersiones}
+            €{stats.masEconomico.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </CardTitle>
           <CardAction>
             <Badge
               variant="outline"
               className="border-orange-200 bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-400"
             >
-              <BookMarked className="size-4" />
-              Pendientes
+              <TrendingDown className="size-4" />
+              Mínimo
             </Badge>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">Libros aún sin ediciones publicadas</div>
-          <div className="text-muted-foreground">No aparecen en el catálogo hasta tener versiones</div>
+          <div className="line-clamp-1 font-medium">Menor precio de pack</div>
+          <div className="text-muted-foreground">Pack más barato</div>
         </CardFooter>
       </Card>
     </div>

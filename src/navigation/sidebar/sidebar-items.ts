@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   GraduationCap,
   BookOpen,
+  Package,
   UtensilsCrossed,
   Apple,
   FileText,
@@ -62,6 +63,11 @@ export const sidebarItems: NavGroup[] = [
         title: "Libros",
         url: "/dashboard/libros",
         icon: BookOpen,
+      },
+      {
+        title: "Packs",
+        url: "/dashboard/packs",
+        icon: Package,
       },
     ],
   },
@@ -146,7 +152,7 @@ export const sidebarItems: NavGroup[] = [
 
 /**
  * Filtra los items del sidebar según el rol del usuario
- * - Solo "admin" puede ver "Entrenadores", "Cursos", "Libros" y "Usuarios"
+ * - Solo "admin" puede ver "Entrenadores", "Cursos", "Libros", "Packs" y "Usuarios"
  * - Solo "admin" y "support" pueden ver "Marketing y KPIs"
  * @param userRole - Rol del usuario actual
  * @returns Array de NavGroup filtrado según el rol
@@ -165,7 +171,8 @@ export const getSidebarItemsForRole = (userRole: string | null | undefined): Nav
               (item) =>
                 item.url !== "/dashboard/entrenadores" &&
                 item.url !== "/dashboard/cursos" &&
-                item.url !== "/dashboard/libros",
+                item.url !== "/dashboard/libros" &&
+                item.url !== "/dashboard/packs",
             ),
           };
         }
@@ -198,7 +205,8 @@ export const getSidebarItemsForRole = (userRole: string | null | undefined): Nav
             (item) =>
               item.url !== "/dashboard/entrenadores" &&
               item.url !== "/dashboard/cursos" &&
-              item.url !== "/dashboard/libros",
+              item.url !== "/dashboard/libros" &&
+              item.url !== "/dashboard/packs",
           ),
         };
       }
@@ -213,7 +221,7 @@ export const getSidebarItemsForRole = (userRole: string | null | undefined): Nav
     });
   }
 
-  // Para otros roles, filtrar Entrenadores, Cursos, Libros, Usuarios y Marketing
+  // Para otros roles, filtrar Entrenadores, Cursos, Libros, Packs, Usuarios y Marketing
   return sidebarItems
     .filter((group) => group.id !== 5) // Ocultar Marketing
     .map((group) => {
@@ -225,7 +233,8 @@ export const getSidebarItemsForRole = (userRole: string | null | undefined): Nav
             (item) =>
               item.url !== "/dashboard/entrenadores" &&
               item.url !== "/dashboard/cursos" &&
-              item.url !== "/dashboard/libros",
+              item.url !== "/dashboard/libros" &&
+              item.url !== "/dashboard/packs",
           ),
         };
       }

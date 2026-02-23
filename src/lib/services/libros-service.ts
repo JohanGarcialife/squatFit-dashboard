@@ -13,12 +13,12 @@ const REQUEST_TIMEOUT = 10000;
 // ============================================================================
 
 // DTO para el formulario (desde la UI)
+// Nota: El precio no va en el libro, se asigna a cada versión
 export interface CreateLibroDto {
   title: string;
   subtitle: string;
   image?: File | null;
   imageUrl?: string;
-  price: number;
 }
 
 export interface UpdateLibroDto extends Partial<CreateLibroDto> {
@@ -33,6 +33,32 @@ export interface ApiResponse<T> {
     limit: number;
     totalPages: number;
   };
+}
+
+// DTOs y tipos para versiones
+export interface CreateVersionDto {
+  title: string;
+  price: string;
+  image?: string;
+  file: File;
+}
+
+export interface UpdateVersionDto {
+  title?: string;
+  price?: string;
+  image?: string;
+}
+
+export interface VersionApi {
+  id: string;
+  book_id: string;
+  title: string;
+  image?: string | null;
+  url?: string | null;
+  version?: string;
+  price: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // ============================================================================
@@ -169,8 +195,6 @@ export class LibrosService {
    * Transforma los datos de la API al formato esperado por la UI
    */
   private static transformLibroFromApi(apiLibro: LibroApi): Libro {
-    const priceNumber = parseFloat(apiLibro.price) || 0;
-
     // Validar y filtrar imágenes inválidas antes de asignarlas
     const validImage = apiLibro.image && this.isValidImageUrl(apiLibro.image) ? apiLibro.image : undefined;
 
@@ -179,7 +203,6 @@ export class LibrosService {
       title: apiLibro.title,
       subtitle: apiLibro.subtitle || "Sin descripción",
       image: validImage,
-      price: priceNumber,
       versions: apiLibro.versions || [],
     };
   }
@@ -271,14 +294,13 @@ export class LibrosService {
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("subtitle", data.subtitle);
-      formData.append("price", data.price.toString());
 
       // Manejar imagen: archivo o URL
       if (data.image instanceof File) {
         formData.append("image", data.image);
         console.log("📤 LibrosService: Enviando archivo de imagen:", data.image.name);
       } else if (data.imageUrl) {
-        formData.append("imageUrl", data.imageUrl);
+        formData.append("image", data.imageUrl);
         console.log("📤 LibrosService: Enviando URL de imagen:", data.imageUrl);
       }
 
@@ -324,7 +346,6 @@ export class LibrosService {
         const formData = new FormData();
         if (data.title) formData.append("title", data.title);
         if (data.subtitle) formData.append("subtitle", data.subtitle);
-        if (data.price !== undefined) formData.append("price", data.price.toString());
         formData.append("image", data.image);
         console.log("📤 LibrosService: Actualizando con archivo de imagen:", data.image.name);
 
@@ -345,7 +366,6 @@ export class LibrosService {
 
         if (data.title) jsonData.title = data.title;
         if (data.subtitle) jsonData.subtitle = data.subtitle;
-        if (data.price !== undefined) jsonData.price = data.price.toString();
         // La API espera el campo "image" con la URL de la imagen
         if (data.imageUrl && this.isValidImageUrl(data.imageUrl)) {
           jsonData.image = data.imageUrl;
@@ -391,6 +411,95 @@ export class LibrosService {
       console.error("❌ LibrosService: Error eliminando libro:", error);
       throw error;
     }
+  }
+
+  // ========================================================================
+  // MÉTODOS DE VERSIONES
+  // ========================================================================
+
+  /**
+   * Crea una nueva versión de un libro
+   * Endpoint: POST /api/v1/book/:bookId/versions (multipart/form-data)
+   */
+  static async createVersion(bookId: string, data: CreateVersionDto): Promise<VersionApi> {
+    if (!bookId || !data.title || !data.price || !data.file) {
+      throw new Error("bookId, title, price y archivo PDF son requeridos");
+    }
+
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("price", data.price);
+    if (data.image) formData.append("image", data.image);
+    formData.append("file", data.file);
+
+    const response = await this.makeRequest<VersionApi | { data: VersionApi }>(`/api/v1/book/${bookId}/versions`, {
+      method: "POST",
+      body: formData,
+    });
+    return (response as { data?: VersionApi }).data ?? (response as VersionApi);
+  }
+
+  /**
+   * Lista las versiones de un libro
+   * Endpoint: GET /api/v1/book/:bookId/versions
+   */
+  static async getVersions(bookId: string): Promise<VersionApi[]> {
+    if (!bookId) throw new Error("bookId requerido");
+    const response = await this.makeRequest<VersionApi[] | { data: VersionApi[] }>(`/api/v1/book/${bookId}/versions`);
+    const arr = Array.isArray(response) ? response : (response as { data?: VersionApi[] }).data;
+    return arr ?? [];
+  }
+
+  /**
+   * Obtiene el detalle de una versión
+   * Endpoint: GET /api/v1/book/versions/:versionId
+   */
+  static async getVersionById(versionId: string): Promise<VersionApi> {
+    if (!versionId) throw new Error("versionId requerido");
+    const response = await this.makeRequest<VersionApi | { data: VersionApi }>(`/api/v1/book/versions/${versionId}`);
+    return (response as { data?: VersionApi }).data ?? (response as VersionApi);
+  }
+
+  /**
+   * Actualiza una versión (title, price, image)
+   * Endpoint: PUT /api/v1/book/versions/:versionId
+   */
+  static async updateVersion(versionId: string, data: UpdateVersionDto): Promise<VersionApi> {
+    if (!versionId) throw new Error("versionId requerido");
+    const body: Record<string, string> = {};
+    if (data.title !== undefined) body.title = data.title;
+    if (data.price !== undefined) body.price = data.price;
+    if (data.image !== undefined) body.image = data.image;
+
+    const response = await this.makeRequest<VersionApi | { data: VersionApi }>(`/api/v1/book/versions/${versionId}`, {
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
+    return (response as { data?: VersionApi }).data ?? (response as VersionApi);
+  }
+
+  /**
+   * Elimina una versión (solo si no está en uso)
+   * Endpoint: DELETE /api/v1/book/versions/:versionId
+   */
+  static async deleteVersion(versionId: string): Promise<void> {
+    if (!versionId) throw new Error("versionId requerido");
+    await this.makeRequest(`/api/v1/book/versions/${versionId}`, { method: "DELETE" });
+  }
+
+  /**
+   * Sube o reemplaza el PDF de una versión
+   * Endpoint: POST /api/v1/book/upload-private-file?version_id=:versionId
+   */
+  static async uploadVersionPdf(versionId: string, file: File): Promise<VersionApi> {
+    if (!versionId || !file) throw new Error("versionId y archivo PDF son requeridos");
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await this.makeRequest<VersionApi | { data: VersionApi }>(
+      `/api/v1/book/upload-private-file?version_id=${versionId}`,
+      { method: "POST", body: formData },
+    );
+    return (response as { data?: VersionApi }).data ?? (response as VersionApi);
   }
 
   /**

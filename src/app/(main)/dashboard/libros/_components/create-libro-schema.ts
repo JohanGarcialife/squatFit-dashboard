@@ -15,14 +15,6 @@ export const createLibroFormSchema = z.object({
     .min(3, "El subtítulo debe tener al menos 3 caracteres")
     .max(500, "El subtítulo no puede exceder 500 caracteres"),
 
-  price: z
-    .number({
-      required_error: "El precio es requerido",
-      invalid_type_error: "El precio debe ser un número",
-    })
-    .min(0, "El precio debe ser mayor o igual a 0")
-    .max(9999, "El precio no puede exceder 9999"),
-
   image: z
     .union([
       z.instanceof(File, { message: "Debe ser un archivo válido" }),
@@ -45,7 +37,6 @@ export type CreateLibroFormValues = z.infer<typeof createLibroFormSchema>;
 export const createLibroDefaultValues: CreateLibroFormValues = {
   title: "",
   subtitle: "",
-  price: 0,
   image: null,
   imageUrl: "",
 };

@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { useLibros } from "@/hooks/use-libros";
 
+import { BookVersionsModal } from "./book-versions-modal";
 import { LibroActions } from "./columns-actions";
 import { librosColumns } from "./columns.libros";
 import { CreateLibroModal } from "./create-libro-modal";
@@ -32,6 +33,7 @@ export function LibrosTable() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isVersionsModalOpen, setIsVersionsModalOpen] = useState(false);
   const [selectedLibro, setSelectedLibro] = useState<Libro | null>(null);
 
   // Handlers de acciones con useCallback para evitar re-renders innecesarios
@@ -45,16 +47,34 @@ export function LibrosTable() {
     setIsDeleteDialogOpen(true);
   }, []);
 
+  const handleManageVersions = useCallback((libro: Libro) => {
+    setSelectedLibro(libro);
+    setIsVersionsModalOpen(true);
+  }, []);
+
+  const handleCreateLibroSuccess = useCallback((libro: Libro) => {
+    setSelectedLibro(libro);
+    setIsCreateModalOpen(false);
+    setIsVersionsModalOpen(true);
+  }, []);
+
   // Columnas con acciones inyectadas
   const columns = useMemo<ColumnDef<Libro>[]>(() => {
     return [
       ...librosColumns.slice(0, -1), // Todas las columnas excepto la última (actions)
       {
         id: "actions",
-        cell: ({ row }) => <LibroActions libro={row.original} onEdit={handleEdit} onDelete={handleDelete} />,
+        cell: ({ row }) => (
+          <LibroActions
+            libro={row.original}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onManageVersions={handleManageVersions}
+          />
+        ),
       },
     ];
-  }, [handleEdit, handleDelete]);
+  }, [handleEdit, handleDelete, handleManageVersions]);
 
   const table = useDataTableInstance({
     data: libros,
@@ -135,11 +155,17 @@ export function LibrosTable() {
       </Card>
 
       {/* Modales */}
-      <CreateLibroModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
+      <CreateLibroModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onSuccess={handleCreateLibroSuccess}
+      />
 
       <EditLibroModal libro={selectedLibro} open={isEditModalOpen} onOpenChange={setIsEditModalOpen} />
 
       <DeleteLibroDialog libro={selectedLibro} open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} />
+
+      <BookVersionsModal libro={selectedLibro} open={isVersionsModalOpen} onOpenChange={setIsVersionsModalOpen} />
     </>
   );
 }

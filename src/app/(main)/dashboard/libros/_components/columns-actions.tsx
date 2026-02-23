@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2, Eye, Copy } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Eye, Copy, Layers } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,10 +18,11 @@ interface LibroActionsProps {
   libro: Libro;
   onEdit: (libro: Libro) => void;
   onDelete: (libro: Libro) => void;
+  onManageVersions: (libro: Libro) => void;
   onView?: (libro: Libro) => void;
 }
 
-export function LibroActions({ libro, onEdit, onDelete, onView }: LibroActionsProps) {
+export function LibroActions({ libro, onEdit, onDelete, onManageVersions, onView }: LibroActionsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,6 +36,10 @@ export function LibroActions({ libro, onEdit, onDelete, onView }: LibroActionsPr
         <DropdownMenuItem onClick={() => navigator.clipboard.writeText(libro.id)}>
           <Copy className="mr-2 h-4 w-4" />
           Copiar ID
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onManageVersions(libro)}>
+          <Layers className="mr-2 h-4 w-4" />
+          Gestionar versiones
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {onView && (

@@ -32,7 +32,6 @@ export function EditLibroModal({ libro, open, onOpenChange }: EditLibroModalProp
       form.reset({
         title: libro.title,
         subtitle: libro.subtitle,
-        price: libro.price,
         image: null,
         imageUrl: libro.image || "",
       });

@@ -222,30 +222,6 @@ export function CreateLibroForm({
           )}
         </div>
 
-        {/* Precio */}
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Precio (EUR) *</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  {...field}
-                  onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                  disabled={isLoading}
-                />
-              </FormControl>
-              <FormDescription>Precio en euros</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* Botones de Acción */}
         <div className="flex justify-end gap-3 pt-6">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>

@@ -66,19 +66,29 @@ export const librosColumns: ColumnDef<Libro>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "price",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Precio" />,
-    cell: ({ row }) => <span className="font-medium tabular-nums">€{row.original.price.toFixed(2)}</span>,
-  },
-  {
     accessorKey: "versions",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Versiones" />,
     cell: ({ row }) => {
-      const versionsCount = row.original.versions?.length || 0;
+      const versions = row.original.versions ?? [];
+      const versionsCount = versions.length;
+      const prices = versions
+        .map((v) => parseFloat((v as { version_price?: string }).version_price ?? "0"))
+        .filter((p) => !Number.isNaN(p) && p > 0);
+      const minPrice = prices.length > 0 ? Math.min(...prices) : null;
+      const maxPrice = prices.length > 0 ? Math.max(...prices) : null;
+      const priceRange =
+        minPrice !== null && maxPrice !== null
+          ? minPrice === maxPrice
+            ? `€${minPrice.toFixed(2)}`
+            : `€${minPrice.toFixed(2)} - €${maxPrice.toFixed(2)}`
+          : null;
       return (
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">{versionsCount}</Badge>
-          {versionsCount > 0 && <span className="text-muted-foreground text-xs">versiones</span>}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <Badge variant="outline">{versionsCount}</Badge>
+            <span className="text-muted-foreground text-xs">versiones</span>
+          </div>
+          {priceRange && <span className="text-muted-foreground text-xs">{priceRange}</span>}
         </div>
       );
     },
