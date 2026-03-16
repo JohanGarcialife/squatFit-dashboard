@@ -311,7 +311,7 @@ export default function FichaTecnica() {
     try {
       const token = getAuthToken();
       if (token) {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode(token) as any;
         return (decoded.sub as string) ?? (decoded.id as string);
       }
     } catch (error) {
@@ -332,7 +332,7 @@ export default function FichaTecnica() {
     try {
       const token = getAuthToken();
       if (token) {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode(token) as any;
 
         // Permitir si es admin
         if (decoded.role === "admin") return true;
