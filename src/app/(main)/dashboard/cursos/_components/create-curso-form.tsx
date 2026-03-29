@@ -71,10 +71,9 @@ export function CreateCursoForm({
           />
         </div>
 
-        {/* Bloque: Instructor y categoría */}
+        {/* Bloque: Instructor */}
         <div className="border-border/70 bg-muted/20 space-y-5 rounded-lg border p-4">
-          <p className="text-muted-foreground text-sm font-medium">Instructor y categoría</p>
-          {/* Instructor */}
+          <p className="text-muted-foreground text-sm font-medium">Instructor</p>
           <FormField
             control={form.control}
             name="instructor"
@@ -93,61 +92,6 @@ export function CreateCursoForm({
               </FormItem>
             )}
           />
-
-          {/* Grid de 2 columnas */}
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {/* Categoría */}
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Categoría *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecciona categoría" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {cursoFormOptions.categories.map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
-                          {category.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Nivel */}
-            <FormField
-              control={form.control}
-              name="level"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nivel *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Selecciona nivel" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {cursoFormOptions.level.map((level) => (
-                        <SelectItem key={level.value} value={level.value}>
-                          {level.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
         </div>
 
         {/* Bloque: Imagen y video (URLs) */}

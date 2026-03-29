@@ -31,15 +31,6 @@ export const createCursoFormSchema = z.object({
 
   duration: z.string().min(3, "La duración es requerida").max(50, "La duración no puede exceder 50 caracteres"),
 
-  level: z.enum(["Principiante", "Intermedio", "Avanzado"], {
-    required_error: "Debes seleccionar un nivel",
-  }),
-
-  category: z
-    .string()
-    .min(3, "La categoría debe tener al menos 3 caracteres")
-    .max(50, "La categoría no puede exceder 50 caracteres"),
-
   image: z.union([z.string().url("Introduce una URL válida"), z.literal("")]).optional(),
   video_presentation: z.union([z.string().url("Introduce una URL válida"), z.literal("")]).optional(),
 });
@@ -55,8 +46,6 @@ export const createCursoDefaultValues: CreateCursoFormValues = {
   name: "",
   description: "",
   instructor: "",
-  category: "",
-  level: "Principiante",
   price: 0,
   duration: "",
   status: "En Desarrollo",
@@ -73,24 +62,6 @@ export const cursoFormOptions = {
     { value: "Activo", label: "Activo" },
     { value: "Inactivo", label: "Inactivo" },
     { value: "En Desarrollo", label: "En Desarrollo" },
-  ] as const,
-
-  level: [
-    { value: "Principiante", label: "Principiante" },
-    { value: "Intermedio", label: "Intermedio" },
-    { value: "Avanzado", label: "Avanzado" },
-  ] as const,
-
-  categories: [
-    { value: "Entrenamiento", label: "Entrenamiento" },
-    { value: "Nutrición", label: "Nutrición" },
-    { value: "Yoga", label: "Yoga" },
-    { value: "CrossFit", label: "CrossFit" },
-    { value: "Pilates", label: "Pilates" },
-    { value: "Running", label: "Running" },
-    { value: "Bienestar", label: "Bienestar" },
-    { value: "Certificación", label: "Certificación" },
-    { value: "Otro", label: "Otro" },
   ] as const,
 
   durations: [

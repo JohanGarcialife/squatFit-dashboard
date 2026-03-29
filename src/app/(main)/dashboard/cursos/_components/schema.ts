@@ -31,8 +31,6 @@ export const cursoSchema = z.object({
   status: z.enum(["Activo", "Inactivo", "En Desarrollo"]).default("Activo"),
   students: z.number().default(0),
   duration: z.string().default("8 semanas"), // Valor por defecto
-  level: z.enum(["Principiante", "Intermedio", "Avanzado"]).default("Principiante"),
-  category: z.string().default("General"),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
   thumbnail: z.string().optional(),

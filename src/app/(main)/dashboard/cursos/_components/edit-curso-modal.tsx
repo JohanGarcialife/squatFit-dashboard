@@ -32,13 +32,11 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
       form.reset({
         name: curso.name,
         description: curso.description,
-        instructor: curso.tutorId ?? curso.instructor ?? "",
+        instructor: curso.tutorId ?? curso.instructor,
         price: curso.price,
-        currency: curso.currency ?? "€",
+        currency: curso.currency,
         status: curso.status,
         duration: curso.duration,
-        level: curso.level,
-        category: curso.category,
       });
     }
   }, [curso, open, form]);

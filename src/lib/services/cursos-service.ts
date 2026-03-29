@@ -1,3 +1,7 @@
+import {
+  courseDetailApiSchema,
+  type CourseDetail,
+} from "@/app/(main)/dashboard/cursos/_components/course-detail-schema";
 import { Curso, CursoApi } from "@/app/(main)/dashboard/cursos/_components/schema";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 
@@ -21,8 +25,6 @@ export interface CreateCursoDto {
   currency?: string;
   status?: "Activo" | "Inactivo" | "En Desarrollo";
   duration: string;
-  level: "Principiante" | "Intermedio" | "Avanzado";
-  category: string;
   image?: string;
   video_presentation?: string;
 }
@@ -56,8 +58,6 @@ export interface GetCursosParams {
   page?: number;
   limit?: number;
   status?: "Activo" | "Inactivo" | "En Desarrollo";
-  category?: string;
-  level?: "Principiante" | "Intermedio" | "Avanzado";
 }
 
 export interface UploadVideoResponse {
@@ -236,8 +236,6 @@ export class CursosService {
       status: "Activo",
       students,
       duration: "8 semanas", // Valor por defecto
-      level: "Principiante", // Valor por defecto
-      category: "General", // Valor por defecto
       thumbnail: validThumbnail,
       tutorId: apiCurso.tutor?.id,
       tutorFirstName: apiCurso.tutor?.firstName,
@@ -264,8 +262,6 @@ export class CursosService {
       if (params?.page) queryParams.append("page", params.page.toString());
       if (params?.limit) queryParams.append("limit", params.limit.toString());
       if (params?.status) queryParams.append("status", params.status);
-      if (params?.category) queryParams.append("category", params.category);
-      if (params?.level) queryParams.append("level", params.level);
 
       const queryString = queryParams.toString();
       const endpoint = `/api/v1/admin-panel/courses${queryString ? `?${queryString}` : ""}`;
@@ -335,6 +331,25 @@ export class CursosService {
       console.error("Error obteniendo curso:", error);
       throw error;
     }
+  }
+
+  /**
+   * Detalle completo del curso (currículo de videos/audios)
+   * Endpoint: GET /api/v1/course/detail/{id}
+   */
+  static async getCourseDetail(id: string): Promise<CourseDetail> {
+    if (!id) {
+      throw new Error("ID de curso requerido");
+    }
+
+    const raw: unknown = await this.makeRequest<unknown>(`/api/v1/course/detail/${id}`);
+    const parsed = courseDetailApiSchema.safeParse(raw);
+    if (!parsed.success) {
+      console.error("CursosService.getCourseDetail: respuesta inválida", parsed.error.flatten());
+      throw new Error("La respuesta del detalle del curso no es válida");
+    }
+
+    return parsed.data;
   }
 
   /**

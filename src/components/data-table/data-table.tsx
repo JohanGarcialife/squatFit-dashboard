@@ -24,6 +24,8 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   dndEnabled?: boolean;
   onReorder?: (newData: TData[]) => void;
+  /** Doble clic en la fila (p. ej. abrir detalle). Ignorar en celdas con controles propios. */
+  onRowDoubleClick?: (row: TData) => void;
 }
 
 function renderTableBody<TData, TValue>({
@@ -31,11 +33,13 @@ function renderTableBody<TData, TValue>({
   columns,
   dndEnabled,
   dataIds,
+  onRowDoubleClick,
 }: {
   table: TanStackTable<TData>;
   columns: ColumnDef<TData, TValue>[];
   dndEnabled: boolean;
   dataIds: UniqueIdentifier[];
+  onRowDoubleClick?: (row: TData) => void;
 }) {
   if (!table.getRowModel().rows.length) {
     return (
@@ -56,7 +60,18 @@ function renderTableBody<TData, TValue>({
     );
   }
   return table.getRowModel().rows.map((row) => (
-    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+    <TableRow
+      key={row.id}
+      data-state={row.getIsSelected() && "selected"}
+      className={onRowDoubleClick ? "cursor-pointer" : undefined}
+      onDoubleClick={
+        onRowDoubleClick
+          ? () => {
+              onRowDoubleClick(row.original);
+            }
+          : undefined
+      }
+    >
       {row.getVisibleCells().map((cell) => (
         <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
       ))}
@@ -69,6 +84,7 @@ export function DataTable<TData, TValue>({
   columns,
   dndEnabled = false,
   onReorder,
+  onRowDoubleClick,
 }: DataTableProps<TData, TValue>) {
   const dataIds: UniqueIdentifier[] = table.getRowModel().rows.map((row) => Number(row.id) as UniqueIdentifier);
   const sortableId = React.useId();
@@ -76,7 +92,7 @@ export function DataTable<TData, TValue>({
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
-    if (active && over && active.id !== over.id && onReorder) {
+    if (over && active.id !== over.id && onReorder) {
       const oldIndex = dataIds.indexOf(active.id);
       const newIndex = dataIds.indexOf(over.id);
 
@@ -102,7 +118,7 @@ export function DataTable<TData, TValue>({
         ))}
       </TableHeader>
       <TableBody className="**:data-[slot=table-cell]:first:w-8">
-        {renderTableBody({ table, columns, dndEnabled, dataIds })}
+        {renderTableBody({ table, columns, dndEnabled, dataIds, onRowDoubleClick })}
       </TableBody>
     </Table>
   );

@@ -29,22 +29,6 @@ function formatPrice(price: number, currency?: string): string {
   return `${symbol}${price.toFixed(2)}`;
 }
 
-/**
- * Obtiene el color del badge según el nivel
- */
-function getLevelBadgeVariant(level: string): "default" | "secondary" | "outline" {
-  switch (level.toLowerCase()) {
-    case "principiante":
-      return "secondary";
-    case "intermedio":
-      return "default";
-    case "avanzado":
-      return "outline";
-    default:
-      return "default";
-  }
-}
-
 // ============================================================================
 // COMPONENTE: CARD DE CURSO
 // ============================================================================
@@ -65,13 +49,6 @@ function CursoCard({ curso }: { curso: Curso }) {
         ) : (
           <div className="flex h-full items-center justify-center">
             <BookOpen className="text-muted-foreground h-12 w-12" />
-          </div>
-        )}
-
-        {/* Badge de nivel */}
-        {curso.level && (
-          <div className="absolute top-2 right-2">
-            <Badge variant={getLevelBadgeVariant(curso.level)}>{curso.level}</Badge>
           </div>
         )}
       </div>
@@ -102,9 +79,7 @@ function CursoCard({ curso }: { curso: Curso }) {
           {/* Precio y Estado */}
           <div className="flex items-center justify-between pt-2">
             <span className="text-lg font-bold">{formatPrice(curso.price, curso.currency)}</span>
-            {curso.status && (
-              <Badge variant={curso.status === "Activo" ? "default" : "secondary"}>{curso.status}</Badge>
-            )}
+            <Badge variant={curso.status === "Activo" ? "default" : "secondary"}>{curso.status}</Badge>
           </div>
         </div>
       </CardContent>

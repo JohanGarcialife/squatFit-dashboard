@@ -15,8 +15,9 @@ import { useCursos, useToggleCursoStatus } from "@/hooks/use-cursos";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 
 import { CursoActions } from "./columns-actions";
-import { cursosColumns } from "./columns.cursos";
+import { getBaseCursosColumns } from "./columns.cursos";
 import { CreateCursoModal } from "./create-curso-modal";
+import { CursoDetalleModal } from "./curso-detalle-modal";
 import { DeleteCursoDialog } from "./delete-curso-dialog";
 import { EditCursoModal } from "./edit-curso-modal";
 import { Curso } from "./schema";
@@ -24,7 +25,7 @@ import { UploadVideoModal } from "./upload-video-modal";
 
 export function CursosTable() {
   const { data: cursosData, isLoading, isError, error } = useCursos();
-  const cursos = cursosData || [];
+  const cursos = cursosData ?? [];
 
   const [globalFilter, setGlobalFilter] = useState("");
 
@@ -33,6 +34,8 @@ export function CursosTable() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUploadVideoModalOpen, setIsUploadVideoModalOpen] = useState(false);
+  const [isDetalleModalOpen, setIsDetalleModalOpen] = useState(false);
+  const [detalleCourseId, setDetalleCourseId] = useState<string | null>(null);
   const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null);
 
   const toggleStatusMutation = useToggleCursoStatus();
@@ -60,10 +63,22 @@ export function CursosTable() {
     setIsUploadVideoModalOpen(true);
   }, []);
 
+  const handleViewDetail = useCallback((curso: Curso) => {
+    setDetalleCourseId(curso.id);
+    setIsDetalleModalOpen(true);
+  }, []);
+
+  const handleDetalleOpenChange = useCallback((open: boolean) => {
+    setIsDetalleModalOpen(open);
+    if (!open) {
+      setDetalleCourseId(null);
+    }
+  }, []);
+
   // Columnas con acciones inyectadas
   const columns = useMemo<ColumnDef<Curso>[]>(() => {
     return [
-      ...cursosColumns.slice(0, -1),
+      ...getBaseCursosColumns({ onViewCurso: handleViewDetail }),
       {
         id: "actions",
         cell: ({ row }) => (
@@ -73,11 +88,12 @@ export function CursosTable() {
             onDelete={handleDelete}
             onToggleStatus={handleToggleStatus}
             onUploadVideo={handleUploadVideo}
+            onView={handleViewDetail}
           />
         ),
       },
     ];
-  }, [handleEdit, handleDelete, handleToggleStatus, handleUploadVideo]);
+  }, [handleEdit, handleDelete, handleToggleStatus, handleUploadVideo, handleViewDetail]);
 
   const table = useDataTableInstance({
     data: cursos,
@@ -148,7 +164,7 @@ export function CursosTable() {
                 </div>
               </div>
             ) : (
-              <DataTable table={table} columns={columns} />
+              <DataTable table={table} columns={columns} onRowDoubleClick={handleViewDetail} />
             )}
           </div>
 
@@ -162,6 +178,7 @@ export function CursosTable() {
       <EditCursoModal curso={selectedCurso} open={isEditModalOpen} onOpenChange={setIsEditModalOpen} />
       <DeleteCursoDialog curso={selectedCurso} open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} />
       <UploadVideoModal curso={selectedCurso} open={isUploadVideoModalOpen} onOpenChange={setIsUploadVideoModalOpen} />
+      <CursoDetalleModal courseId={detalleCourseId} open={isDetalleModalOpen} onOpenChange={handleDetalleOpenChange} />
     </>
   );
 }

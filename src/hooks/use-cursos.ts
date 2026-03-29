@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import type { CourseDetail } from "@/app/(main)/dashboard/cursos/_components/course-detail-schema";
 import { Curso } from "@/app/(main)/dashboard/cursos/_components/schema";
 import { CursosService, CreateCursoDto, GetCursosParams, UploadVideoResponse } from "@/lib/services/cursos-service";
 
@@ -14,6 +15,8 @@ export const cursosKeys = {
   list: (params?: GetCursosParams) => [...cursosKeys.lists(), params] as const,
   details: () => [...cursosKeys.all, "detail"] as const,
   detail: (id: string) => [...cursosKeys.details(), id] as const,
+  /** Detalle API GET /api/v1/course/detail/{id} (currículo, tutor, etc.) */
+  courseApiDetail: (id: string) => [...cursosKeys.all, "course-api-detail", id] as const,
 };
 
 // ============================================================================
@@ -45,6 +48,21 @@ export function useCurso(id: string) {
     queryFn: () => CursosService.getCursoById(id),
     enabled: !!id, // Solo ejecuta si hay ID
     staleTime: 5 * 60 * 1000,
+    retry: 1,
+  });
+}
+
+/**
+ * Detalle del curso desde GET /api/v1/course/detail/{id}
+ */
+export function useCourseDetail(courseId: string | null, options?: { enabled?: boolean }) {
+  const enabled = !!courseId && (options?.enabled ?? true);
+
+  return useQuery<CourseDetail, Error>({
+    queryKey: cursosKeys.courseApiDetail(courseId ?? ""),
+    queryFn: () => CursosService.getCourseDetail(courseId as string),
+    enabled,
+    staleTime: 2 * 60 * 1000,
     retry: 1,
   });
 }
@@ -271,7 +289,7 @@ export function useUploadCursoVideo() {
     onSuccess: (response, { courseId }) => {
       queryClient.invalidateQueries({ queryKey: cursosKeys.detail(courseId) });
       queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
-      toast.success(response.message ?? "Video subido exitosamente", {
+      toast.success(response.message, {
         id: `upload-video-${courseId}`,
       });
     },
