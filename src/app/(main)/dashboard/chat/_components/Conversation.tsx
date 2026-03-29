@@ -652,7 +652,7 @@ export default function Conversation() {
               if (showDateSeparator) lastDate = message.messageDate;
 
               // Log para debug de renderizado
-              const messageTyped = message as any;
+              const messageTyped = message as unknown as Record<string, unknown>;
               const msgContent = message.content ?? "";
               if (msgContent.includes("desde") || msgContent.includes("adviser") || msgContent.includes("dietista")) {
                 let bgClass = "bg-gray-200";

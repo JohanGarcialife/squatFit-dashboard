@@ -253,7 +253,7 @@ export class EntrenadoresService {
 
   /**
    * Elimina un entrenador
-   * Endpoint: DELETE /api/v1/coaches/{id}
+   * Endpoint: DELETE /api/v1/admin-panel/coaches?coach_id={id}
    */
   static async deleteEntrenador(id: string): Promise<void> {
     if (!id) {
@@ -263,9 +263,10 @@ export class EntrenadoresService {
     try {
       console.log("🗑️ EntrenadoresService: Eliminando entrenador:", id);
 
-      await this.makeRequest<{ success: boolean; message: string }>(`/api/v1/coaches/${id}`, {
-        method: "DELETE",
-      });
+      await this.makeRequest<{ success: boolean; message: string }>(
+        `/api/v1/admin-panel/coaches?coach_id=${id}`,
+        { method: "DELETE" },
+      );
 
       console.log("✅ EntrenadoresService: Entrenador eliminado exitosamente");
     } catch (error) {

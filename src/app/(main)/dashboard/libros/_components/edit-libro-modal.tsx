@@ -41,15 +41,7 @@ export function EditLibroModal({ libro, open, onOpenChange }: EditLibroModalProp
   const handleSubmit = async (values: CreateLibroFormValues) => {
     if (!libro) return;
 
-    // Transformar valores para que coincidan con Partial<CreateLibroDto>
-    const dto = {
-      title: values.title,
-      subtitle: values.subtitle,
-      image: values.image instanceof File ? values.image : null,
-      imageUrl: typeof values.image === "string" ? values.image : values.imageUrl || undefined,
-    };
-
-    const payload = { id: libro.id, data: dto };
+    const payload = { id: libro.id, data: values };
     console.log("📤 Actualizar libro - datos enviados:", payload);
 
     try {

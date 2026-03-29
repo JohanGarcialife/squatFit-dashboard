@@ -26,15 +26,7 @@ export function CreateLibroModal({ open, onOpenChange, onSuccess }: CreateLibroM
 
   const handleSubmit = async (values: CreateLibroFormValues) => {
     try {
-      // Transformar valores para que coincidan con CreateLibroDto
-      const dto = {
-        title: values.title,
-        subtitle: values.subtitle,
-        image: values.image instanceof File ? values.image : null,
-        imageUrl: typeof values.image === "string" ? values.image : values.imageUrl || undefined,
-      };
-
-      const newLibro = await createLibroMutation.mutateAsync(dto as any);
+      const newLibro = await createLibroMutation.mutateAsync(values);
 
       // Cerrar modal y resetear formulario
       onOpenChange(false);

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { Curso } from "@/app/(main)/dashboard/cursos/_components/schema";
-import { CursosService, CreateCursoDto, GetCursosParams } from "@/lib/services/cursos-service";
+import { CursosService, CreateCursoDto, GetCursosParams, UploadVideoResponse } from "@/lib/services/cursos-service";
 
 // ============================================================================
 // QUERY KEYS
@@ -250,4 +250,36 @@ export function useInvalidateCursos() {
   return () => {
     queryClient.invalidateQueries({ queryKey: cursosKeys.all });
   };
+}
+
+// ============================================================================
+// UPLOAD DE VIDEO
+// ============================================================================
+
+/**
+ * Hook para subir el video de presentación de un curso
+ * Endpoint: POST /api/v1/course/upload-video?course_id={id}
+ */
+export function useUploadCursoVideo() {
+  const queryClient = useQueryClient();
+
+  return useMutation<UploadVideoResponse, Error, { courseId: string; file: File }>({
+    mutationFn: ({ courseId, file }) => CursosService.uploadCursoVideo(courseId, file),
+    onMutate: ({ courseId }) => {
+      toast.loading("Subiendo video...", { id: `upload-video-${courseId}` });
+    },
+    onSuccess: (response, { courseId }) => {
+      queryClient.invalidateQueries({ queryKey: cursosKeys.detail(courseId) });
+      queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
+      toast.success(response.message ?? "Video subido exitosamente", {
+        id: `upload-video-${courseId}`,
+      });
+    },
+    onError: (error, { courseId }) => {
+      console.error("Error subiendo video del curso:", error);
+      toast.error(error.message || "Error al subir el video", {
+        id: `upload-video-${courseId}`,
+      });
+    },
+  });
 }

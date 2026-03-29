@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { useEntrenadores } from "@/hooks/use-entrenadores";
+import { useDeleteEntrenador, useEntrenadores } from "@/hooks/use-entrenadores";
 
 import { getEntrenadoresColumns } from "./columns.entrenadores";
 import { EntrenadorUI } from "./schema";
@@ -24,8 +24,9 @@ export function EntrenadoresTable() {
 
   // Obtener entrenadores del API
   const { data: entrenadoresData, isLoading, error } = useEntrenadores();
+  const deleteEntrenador = useDeleteEntrenador();
 
-  // Handlers del modal
+  // Handlers del modal de edición
   const handleEditUser = (entrenador: EntrenadorUI) => {
     setEditingUser(entrenador);
     setIsEditModalOpen(true);
@@ -34,6 +35,13 @@ export function EntrenadoresTable() {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setEditingUser(null);
+  };
+
+  // Handler de eliminación
+  const handleDeleteUser = (entrenador: EntrenadorUI) => {
+    if (confirm(`¿Estás seguro de que deseas eliminar a ${entrenador.fullName}? Esta acción no se puede deshacer.`)) {
+      deleteEntrenador.mutate(entrenador.id);
+    }
   };
 
   // Transformar datos del API a formato UI
@@ -52,7 +60,10 @@ export function EntrenadoresTable() {
   }, [entrenadoresData]);
 
   // Generar columnas con handlers
-  const columns = useMemo(() => getEntrenadoresColumns({ onEdit: handleEditUser }), []);
+  const columns = useMemo(
+    () => getEntrenadoresColumns({ onEdit: handleEditUser, onDelete: handleDeleteUser }),
+    [],
+  );
 
   const table = useDataTableInstance({
     data: entrenadores,

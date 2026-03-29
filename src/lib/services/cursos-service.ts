@@ -60,6 +60,11 @@ export interface GetCursosParams {
   level?: "Principiante" | "Intermedio" | "Avanzado";
 }
 
+export interface UploadVideoResponse {
+  message: string;
+  url?: string;
+}
+
 // ============================================================================
 // SERVICIO DE CURSOS
 // ============================================================================
@@ -267,21 +272,22 @@ export class CursosService {
 
       const response = await this.makeRequest<any>(endpoint);
 
-      // Log: datos crudos enviados por el backend
-      console.log("📦 CursosService: Respuesta completa del back:", response);
+      // Debug: respuesta cruda del endpoint admin-panel/courses
+      console.log(
+        "[GET /api/v1/admin-panel/courses]",
+        { endpoint, query: queryString || "(sin query)" },
+        "→ respuesta completa:",
+        response,
+      );
       if (typeof response === "object" && response !== null) {
         const arr = Array.isArray(response) ? response : (response?.data ?? response?.courses ?? []);
-        if (Array.isArray(arr) && arr.length > 0) {
-          console.log("📋 CursosService: Datos por curso (tal como los envía el back):", {
-            totalCursos: arr.length,
-            cursos: arr.map((c: Record<string, unknown>, i: number) => ({
-              index: i + 1,
-              id: c.id,
-              title: c.title,
-              students: c.students,
-              studentsType: typeof c.students,
-            })),
-          });
+        if (Array.isArray(arr)) {
+          console.log(
+            "[GET /api/v1/admin-panel/courses] total ítems en lista:",
+            arr.length,
+            "| primer curso (todos los campos del back):",
+            arr[0] ?? "(vacío)",
+          );
         }
       }
 
@@ -482,6 +488,60 @@ export class CursosService {
     } catch (error) {
       console.error("Error cambiando estado del curso:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Sube un archivo de video y lo asocia a un curso
+   * Endpoint: POST /api/v1/course/upload-video?course_id={id}
+   *
+   * NOTA: Usa multipart/form-data. No se establece Content-Type manualmente
+   * para que el navegador añada el boundary correcto.
+   */
+  static async uploadCursoVideo(courseId: string, file: File): Promise<UploadVideoResponse> {
+    if (!courseId) {
+      throw new Error("ID de curso requerido");
+    }
+    if (!file) {
+      throw new Error("Archivo de video requerido");
+    }
+
+    const token = getAuthToken() ?? (typeof window !== "undefined" ? localStorage.getItem("authToken") : null);
+    const url = `${API_BASE_URL}/api/v1/course/upload-video?course_id=${courseId}`;
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // Timeout extendido (2 minutos) para archivos de video pesados
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120_000);
+
+    try {
+      console.log("📹 CursosService: Subiendo video al curso:", courseId);
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        await this.handleResponseError(response);
+      }
+
+      const result: UploadVideoResponse = await response.json();
+      console.log("✅ CursosService: Video subido exitosamente:", result);
+      return result;
+    } catch (error) {
+      this.handleRequestError(error, timeoutId);
     }
   }
 

@@ -339,7 +339,9 @@ export class LibrosService {
 
       // Según documentación: PUT /api/v1/book/{id} con body application/json
       // Campos: title, subtitle, image (URL string), price (string)
-      if (data.image instanceof File) {
+      const hasFile = data.image instanceof File;
+
+      if (hasFile) {
         // Solo usar FormData cuando se sube un archivo nuevo (si la API lo acepta)
         const formData = new FormData();
         if (data.title) formData.append("title", data.title);
