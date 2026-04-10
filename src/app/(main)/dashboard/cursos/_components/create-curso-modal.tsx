@@ -2,12 +2,18 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useCreateCurso } from "@/hooks/use-cursos";
+import { useCreateCurso, useLinkCursoVideo, useUploadCursoVideo } from "@/hooks/use-cursos";
 
 import { CreateCursoForm } from "./create-curso-form";
-import { createCursoFormSchema, CreateCursoFormValues, createCursoDefaultValues } from "./create-curso-schema";
+import {
+  createCursoFormSchema,
+  CreateCursoFormValues,
+  createCursoDefaultValues,
+  mapCreateCursoFormToDto,
+} from "./create-curso-schema";
 
 interface CreateCursoModalProps {
   open: boolean;
@@ -16,6 +22,8 @@ interface CreateCursoModalProps {
 
 export function CreateCursoModal({ open, onOpenChange }: CreateCursoModalProps) {
   const createCursoMutation = useCreateCurso();
+  const uploadVideoMutation = useUploadCursoVideo();
+  const linkVideoMutation = useLinkCursoVideo();
 
   const form = useForm<CreateCursoFormValues>({
     resolver: zodResolver(createCursoFormSchema),
@@ -24,7 +32,28 @@ export function CreateCursoModal({ open, onOpenChange }: CreateCursoModalProps) 
 
   const handleSubmit = async (values: CreateCursoFormValues) => {
     try {
-      await createCursoMutation.mutateAsync(values);
+      const createdCurso = await createCursoMutation.mutateAsync(mapCreateCursoFormToDto(values));
+
+      try {
+        if (values.isExternalVideoCourse) {
+          await linkVideoMutation.mutateAsync({
+            courseId: createdCurso.id,
+            title: values.videoTitle ?? "",
+            url: values.videoUrl ?? "",
+            description: values.videoDescription,
+            priority: values.videoPriority,
+          });
+        } else if (values.uploadVideoFile) {
+          await uploadVideoMutation.mutateAsync({
+            courseId: createdCurso.id,
+            file: values.uploadVideoFile,
+            description: values.videoDescription,
+            priority: values.videoPriority,
+          });
+        }
+      } catch {
+        toast.error("El curso se creó, pero no se pudo completar la configuracion inicial del video.");
+      }
 
       // Cerrar modal y resetear formulario
       onOpenChange(false);
@@ -42,20 +71,23 @@ export function CreateCursoModal({ open, onOpenChange }: CreateCursoModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Crear Nuevo Curso</DialogTitle>
+      <DialogContent className="flex max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+        <DialogHeader className="bg-background/95 shrink-0 border-b px-7 py-5 text-left backdrop-blur">
+          <DialogTitle className="pr-10 text-xl leading-tight">Crear Nuevo Curso</DialogTitle>
           <DialogDescription>
             Completa la información del curso. Los campos marcados con * son obligatorios.
           </DialogDescription>
         </DialogHeader>
 
-        <CreateCursoForm
-          form={form}
-          onSubmit={handleSubmit}
-          isLoading={createCursoMutation.isPending}
-          onCancel={handleCancel}
-        />
+        <div className="min-h-0 flex-1 overflow-y-auto px-7 py-6">
+          <CreateCursoForm
+            form={form}
+            onSubmit={handleSubmit}
+            isLoading={createCursoMutation.isPending || uploadVideoMutation.isPending || linkVideoMutation.isPending}
+            onCancel={handleCancel}
+            showVideoSourceFields
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

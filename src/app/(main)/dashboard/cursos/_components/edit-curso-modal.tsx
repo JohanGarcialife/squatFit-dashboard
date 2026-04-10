@@ -9,7 +9,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useUpdateCurso } from "@/hooks/use-cursos";
 
 import { CreateCursoForm } from "./create-curso-form";
-import { createCursoFormSchema, CreateCursoFormValues, createCursoDefaultValues } from "./create-curso-schema";
+import {
+  createCursoFormSchema,
+  CreateCursoFormValues,
+  createCursoDefaultValues,
+  mapCreateCursoFormToDto,
+} from "./create-curso-schema";
 import { Curso } from "./schema";
 
 interface EditCursoModalProps {
@@ -30,6 +35,7 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
   useEffect(() => {
     if (curso && open) {
       form.reset({
+        ...createCursoDefaultValues,
         name: curso.name,
         description: curso.description,
         instructor: curso.tutorId ?? curso.instructor,
@@ -47,7 +53,7 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
     try {
       await updateCursoMutation.mutateAsync({
         id: curso.id,
-        data: values,
+        data: mapCreateCursoFormToDto(values),
       });
 
       // Cerrar modal
@@ -80,6 +86,7 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
           onCancel={handleCancel}
           submitLabel="Actualizar Curso"
           loadingLabel="Actualizando..."
+          showVideoSourceFields={false}
         />
       </DialogContent>
     </Dialog>

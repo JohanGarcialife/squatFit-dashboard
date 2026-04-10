@@ -65,6 +65,21 @@ export interface UploadVideoResponse {
   url?: string;
 }
 
+export interface UploadCursoVideoPayload {
+  courseId: string;
+  file: File;
+  description?: string;
+  priority?: number;
+}
+
+export interface LinkCursoVideoPayload {
+  courseId: string;
+  title: string;
+  url: string;
+  description?: string;
+  priority?: number;
+}
+
 // ============================================================================
 // SERVICIO DE CURSOS
 // ============================================================================
@@ -513,12 +528,14 @@ export class CursosService {
    * NOTA: Usa multipart/form-data. No se establece Content-Type manualmente
    * para que el navegador añada el boundary correcto.
    */
-  static async uploadCursoVideo(courseId: string, file: File): Promise<UploadVideoResponse> {
+  static async uploadCursoVideo({
+    courseId,
+    file,
+    description,
+    priority,
+  }: UploadCursoVideoPayload): Promise<UploadVideoResponse> {
     if (!courseId) {
       throw new Error("ID de curso requerido");
-    }
-    if (!file) {
-      throw new Error("Archivo de video requerido");
     }
 
     const token = getAuthToken() ?? (typeof window !== "undefined" ? localStorage.getItem("authToken") : null);
@@ -531,6 +548,12 @@ export class CursosService {
 
     const formData = new FormData();
     formData.append("file", file);
+    if (description?.trim()) {
+      formData.append("description", description.trim());
+    }
+    if (priority !== undefined) {
+      formData.append("priority", priority.toString());
+    }
 
     // Timeout extendido (2 minutos) para archivos de video pesados
     const controller = new AbortController();
@@ -557,6 +580,50 @@ export class CursosService {
       return result;
     } catch (error) {
       this.handleRequestError(error, timeoutId);
+    }
+  }
+
+  /**
+   * Vincula un video externo a un curso
+   * Endpoint: POST /api/v1/course/link-video?course_id={id}
+   */
+  static async linkCursoVideo({
+    courseId,
+    title,
+    url,
+    description,
+    priority,
+  }: LinkCursoVideoPayload): Promise<UploadVideoResponse> {
+    if (!courseId) {
+      throw new Error("ID de curso requerido");
+    }
+
+    if (!title.trim()) {
+      throw new Error("El titulo del video es requerido");
+    }
+
+    if (!url.trim()) {
+      throw new Error("La URL del video es requerida");
+    }
+
+    const trimmedDescription = description?.trim();
+
+    const payload = {
+      title: title.trim(),
+      url: url.trim(),
+      description: trimmedDescription ? trimmedDescription : undefined,
+      priority,
+    };
+
+    try {
+      console.log("🔗 CursosService: Vinculando video externo al curso:", courseId);
+      return await this.makeRequest<UploadVideoResponse>(`/api/v1/course/link-video?course_id=${courseId}`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.error("Error vinculando video externo:", error);
+      throw error;
     }
   }
 

@@ -24,7 +24,6 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   dndEnabled?: boolean;
   onReorder?: (newData: TData[]) => void;
-  /** Doble clic en la fila (p. ej. abrir detalle). Ignorar en celdas con controles propios. */
   onRowDoubleClick?: (row: TData) => void;
 }
 

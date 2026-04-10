@@ -3,7 +3,14 @@ import { toast } from "sonner";
 
 import type { CourseDetail } from "@/app/(main)/dashboard/cursos/_components/course-detail-schema";
 import { Curso } from "@/app/(main)/dashboard/cursos/_components/schema";
-import { CursosService, CreateCursoDto, GetCursosParams, UploadVideoResponse } from "@/lib/services/cursos-service";
+import {
+  CursosService,
+  CreateCursoDto,
+  GetCursosParams,
+  LinkCursoVideoPayload,
+  UploadCursoVideoPayload,
+  UploadVideoResponse,
+} from "@/lib/services/cursos-service";
 
 // ============================================================================
 // QUERY KEYS
@@ -15,7 +22,7 @@ export const cursosKeys = {
   list: (params?: GetCursosParams) => [...cursosKeys.lists(), params] as const,
   details: () => [...cursosKeys.all, "detail"] as const,
   detail: (id: string) => [...cursosKeys.details(), id] as const,
-  /** Detalle API GET /api/v1/course/detail/{id} (currículo, tutor, etc.) */
+  /** Detalle API GET /api/v1/course/detail/{id} */
   courseApiDetail: (id: string) => [...cursosKeys.all, "course-api-detail", id] as const,
 };
 
@@ -281,13 +288,14 @@ export function useInvalidateCursos() {
 export function useUploadCursoVideo() {
   const queryClient = useQueryClient();
 
-  return useMutation<UploadVideoResponse, Error, { courseId: string; file: File }>({
-    mutationFn: ({ courseId, file }) => CursosService.uploadCursoVideo(courseId, file),
+  return useMutation<UploadVideoResponse, Error, UploadCursoVideoPayload>({
+    mutationFn: (payload) => CursosService.uploadCursoVideo(payload),
     onMutate: ({ courseId }) => {
       toast.loading("Subiendo video...", { id: `upload-video-${courseId}` });
     },
     onSuccess: (response, { courseId }) => {
       queryClient.invalidateQueries({ queryKey: cursosKeys.detail(courseId) });
+      queryClient.invalidateQueries({ queryKey: cursosKeys.courseApiDetail(courseId) });
       queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
       toast.success(response.message, {
         id: `upload-video-${courseId}`,
@@ -297,6 +305,35 @@ export function useUploadCursoVideo() {
       console.error("Error subiendo video del curso:", error);
       toast.error(error.message || "Error al subir el video", {
         id: `upload-video-${courseId}`,
+      });
+    },
+  });
+}
+
+/**
+ * Hook para vincular un video externo a un curso
+ * Endpoint: POST /api/v1/course/link-video?course_id={id}
+ */
+export function useLinkCursoVideo() {
+  const queryClient = useQueryClient();
+
+  return useMutation<UploadVideoResponse, Error, LinkCursoVideoPayload>({
+    mutationFn: (payload) => CursosService.linkCursoVideo(payload),
+    onMutate: ({ courseId }) => {
+      toast.loading("Vinculando video externo...", { id: `link-video-${courseId}` });
+    },
+    onSuccess: (response, { courseId }) => {
+      queryClient.invalidateQueries({ queryKey: cursosKeys.detail(courseId) });
+      queryClient.invalidateQueries({ queryKey: cursosKeys.courseApiDetail(courseId) });
+      queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
+      toast.success(response.message, {
+        id: `link-video-${courseId}`,
+      });
+    },
+    onError: (error, { courseId }) => {
+      console.error("Error vinculando video externo del curso:", error);
+      toast.error(error.message || "Error al vincular el video externo", {
+        id: `link-video-${courseId}`,
       });
     },
   });

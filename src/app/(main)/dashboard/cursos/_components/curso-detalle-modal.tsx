@@ -4,7 +4,6 @@ import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCourseDetail } from "@/hooks/use-cursos";
 
 import { CursoDetalleContent } from "./curso-detalle-content";
@@ -20,15 +19,15 @@ export function CursoDetalleModal({ courseId, open, onOpenChange }: CursoDetalle
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[min(90vh,720px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
-        <DialogHeader className="shrink-0 border-b px-6 py-4 text-left">
-          <DialogTitle className="pr-8 leading-tight">{data?.title ?? "Detalle del curso"}</DialogTitle>
+      <DialogContent className="flex max-h-[min(92vh,820px)] flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
+        <DialogHeader className="bg-background/95 shrink-0 border-b px-7 py-5 text-left backdrop-blur">
+          <DialogTitle className="pr-10 text-xl leading-tight">{data?.title ?? "Detalle del curso"}</DialogTitle>
           <DialogDescription className="sr-only">
             Información del curso, tutor y currículo de videos obtenida del servidor.
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[min(70vh,560px)] px-6 py-4">
+        <div className="min-h-0 flex-1 overflow-y-auto px-7 py-6">
           {!courseId ? null : isLoading ? (
             <div className="text-muted-foreground flex flex-col items-center justify-center gap-2 py-12">
               <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
@@ -47,7 +46,7 @@ export function CursoDetalleModal({ courseId, open, onOpenChange }: CursoDetalle
           ) : data ? (
             <CursoDetalleContent data={data} />
           ) : null}
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
