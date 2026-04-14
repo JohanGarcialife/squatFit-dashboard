@@ -346,8 +346,8 @@ export class LibrosService {
         const formData = new FormData();
         if (data.title) formData.append("title", data.title);
         if (data.subtitle) formData.append("subtitle", data.subtitle);
-        formData.append("image", data.image);
-        console.log("📤 LibrosService: Actualizando con archivo de imagen:", data.image.name);
+        formData.append("image", data.image as File);
+        console.log("📤 LibrosService: Actualizando con archivo de imagen:", (data.image as File).name);
 
         const response = await this.makeRequest<any>(`/api/v1/book/${id}`, {
           method: "PUT",
