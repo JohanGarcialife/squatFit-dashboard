@@ -19,7 +19,7 @@
 
 ### Conclusión
 
-El backend y la infraestructura del frontend están **completamente implementados** para crear recetas. Sin embargo, **falta conectar la UI** con estos servicios. El botón "Nueva Receta" en el componente `BancoRecetas` no tiene ninguna acción asociada.
+El backend y la infraestructura del frontend están **completamente implementados** para crear recetas. Sin embargo, **falta conectar la UI** con estos servicios. El botón "Nueva Receta" en el componente `BancoRecetas` no tiene ninguna acción asociada..
 
 ---
 
