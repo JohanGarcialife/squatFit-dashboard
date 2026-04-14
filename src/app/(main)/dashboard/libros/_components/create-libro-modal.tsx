@@ -26,7 +26,7 @@ export function CreateLibroModal({ open, onOpenChange, onSuccess }: CreateLibroM
 
   const handleSubmit = async (values: CreateLibroFormValues) => {
     try {
-      const newLibro = await createLibroMutation.mutateAsync(values);
+      const newLibro = await createLibroMutation.mutateAsync(values as any);
 
       // Cerrar modal y resetear formulario
       onOpenChange(false);
