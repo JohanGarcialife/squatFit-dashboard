@@ -20,9 +20,9 @@ import { CreateCursoModal } from "./create-curso-modal";
 import { DeleteCursoDialog } from "./delete-curso-dialog";
 import { EditCursoModal } from "./edit-curso-modal";
 import { Curso } from "./schema";
+import { UploadVideoModal } from "./upload-video-modal";
 
 export function CursosTable() {
-  // Obtener cursos de la API
   const { data: cursosData, isLoading, isError, error } = useCursos();
   const cursos = cursosData || [];
 
@@ -32,11 +32,11 @@ export function CursosTable() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isUploadVideoModalOpen, setIsUploadVideoModalOpen] = useState(false);
   const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null);
 
   const toggleStatusMutation = useToggleCursoStatus();
 
-  // Handlers de acciones con useCallback para evitar re-renders innecesarios
   const handleEdit = useCallback((curso: Curso) => {
     setSelectedCurso(curso);
     setIsEditModalOpen(true);
@@ -55,10 +55,15 @@ export function CursosTable() {
     [toggleStatusMutation],
   );
 
+  const handleUploadVideo = useCallback((curso: Curso) => {
+    setSelectedCurso(curso);
+    setIsUploadVideoModalOpen(true);
+  }, []);
+
   // Columnas con acciones inyectadas
   const columns = useMemo<ColumnDef<Curso>[]>(() => {
     return [
-      ...cursosColumns.slice(0, -1), // Todas las columnas excepto la última (actions)
+      ...cursosColumns.slice(0, -1),
       {
         id: "actions",
         cell: ({ row }) => (
@@ -67,11 +72,12 @@ export function CursosTable() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             onToggleStatus={handleToggleStatus}
+            onUploadVideo={handleUploadVideo}
           />
         ),
       },
     ];
-  }, [handleEdit, handleDelete, handleToggleStatus]);
+  }, [handleEdit, handleDelete, handleToggleStatus, handleUploadVideo]);
 
   const table = useDataTableInstance({
     data: cursos,
@@ -155,6 +161,7 @@ export function CursosTable() {
       <CreateCursoModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
       <EditCursoModal curso={selectedCurso} open={isEditModalOpen} onOpenChange={setIsEditModalOpen} />
       <DeleteCursoDialog curso={selectedCurso} open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} />
+      <UploadVideoModal curso={selectedCurso} open={isUploadVideoModalOpen} onOpenChange={setIsUploadVideoModalOpen} />
     </>
   );
 }

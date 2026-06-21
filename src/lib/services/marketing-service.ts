@@ -137,9 +137,12 @@ export class MarketingService {
     month?: number;
     search?: string;
   }): Promise<SaleApiResponse[]> {
+    const limit = params?.limit ?? 1000;
+    const page = params?.page ?? 1;
+
     const queryParams = new URLSearchParams();
-    if (params?.limit) queryParams.append("limit", String(params.limit));
-    if (params?.page) queryParams.append("page", String(params.page));
+    queryParams.append("limit", String(limit));
+    queryParams.append("page", String(page));
     if (params?.month) queryParams.append("month", String(params.month));
     if (params?.search) queryParams.append("search", params.search);
 
@@ -155,9 +158,12 @@ export class MarketingService {
    * Endpoint: GET /api/v1/admin-panel/advices
    */
   private static async getAdvicesFromBackend(params?: { limit?: number; page?: number }): Promise<AdvicesApiResponse> {
+    const limit = params?.limit ?? 1000;
+    const page = params?.page ?? 1;
+
     const queryParams = new URLSearchParams();
-    if (params?.limit) queryParams.append("limit", String(params.limit));
-    if (params?.page) queryParams.append("page", String(params.page));
+    queryParams.append("limit", String(limit));
+    queryParams.append("page", String(page));
 
     const queryString = queryParams.toString();
     return MarketingApiClient.makeRequest<AdvicesApiResponse>(

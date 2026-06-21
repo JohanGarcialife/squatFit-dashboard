@@ -43,7 +43,7 @@ export function AlumnosTable() {
     return alumnosData.map((alumno) => ({
       ...alumno,
       fullName: `${alumno.firstName} ${alumno.lastName ?? ""}`.trim() || "Sin nombre",
-      statusDisplay: alumno.status.toLowerCase() === "active" ? ("Activo" as const) : ("Inactivo" as const),
+      statusDisplay: alumno.status?.toLowerCase() === "active" ? ("Activo" as const) : ("Inactivo" as const),
     }));
   }, [alumnosData]);
 

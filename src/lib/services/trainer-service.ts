@@ -355,15 +355,13 @@ export class TrainerService {
     try {
       console.log("💪 TrainerService: Obteniendo clientes activos...");
 
+      const page = params?.page !== undefined && typeof params.page === "number" && params.page > 0 ? params.page : 1;
+      const limit =
+        params?.limit !== undefined && typeof params.limit === "number" && params.limit > 0 ? params.limit : 1000;
+
       const queryParams = new URLSearchParams();
-      // Validar que page sea un número válido y mayor que 0
-      if (params?.page !== undefined && typeof params.page === "number" && params.page > 0) {
-        queryParams.append("page", params.page.toString());
-      }
-      // Validar que limit sea un número válido y mayor que 0
-      if (params?.limit !== undefined && typeof params.limit === "number" && params.limit > 0) {
-        queryParams.append("limit", params.limit.toString());
-      }
+      queryParams.append("page", page.toString());
+      queryParams.append("limit", limit.toString());
 
       const queryString = queryParams.toString();
       const endpoint = `/api/v1/admin-panel/advices${queryString ? `?${queryString}` : ""}`;

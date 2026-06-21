@@ -24,10 +24,10 @@ export function AlumnosCards() {
     }
 
     const total = alumnosData.length;
-    const activos = alumnosData.filter((a) => a.status.toLowerCase() === "active").length;
-    const usuarios = alumnosData.filter((a) => a.role.toLowerCase() === "user").length;
-    const coaches = alumnosData.filter((a) => a.role.toLowerCase() === "coach").length;
-    const admins = alumnosData.filter((a) => a.role.toLowerCase() === "admin").length;
+    const activos = alumnosData.filter((a) => a.status?.toLowerCase() === "active").length;
+    const usuarios = alumnosData.filter((a) => a.role?.toLowerCase() === "user").length;
+    const coaches = alumnosData.filter((a) => a.role?.toLowerCase() === "coach").length;
+    const admins = alumnosData.filter((a) => a.role?.toLowerCase() === "admin").length;
 
     return { total, activos, usuarios, coaches, admins };
   }, [alumnosData]);

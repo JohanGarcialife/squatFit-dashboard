@@ -60,6 +60,11 @@ export interface GetCursosParams {
   level?: "Principiante" | "Intermedio" | "Avanzado";
 }
 
+export interface UploadVideoResponse {
+  message: string;
+  url?: string;
+}
+
 // ============================================================================
 // SERVICIO DE CURSOS
 // ============================================================================
@@ -482,6 +487,60 @@ export class CursosService {
     } catch (error) {
       console.error("Error cambiando estado del curso:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Sube un archivo de video y lo asocia a un curso
+   * Endpoint: POST /api/v1/course/upload-video?course_id={id}
+   *
+   * NOTA: Usa multipart/form-data. No se establece Content-Type manualmente
+   * para que el navegador añada el boundary correcto.
+   */
+  static async uploadCursoVideo(courseId: string, file: File): Promise<UploadVideoResponse> {
+    if (!courseId) {
+      throw new Error("ID de curso requerido");
+    }
+    if (!file) {
+      throw new Error("Archivo de video requerido");
+    }
+
+    const token = getAuthToken() ?? (typeof window !== "undefined" ? localStorage.getItem("authToken") : null);
+    const url = `${API_BASE_URL}/api/v1/course/upload-video?course_id=${courseId}`;
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // Timeout extendido (2 minutos) para archivos de video pesados
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120_000);
+
+    try {
+      console.log("📹 CursosService: Subiendo video al curso:", courseId);
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        await this.handleResponseError(response);
+      }
+
+      const result: UploadVideoResponse = await response.json();
+      console.log("✅ CursosService: Video subido exitosamente:", result);
+      return result;
+    } catch (error) {
+      this.handleRequestError(error, timeoutId);
     }
   }
 

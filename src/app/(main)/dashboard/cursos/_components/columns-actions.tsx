@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2, Eye, Power } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Eye, Power, Video } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,9 +20,10 @@ interface CursoActionsProps {
   onDelete: (curso: Curso) => void;
   onToggleStatus: (curso: Curso) => void;
   onView?: (curso: Curso) => void;
+  onUploadVideo: (curso: Curso) => void;
 }
 
-export function CursoActions({ curso, onEdit, onDelete, onToggleStatus, onView }: CursoActionsProps) {
+export function CursoActions({ curso, onEdit, onDelete, onToggleStatus, onView, onUploadVideo }: CursoActionsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -44,6 +45,10 @@ export function CursoActions({ curso, onEdit, onDelete, onToggleStatus, onView }
         <DropdownMenuItem onClick={() => onEdit(curso)}>
           <Pencil className="mr-2 h-4 w-4" />
           Editar curso
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onUploadVideo(curso)}>
+          <Video className="mr-2 h-4 w-4" />
+          Subir video
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onToggleStatus(curso)}>
           <Power className="mr-2 h-4 w-4" />
