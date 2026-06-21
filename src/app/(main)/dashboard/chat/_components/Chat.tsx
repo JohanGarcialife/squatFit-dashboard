@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { jwtDecode } from "jwt-decode";
 import { User, MoreHorizontal, Wifi, WifiOff, Loader2 } from "lucide-react";
 
-import { useChat } from "@/contexts/chat-context";
+import { useChat, Conversation } from "@/contexts/chat-context";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 import { formatMessageTime, getInitials, getRoleDisplayName } from "@/lib/services/chat-service";
 
@@ -160,7 +160,7 @@ export default function Chat() {
   };
 
   // Renderizar avatar del chat
-  const renderChatAvatar = (chat: unknown) => (
+  const renderChatAvatar = (chat: Conversation) => (
     <div className="relative flex-shrink-0">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white">
         {getInitials(chat.name)}
@@ -173,7 +173,7 @@ export default function Chat() {
   );
 
   // Renderizar información del chat
-  const renderChatInfo = (chat: unknown) => (
+  const renderChatInfo = (chat: Conversation) => (
     <div className="min-w-0 flex-grow overflow-hidden">
       <div className="flex items-center justify-between">
         <p className="truncate text-sm font-semibold text-gray-800 dark:text-gray-100">{chat.name}</p>
@@ -228,7 +228,7 @@ export default function Chat() {
 
       {chat.lastMessage && (
         <p className="truncate text-xs text-gray-400 dark:text-gray-500">
-          {chat.lastMessage.sender === getCurrentUserId() ? "Tú: " : ""}
+          {chat.lastMessage.sender_id === getCurrentUserId() ? "Tú: " : ""}
           {chat.lastMessage.content}
         </p>
       )}
@@ -236,7 +236,7 @@ export default function Chat() {
   );
 
   // Renderizar metadata y contadores
-  const renderChatMetadata = (chat: unknown) => (
+  const renderChatMetadata = (chat: Conversation) => (
     <div className="ml-2 flex flex-shrink-0 flex-col items-end gap-y-1">
       {chat.name === "Nuevos Leads" ? (
         <MoreHorizontal size={16} className="text-gray-500 dark:text-gray-400" />
@@ -253,7 +253,7 @@ export default function Chat() {
   );
 
   // Renderizar un elemento de conversación individual
-  const renderConversationItem = (chat: unknown) => {
+  const renderConversationItem = (chat: Conversation) => {
     // Validar que el chat tenga un ID válido
     if (!chat.id || typeof chat.id !== "string" || chat.id.trim() === "") {
       return null;
