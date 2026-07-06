@@ -34,11 +34,8 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
         description: curso.description,
         instructor: curso.tutorId ?? curso.instructor ?? "",
         price: curso.price,
-        currency: curso.currency ?? "€",
-        status: curso.status,
-        duration: curso.duration,
-        level: curso.level,
-        category: curso.category,
+        image: curso.thumbnail ?? "",
+        video_presentation: curso.videoPresentation ?? "",
       });
     }
   }, [curso, open, form]);

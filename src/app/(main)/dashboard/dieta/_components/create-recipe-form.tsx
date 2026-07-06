@@ -28,53 +28,57 @@ export function CreateRecipeForm({
 }: CreateRecipeFormProps) {
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        {/* Nombre de la Receta */}
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre de la Receta *</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej: Ensalada de pollo y quinoa" {...field} disabled={isLoading} />
-              </FormControl>
-              <FormDescription>Mínimo 3 caracteres, máximo 100</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Bloque: Información básica */}
+        <div className="border-border/70 bg-background space-y-5 rounded-lg border p-4">
+          <p className="text-muted-foreground text-sm font-medium">Información básica</p>
+          {/* Nombre de la Receta */}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre de la Receta *</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ej: Ensalada de pollo y quinoa" {...field} disabled={isLoading} />
+                </FormControl>
+                <FormDescription>Mínimo 3 caracteres, máximo 100</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Descripción */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Describe la receta (opcional)..."
-                  className="min-h-[80px] resize-none"
-                  {...field}
-                  disabled={isLoading}
-                  value={field.value ?? ""}
-                />
-              </FormControl>
-              <FormDescription>Máximo 500 caracteres</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* Descripción */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describe la receta (opcional)..."
+                    className="min-h-[80px] resize-none"
+                    {...field}
+                    disabled={isLoading}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
+                <FormDescription>Máximo 500 caracteres</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        {/* Información Nutricional */}
-        <div className="space-y-4">
-          <div className="border-b pb-2">
-            <h3 className="text-sm font-semibold">Información Nutricional (Totales)</h3>
+        {/* Bloque: Información Nutricional */}
+        <div className="border-border/70 bg-background space-y-5 rounded-lg border p-4">
+          <div className="space-y-1">
+            <p className="text-muted-foreground text-sm font-medium">Información Nutricional (Totales)</p>
             <p className="text-muted-foreground text-xs">Ingresa los valores totales de la receta completa</p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             {/* Calorías */}
             <FormField
               control={form.control}
@@ -175,11 +179,11 @@ export function CreateRecipeForm({
 
         {/* Botones */}
         <div className="flex gap-3 pt-4">
-          <Button type="submit" disabled={isLoading} className="flex-1">
-            {isLoading ? loadingLabel : submitLabel}
-          </Button>
           <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
             Cancelar
+          </Button>
+          <Button type="submit" disabled={isLoading} className="flex-1">
+            {isLoading ? loadingLabel : submitLabel}
           </Button>
         </div>
       </form>

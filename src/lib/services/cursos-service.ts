@@ -18,11 +18,6 @@ export interface CreateCursoDto {
   description: string;
   instructor: string;
   price: number;
-  currency?: string;
-  status?: "Activo" | "Inactivo" | "En Desarrollo";
-  duration: string;
-  level: "Principiante" | "Intermedio" | "Avanzado";
-  category: string;
   image?: string;
   video_presentation?: string;
 }
@@ -63,6 +58,13 @@ export interface GetCursosParams {
 export interface UploadVideoResponse {
   message: string;
   url?: string;
+}
+
+export interface LinkVideoDto {
+  title: string;
+  url: string;
+  description?: string;
+  priority?: number;
 }
 
 // ============================================================================
@@ -202,6 +204,12 @@ export class CursosService {
 
     // Filtrar URLs de Google Storage que sean genéricas o inválidas
     if (trimmedUrl.includes("storage.googleapis.com") && trimmedUrl.includes("/image.jpg")) {
+      return false;
+    }
+
+    // Filtrar dominios de video para evitar usarlos como imágenes
+    const lowerUrl = trimmedUrl.toLowerCase();
+    if (lowerUrl.includes("youtube.com") || lowerUrl.includes("youtu.be") || lowerUrl.includes("vimeo.com")) {
       return false;
     }
 
@@ -497,7 +505,12 @@ export class CursosService {
    * NOTA: Usa multipart/form-data. No se establece Content-Type manualmente
    * para que el navegador añada el boundary correcto.
    */
-  static async uploadCursoVideo(courseId: string, file: File): Promise<UploadVideoResponse> {
+  static async uploadCursoVideo(
+    courseId: string,
+    file: File,
+    description?: string,
+    priority?: number,
+  ): Promise<UploadVideoResponse> {
     if (!courseId) {
       throw new Error("ID de curso requerido");
     }
@@ -515,6 +528,12 @@ export class CursosService {
 
     const formData = new FormData();
     formData.append("file", file);
+    if (description) {
+      formData.append("description", description);
+    }
+    if (priority !== undefined) {
+      formData.append("priority", priority.toString());
+    }
 
     // Timeout extendido (2 minutos) para archivos de video pesados
     const controller = new AbortController();
@@ -541,6 +560,35 @@ export class CursosService {
       return result;
     } catch (error) {
       this.handleRequestError(error, timeoutId);
+    }
+  }
+
+  /**
+   * Vincula un video mediante una URL externa (ej. YouTube, Vimeo) sin subir archivo físico
+   * Endpoint: POST /api/v1/course/link-video?course_id={id}
+   */
+  static async linkCursoVideo(courseId: string, data: LinkVideoDto): Promise<{ message: string }> {
+    if (!courseId) {
+      throw new Error("ID de curso requerido");
+    }
+    if (!data.title || !data.url) {
+      throw new Error("Título y URL de video son requeridos");
+    }
+
+    try {
+      console.log("🔗 CursosService: Vinculando video externo al curso:", courseId);
+      console.log("📤 CursosService: Datos enviados a la API:", data);
+
+      const response = await this.makeRequest<{ message: string }>(`/api/v1/course/link-video?course_id=${courseId}`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
+      console.log("✅ CursosService: Video externo vinculado exitosamente");
+      return response;
+    } catch (error) {
+      console.error("Error vinculando video externo:", error);
+      throw error;
     }
   }
 

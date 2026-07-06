@@ -120,34 +120,34 @@ export const sidebarItems: NavGroup[] = [
       },
     ],
   },
-  {
-    id: 4,
-    label: "Operaciones",
-    items: [
-      {
-        title: "Trainer",
-        url: "/dashboard/trainer",
-        icon: Dumbbell,
-      },
-      // {
-      //   title: "Ventas",
-      //   url: "/dashboard/ventas",
-      //   icon: ShoppingCart,
-      // },
-    ],
-  },
-  {
-    id: 5,
-    label: "Marketing",
-    items: [
-      {
-        title: "Marketing y KPIs",
-        url: "/dashboard/marketing",
-        icon: BarChart3,
-        isNew: true,
-      },
-    ],
-  },
+  // {
+  //   id: 4,
+  //   label: "Operaciones",
+  //   items: [
+  //     {
+  //       title: "Trainer",
+  //       url: "/dashboard/trainer",
+  //       icon: Dumbbell,
+  //     },
+  //     // {
+  //     //   title: "Ventas",
+  //     //   url: "/dashboard/ventas",
+  //     //   icon: ShoppingCart,
+  //     // },
+  //   ],
+  // },
+  // {
+  //   id: 5,
+  //   label: "Marketing",
+  //   items: [
+  //     {
+  //       title: "Marketing y KPIs",
+  //       url: "/dashboard/marketing",
+  //       icon: BarChart3,
+  //       isNew: true,
+  //     },
+  //   ],
+  // },
 ];
 
 /**

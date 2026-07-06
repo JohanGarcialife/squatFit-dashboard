@@ -39,8 +39,7 @@ function formatDate(dateString: string): string {
 /**
  * Formatea el precio con el símbolo de moneda
  */
-function formatPrice(amount: number | null | undefined, currency?: string): string {
-  // Validar que amount sea un número válido
+function formatPrice(amount: string | null | undefined, currency?: string): string {
   if (amount == null || amount === undefined) {
     return "—";
   }
@@ -59,11 +58,11 @@ function formatPrice(amount: number | null | undefined, currency?: string): stri
  */
 function getSaleTypeBadgeVariant(type: string): "default" | "secondary" | "outline" {
   switch (type) {
-    case "course":
+    case "Curso":
       return "default";
-    case "advice":
+    case "Asesoría":
       return "secondary";
-    case "book":
+    case "Libro":
       return "outline";
     default:
       return "default";
@@ -75,11 +74,11 @@ function getSaleTypeBadgeVariant(type: string): "default" | "secondary" | "outli
  */
 function translateSaleType(type: string): string {
   switch (type) {
-    case "course":
+    case "Curso":
       return "Curso";
-    case "advice":
+    case "Asesoría":
       return "Asesoría";
-    case "book":
+    case "Libro":
       return "Libro";
     default:
       return type;
@@ -136,16 +135,14 @@ export function VentasRecientes() {
                 <TableBody>
                   {data.sales.map((sale) => (
                     <TableRow key={sale.id}>
-                      <TableCell className="font-medium">{formatDate(sale.created_at)}</TableCell>
+                      <TableCell className="font-medium">{formatDate(sale.date)}</TableCell>
                       <TableCell className="max-w-[200px] truncate">{sale.title}</TableCell>
-                      <TableCell className="max-w-[150px] truncate">
-                        {sale.user_name ?? sale.user_email ?? "—"}
-                      </TableCell>
+                      <TableCell className="max-w-[150px] truncate">{sale.firstName ?? "—"}</TableCell>
                       <TableCell>
                         <Badge variant={getSaleTypeBadgeVariant(sale.type)}>{translateSaleType(sale.type)}</Badge>
                       </TableCell>
                       <TableCell className="text-right font-semibold">
-                        {formatPrice(sale.amount_value, sale.currency)}
+                        {formatPrice(sale.amount_value, sale.amount_currency)}
                       </TableCell>
                     </TableRow>
                   ))}

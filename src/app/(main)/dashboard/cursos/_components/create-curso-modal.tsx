@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useCreateCurso } from "@/hooks/use-cursos";
+import { CursosService } from "@/lib/services/cursos-service";
 
 import { CreateCursoForm } from "./create-curso-form";
 import { createCursoFormSchema, CreateCursoFormValues, createCursoDefaultValues } from "./create-curso-schema";
@@ -24,7 +25,41 @@ export function CreateCursoModal({ open, onOpenChange }: CreateCursoModalProps) 
 
   const handleSubmit = async (values: CreateCursoFormValues) => {
     try {
-      await createCursoMutation.mutateAsync(values);
+      const createdCurso = await createCursoMutation.mutateAsync({
+        name: values.name,
+        description: values.description,
+        instructor: values.instructor,
+        price: values.price,
+        image: values.image,
+        video_presentation: values.video_presentation,
+      });
+
+      // Si se marcó agregar el primer video de instrucción y tenemos el ID del curso
+      if (values.add_course_video && createdCurso?.id) {
+        if (values.course_video_type === "local" && values.course_video_file) {
+          try {
+            await CursosService.uploadCursoVideo(
+              createdCurso.id,
+              values.course_video_file,
+              values.course_video_description || undefined,
+              values.course_video_priority,
+            );
+          } catch (uploadError) {
+            console.error("Error al subir el video local del curso:", uploadError);
+          }
+        } else if (values.course_video_type === "external" && values.course_video_title && values.course_video_url) {
+          try {
+            await CursosService.linkCursoVideo(createdCurso.id, {
+              title: values.course_video_title.trim(),
+              url: values.course_video_url.trim(),
+              description: values.course_video_description?.trim() || undefined,
+              priority: values.course_video_priority,
+            });
+          } catch (linkError) {
+            console.error("Error al vincular el video externo del curso:", linkError);
+          }
+        }
+      }
 
       // Cerrar modal y resetear formulario
       onOpenChange(false);

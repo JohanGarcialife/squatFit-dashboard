@@ -1,0 +1,50 @@
+import { type NextRequest, NextResponse } from "next/server";
+
+import { getAuthTokenFromCookies } from "@/lib/auth/server-utils";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
+
+/**
+ * Proxy para GET /api/v1/admin-panel/sales
+ * Soporta query params: page, limit, month, search
+ * Lee el token desde la cookie HttpOnly en el servidor
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const token = await getAuthTokenFromCookies();
+
+    if (!token) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    // Reenviar los query params al backend
+    const { searchParams } = new URL(request.url);
+    const page = searchParams.get("page") ?? "1";
+    const limit = searchParams.get("limit") ?? "20";
+    const month = searchParams.get("month");
+    const search = searchParams.get("search");
+
+    const params = new URLSearchParams({ page, limit });
+    if (month) params.append("month", month);
+    if (search) params.append("search", search);
+
+    const response = await fetch(`${API_BASE_URL}/api/v1/admin-panel/sales?${params.toString()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return NextResponse.json({ error: errorData.message ?? `Error ${response.status}` }, { status: response.status });
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("Error en proxy sales:", error);
+    return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+  }
+}

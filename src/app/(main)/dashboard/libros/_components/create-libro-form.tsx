@@ -34,7 +34,6 @@ export function CreateLibroForm({
 
   const handleImageChange = (file: File | null) => {
     if (file) {
-      // Crear preview de la imagen
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -67,159 +66,165 @@ export function CreateLibroForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        {/* Título del Libro */}
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Título del Libro *</FormLabel>
-              <FormControl>
-                <Input placeholder="Ej: Guía completa de nutrición deportiva" {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Bloque: Información del libro */}
+        <div className="border-border/70 bg-background space-y-5 rounded-lg border p-4">
+          <p className="text-muted-foreground text-sm font-medium">Información del libro</p>
+          {/* Título del Libro */}
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Título del Libro *</FormLabel>
+                <FormControl>
+                  <Input placeholder="Ej: Guía completa de nutrición deportiva" {...field} disabled={isLoading} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Subtítulo / Descripción */}
-        <FormField
-          control={form.control}
-          name="subtitle"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subtítulo / Descripción *</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Describe el contenido y propósito del libro..."
-                  className="min-h-[100px] resize-none"
-                  {...field}
-                  disabled={isLoading}
-                />
-              </FormControl>
-              <FormDescription>Mínimo 3 caracteres, máximo 500</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          {/* Subtítulo / Descripción */}
+          <FormField
+            control={form.control}
+            name="subtitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subtítulo / Descripción *</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Describe el contenido y propósito del libro..."
+                    className="min-h-[100px] resize-none"
+                    {...field}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormDescription>Mínimo 3 caracteres, máximo 500</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-        {/* Imagen del Libro */}
-        <div className="space-y-3">
-          <FormLabel>Imagen de portada</FormLabel>
+        {/* Bloque: Imagen del Libro */}
+        <div className="border-border/70 bg-background space-y-5 rounded-lg border p-4">
+          <p className="text-muted-foreground text-sm font-medium">Imagen de portada</p>
 
-          {/* Toggle entre archivo y URL */}
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={!useUrl ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                setUseUrl(false);
-                form.setValue("imageUrl", "");
-              }}
-              disabled={isLoading}
-            >
-              Subir Archivo
-            </Button>
-            <Button
-              type="button"
-              variant={useUrl ? "default" : "outline"}
-              size="sm"
-              onClick={() => {
-                setUseUrl(true);
-                form.setValue("image", null);
-                setImagePreview(null);
-              }}
-              disabled={isLoading}
-            >
-              Usar URL
-            </Button>
-          </div>
+          <div className="space-y-3">
+            {/* Toggle entre archivo y URL */}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={!useUrl ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setUseUrl(false);
+                  form.setValue("imageUrl", "");
+                }}
+                disabled={isLoading}
+              >
+                Subir Archivo
+              </Button>
+              <Button
+                type="button"
+                variant={useUrl ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setUseUrl(true);
+                  form.setValue("image", null);
+                  setImagePreview(null);
+                }}
+                disabled={isLoading}
+              >
+                Usar URL
+              </Button>
+            </div>
 
-          {!useUrl ? (
-            // Upload de archivo
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field: { value, onChange, ...field } }) => (
-                <FormItem>
-                  <FormControl>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0] || null;
-                            handleImageChange(file);
-                            onChange(file);
-                          }}
-                          disabled={isLoading}
-                          className="cursor-pointer"
-                          {...field}
-                        />
-                        {imagePreview && (
-                          <Button type="button" variant="ghost" size="icon" onClick={clearImage} disabled={isLoading}>
-                            <X className="size-4" />
-                          </Button>
-                        )}
-                      </div>
-                      {imagePreview && (
-                        <div className="relative h-32 w-32 overflow-hidden rounded-lg border">
-                          <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormDescription>Formatos: JPG, PNG, WEBP (máx. 5MB)</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ) : (
-            // URL de imagen
-            <FormField
-              control={form.control}
-              name="imageUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3">
-                        <Input
-                          placeholder="https://ejemplo.com/imagen.jpg"
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            handleUrlChange(e.target.value);
-                          }}
-                          disabled={isLoading}
-                        />
-                        {imagePreview && (
-                          <Button type="button" variant="ghost" size="icon" onClick={clearImage} disabled={isLoading}>
-                            <X className="size-4" />
-                          </Button>
-                        )}
-                      </div>
-                      {imagePreview && (
-                        <div className="relative h-32 w-32 overflow-hidden rounded-lg border">
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="h-full w-full object-cover"
-                            onError={() => setImagePreview(null)}
+            {!useUrl ? (
+              // Upload de archivo
+              <FormField
+                control={form.control}
+                name="image"
+                render={({ field: { value, onChange, ...field } }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0] || null;
+                              handleImageChange(file);
+                              onChange(file);
+                            }}
+                            disabled={isLoading}
+                            className="cursor-pointer"
+                            {...field}
                           />
+                          {imagePreview && (
+                            <Button type="button" variant="ghost" size="icon" onClick={clearImage} disabled={isLoading}>
+                              <X className="size-4" />
+                            </Button>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormDescription>URL pública de la imagen de portada</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
+                        {imagePreview && (
+                          <div className="relative h-32 w-32 overflow-hidden rounded-lg border">
+                            <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormDescription>Formatos: JPG, PNG, WEBP (máx. 5MB)</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : (
+              // URL de imagen
+              <FormField
+                control={form.control}
+                name="imageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Input
+                            placeholder="https://ejemplo.com/imagen.jpg"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              handleUrlChange(e.target.value);
+                            }}
+                            disabled={isLoading}
+                          />
+                          {imagePreview && (
+                            <Button type="button" variant="ghost" size="icon" onClick={clearImage} disabled={isLoading}>
+                              <X className="size-4" />
+                            </Button>
+                          )}
+                        </div>
+                        {imagePreview && (
+                          <div className="relative h-32 w-32 overflow-hidden rounded-lg border">
+                            <img
+                              src={imagePreview}
+                              alt="Preview"
+                              className="h-full w-full object-cover"
+                              onError={() => setImagePreview(null)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormDescription>URL pública de la imagen de portada</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
         </div>
 
         {/* Botones de Acción */}

@@ -97,10 +97,10 @@ export class AdvicesService {
 
       // Construir query params
       const queryParams = new URLSearchParams();
-      if (params?.limit) queryParams.append("limit", params.limit.toString());
-      if (params?.page) queryParams.append("page", params.page.toString());
+      queryParams.append("limit", (params?.limit ?? 20).toString());
+      queryParams.append("page", (params?.page ?? 1).toString());
 
-      const url = `${API_BASE_URL}/api/v1/admin-panel/advices${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+      const url = `${API_BASE_URL}/api/v1/admin-panel/advices?${queryParams.toString()}`;
 
       const response = await fetch(url, {
         method: "GET",

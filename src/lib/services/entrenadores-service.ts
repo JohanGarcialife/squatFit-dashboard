@@ -16,12 +16,8 @@ export interface CreateEntrenadorDto {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
-  specialties: string[];
-  certifications: string[];
-  experience: number;
-  hourlyRate: number;
-  bio?: string;
+  username: string;
+  password?: string;
 }
 
 export interface UpdateEntrenadorDto extends Partial<CreateEntrenadorDto> {
@@ -202,20 +198,23 @@ export class EntrenadoresService {
   }
 
   /**
-   * Crea un nuevo entrenador
-   * Endpoint: POST /api/v1/coaches
+   * Crea un nuevo entrenador (asesor)
+   * Endpoint: POST /api/v1/admin-panel/create-adviser
    */
   static async createEntrenador(data: CreateEntrenadorDto): Promise<Entrenador> {
-    if (!data.firstName || !data.lastName || !data.email) {
-      throw new Error("Nombre, apellido y email son requeridos");
+    if (!data.firstName || !data.lastName || !data.email || !data.username) {
+      throw new Error("Nombre, apellido, email y username son requeridos");
     }
 
     try {
       console.log("📝 EntrenadoresService: Creando nuevo entrenador:", data.firstName, data.lastName);
 
-      const response = await this.makeRequest<ApiResponse<Entrenador>>("/api/v1/coaches", {
+      const response = await this.makeRequest<ApiResponse<Entrenador>>("/api/v1/admin-panel/create-adviser", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          password: data.password || "AsesorPass123!", // Contraseña por defecto si no se provee
+        }),
       });
 
       console.log("✅ EntrenadoresService: Entrenador creado exitosamente");

@@ -90,14 +90,9 @@ export class SalesService {
    */
   static async getTotalSales(): Promise<TotalSalesResponse> {
     try {
-      const token = getAuthToken();
-      const headers = this.getDefaultHeaders(token);
-      const controller = this.createAbortController();
-
-      const response = await fetch(`${API_BASE_URL}/api/v1/admin-panel/total-sales`, {
+      const response = await fetch("/api/admin/total-sales", {
         method: "GET",
-        headers,
-        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
@@ -108,9 +103,6 @@ export class SalesService {
       return data;
     } catch (error) {
       if (error instanceof Error) {
-        if (error.name === "AbortError") {
-          throw new Error("La petición ha excedido el tiempo límite");
-        }
         throw error;
       }
       throw new Error("Error desconocido al obtener el total de ventas");
@@ -127,23 +119,16 @@ export class SalesService {
    */
   static async getSales(params?: GetSalesParams): Promise<SalesListResponse> {
     try {
-      const token = getAuthToken();
-      const headers = this.getDefaultHeaders(token);
-      const controller = this.createAbortController();
-
       // Construir query params
       const queryParams = new URLSearchParams();
-      if (params?.limit) queryParams.append("limit", params.limit.toString());
-      if (params?.page) queryParams.append("page", params.page.toString());
+      queryParams.append("limit", (params?.limit ?? 20).toString());
+      queryParams.append("page", (params?.page ?? 1).toString());
       if (params?.month) queryParams.append("month", params.month.toString());
       if (params?.search) queryParams.append("search", params.search);
 
-      const url = `${API_BASE_URL}/api/v1/admin-panel/sales${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
-
-      const response = await fetch(url, {
+      const response = await fetch(`/api/admin/sales?${queryParams.toString()}`, {
         method: "GET",
-        headers,
-        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
@@ -154,9 +139,6 @@ export class SalesService {
       return data;
     } catch (error) {
       if (error instanceof Error) {
-        if (error.name === "AbortError") {
-          throw new Error("La petición ha excedido el tiempo límite");
-        }
         throw error;
       }
       throw new Error("Error desconocido al obtener las ventas");

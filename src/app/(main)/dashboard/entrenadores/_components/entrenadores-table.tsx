@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { Search } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
@@ -15,12 +16,14 @@ import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { useDeleteEntrenador, useEntrenadores } from "@/hooks/use-entrenadores";
 
 import { getEntrenadoresColumns } from "./columns.entrenadores";
+import { CreateEntrenadorModal } from "./create-entrenador-modal";
 import { EntrenadorUI } from "./schema";
 
 export function EntrenadoresTable() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [editingUser, setEditingUser] = useState<EntrenadorUI | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Obtener entrenadores del API
   const { data: entrenadoresData, isLoading, error } = useEntrenadores();
@@ -79,7 +82,7 @@ export function EntrenadoresTable() {
           <CardTitle>Gestión de Entrenadores</CardTitle>
           <CardDescription>Administra el equipo de entrenadores y profesionales</CardDescription>
         </div>
-        {/* <Button className="gap-2">
+        {/* <Button className="gap-2" onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="h-4 w-4" />
           Nuevo Entrenador
         </Button> */}
@@ -142,6 +145,9 @@ export function EntrenadoresTable() {
           }}
         />
       )}
+
+      {/* Modal de Creación */}
+      <CreateEntrenadorModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
     </Card>
   );
 }

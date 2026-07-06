@@ -58,7 +58,7 @@ export function VentasTotalesCard() {
         <DollarSign className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{data?.total ?? 0}</div>
+        <div className="text-2xl font-bold">{(data?.courses ?? 0) + (data?.advices ?? 0) + (data?.books ?? 0)}</div>
         <p className="text-muted-foreground text-xs">Total de transacciones</p>
       </CardContent>
     </Card>

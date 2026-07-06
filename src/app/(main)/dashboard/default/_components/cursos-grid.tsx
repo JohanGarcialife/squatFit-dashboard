@@ -5,7 +5,6 @@
  * Muestra los últimos 3 cursos disponibles
  */
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { ArrowRight, BookOpen, Clock, User } from "lucide-react";
@@ -55,13 +54,7 @@ function CursoCard({ curso }: { curso: Curso }) {
       {/* Imagen del curso */}
       <div className="bg-muted relative h-40 w-full overflow-hidden">
         {curso.thumbnail ? (
-          <Image
-            src={curso.thumbnail}
-            alt={curso.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
+          <img src={curso.thumbnail} alt={curso.name} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center">
             <BookOpen className="text-muted-foreground h-12 w-12" />

@@ -99,10 +99,10 @@ export class AdminTasksService {
       const queryParams = new URLSearchParams();
       if (params?.status) queryParams.append("status", params.status);
       if (params?.priority) queryParams.append("priority", params.priority);
-      if (params?.limit) queryParams.append("limit", params.limit.toString());
-      if (params?.offset) queryParams.append("offset", params.offset.toString());
+      queryParams.append("limit", (params?.limit ?? 20).toString());
+      queryParams.append("offset", (params?.offset ?? 0).toString());
 
-      const url = `${API_BASE_URL}/api/v1/admin-panel/tasks/assigned-to-me${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+      const url = `${API_BASE_URL}/api/v1/admin-panel/tasks/assigned-to-me?${queryParams.toString()}`;
 
       const response = await fetch(url, {
         method: "GET",

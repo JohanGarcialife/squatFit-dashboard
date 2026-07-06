@@ -70,31 +70,122 @@ export function EditUserForm({ userId, defaultValues, onSubmit, onCancel, isLoad
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        {/* Nombres */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="firstName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nombre</FormLabel>
-                <FormControl>
-                  <Input placeholder="Juan" {...field} disabled={isLoading} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {/* Bloque: Información personal */}
+        <div className="border-border/70 bg-background space-y-5 rounded-lg border p-4">
+          <p className="text-muted-foreground text-sm font-medium">Información personal</p>
 
+          {/* Nombres */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Juan" {...field} disabled={isLoading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Apellido</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Pérez" {...field} disabled={isLoading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Email y Username */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="usuario@example.com" {...field} disabled={isLoading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="juanperez" {...field} disabled={isLoading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Teléfono y Fecha de nacimiento */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="phone_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Teléfono</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+34612345678" {...field} disabled={isLoading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="birth"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fecha de Nacimiento</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} disabled={isLoading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Bloque: Biografía / Descripción */}
+        <div className="border-border/70 bg-background space-y-5 rounded-lg border p-4">
+          <p className="text-muted-foreground text-sm font-medium">Sobre el usuario</p>
           <FormField
             control={form.control}
-            name="lastName"
+            name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Apellido</FormLabel>
+                <FormLabel>Descripción</FormLabel>
                 <FormControl>
-                  <Input placeholder="Pérez" {...field} disabled={isLoading} />
+                  <Textarea
+                    placeholder="Descripción del usuario..."
+                    className="resize-none"
+                    rows={3}
+                    {...field}
+                    disabled={isLoading}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -102,103 +193,23 @@ export function EditUserForm({ userId, defaultValues, onSubmit, onCancel, isLoad
           />
         </div>
 
-        {/* Email y Username */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Bloque: Multimedia y Perfil */}
+        <div className="border-border/70 bg-background space-y-5 rounded-lg border p-4">
+          <p className="text-muted-foreground text-sm font-medium">Foto de perfil</p>
           <FormField
             control={form.control}
-            name="email"
+            name="profile_picture"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>URL de Foto de Perfil</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="usuario@example.com" {...field} disabled={isLoading} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="juanperez" {...field} disabled={isLoading} />
+                  <Input type="url" placeholder="https://ejemplo.com/imagen.jpg" {...field} disabled={isLoading} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-
-        {/* Teléfono y Fecha de nacimiento */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="phone_number"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Teléfono</FormLabel>
-                <FormControl>
-                  <Input placeholder="+34612345678" {...field} disabled={isLoading} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="birth"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Fecha de Nacimiento</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} disabled={isLoading} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Descripción */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Descripción</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Descripción del usuario..."
-                  className="resize-none"
-                  rows={3}
-                  {...field}
-                  disabled={isLoading}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* URL de Imagen de Perfil */}
-        <FormField
-          control={form.control}
-          name="profile_picture"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL de Foto de Perfil</FormLabel>
-              <FormControl>
-                <Input type="url" placeholder="https://ejemplo.com/imagen.jpg" {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* Botones de Acción */}
         <div className="flex justify-end gap-3 pt-4">

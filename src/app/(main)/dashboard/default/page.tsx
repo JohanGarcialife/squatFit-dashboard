@@ -1,40 +1,38 @@
 /**
  * Página principal del Dashboard HOME
- * Muestra métricas, ventas, tareas, asesorías, IMC y cursos
+ * Combina las métricas del API admin-panel + los widgets operativos originales
  */
 
-import { AsesoriasOverview } from "./_components/asesorias-overview";
+"use client";
+
+import { DashboardHeader } from "@/app/(main)/dashboard/_components/home/dashboard-header";
+import { KPICards } from "@/app/(main)/dashboard/_components/home/kpi-cards";
+import { SystemPerformanceDashboard } from "@/app/(main)/dashboard/_components/home/system-performance/system-performance-dashboard";
+
 import { CursosGrid } from "./_components/cursos-grid";
 import { HomeCards } from "./_components/home-cards";
-import { IMCWidget } from "./_components/imc-widget";
-import { TareasWidget } from "./_components/tareas-widget";
-import { VentasRecientes } from "./_components/ventas-recientes";
 
 export default function DashboardDefaultPage() {
   return (
-    <div className="@container/main flex flex-col gap-4 md:gap-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard - Squat Fit</h1>
-        <p className="text-muted-foreground">Panel de control administrativo</p>
+    <div className="@container/main flex flex-col gap-6">
+      {/* ─── SECCIÓN 1: MÉTRICAS GLOBALES DEL API ─── */}
+      <DashboardHeader />
+
+      {/* ─── NUEVO: RENDIMIENTO DEL SISTEMA (Comentado temporalmente) ─── */}
+      {/* <SystemPerformanceDashboard /> */}
+
+      {/* KPI Cards — Cursos vendidos, Asesorías, Libros, Usuarios */}
+      <KPICards />
+
+      {/* ─── SECCIÓN 2: OPERACIONES DEL DÍA ─── */}
+      <div className="border-t pt-2">
+        <p className="text-muted-foreground mb-4 text-xs font-medium tracking-wider uppercase">Operaciones del día</p>
       </div>
 
-      {/* Fila 1: 4 Cards de Métricas */}
+      {/* Cards operativas — Ventas totales, Tareas, Asesorías, Cursos */}
       <HomeCards />
 
-      {/* Fila 2: Ventas Recientes + Widget de Tareas */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <VentasRecientes />
-        <TareasWidget />
-      </div>
-
-      {/* Fila 3: Asesorías Overview + IMC Widget */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <AsesoriasOverview />
-        <IMCWidget />
-      </div>
-
-      {/* Fila 4: Grid de Cursos (Full Width) */}
+      {/* Grid de Cursos disponibles */}
       <CursosGrid />
     </div>
   );

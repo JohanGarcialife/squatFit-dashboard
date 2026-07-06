@@ -35,7 +35,7 @@ export function useTotalSales() {
     gcTime: 10 * 60 * 1000, // 10 minutos
     retry: false, // No reintentar en caso de error
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnReconnect: false,
   });
 }
@@ -54,7 +54,7 @@ export function useSales(params?: GetSalesParams) {
     gcTime: 10 * 60 * 1000, // 10 minutos
     retry: false, // No reintentar en caso de error
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnReconnect: false,
   });
 }
