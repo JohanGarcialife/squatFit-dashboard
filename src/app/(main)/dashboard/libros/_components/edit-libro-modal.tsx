@@ -45,7 +45,7 @@ export function EditLibroModal({ libro, open, onOpenChange }: EditLibroModalProp
     console.log("📤 Actualizar libro - datos enviados:", payload);
 
     try {
-      await updateLibroMutation.mutateAsync(payload);
+      await updateLibroMutation.mutateAsync(payload as any);
 
       // Cerrar modal
       onOpenChange(false);

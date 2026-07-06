@@ -99,7 +99,6 @@ export function CreateRecipeModal({ open, onOpenChange }: CreateRecipeModalProps
   const handleClose = () => {
     onOpenChange(false);
     form.reset();
-    setCreatedRecipeId(null);
     setSelectedImage(null);
     setImagePreview(null);
   };
