@@ -145,3 +145,14 @@
     background-clip: padding-box;
   }
 }
+
+/* Tarjeta de métrica del diseño de María: fondo naranja suave (#FFF0E7),
+   sin borde y con la cifra principal en naranja. Reutilizable en otras
+   pestañas: basta con añadir la clase `sqf-metric-card` a la <Card>. */
+.sqf-metric-card {
+  background-color: #fff0e7 !important;
+  border-color: transparent !important;
+}
+.sqf-metric-card .text-2xl {
+  color: var(--primary);
+}

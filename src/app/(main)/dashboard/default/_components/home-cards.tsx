@@ -23,7 +23,7 @@ export function VentasTotalesCard() {
 
   if (error) {
     return (
-      <Card>
+      <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
           <DollarSign className="text-muted-foreground h-4 w-4" />
@@ -38,7 +38,7 @@ export function VentasTotalesCard() {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
           <DollarSign className="text-muted-foreground h-4 w-4" />
@@ -52,7 +52,7 @@ export function VentasTotalesCard() {
   }
 
   return (
-    <Card>
+    <Card className="sqf-metric-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
         <DollarSign className="text-muted-foreground h-4 w-4" />
@@ -73,7 +73,7 @@ export function TareasPendientesCard() {
   const count = usePendingTasksCount();
 
   return (
-    <Card>
+    <Card className="sqf-metric-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Tareas Pendientes</CardTitle>
         <CheckSquare className="text-muted-foreground h-4 w-4" />
@@ -95,7 +95,7 @@ export function AsesoriasActivasCard() {
 
   if (error) {
     return (
-      <Card>
+      <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Asesorías</CardTitle>
           <Users className="text-muted-foreground h-4 w-4" />
@@ -110,7 +110,7 @@ export function AsesoriasActivasCard() {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Asesorías</CardTitle>
           <Users className="text-muted-foreground h-4 w-4" />
@@ -124,7 +124,7 @@ export function AsesoriasActivasCard() {
   }
 
   return (
-    <Card>
+    <Card className="sqf-metric-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Asesorías</CardTitle>
         <Users className="text-muted-foreground h-4 w-4" />
@@ -146,7 +146,7 @@ export function CursosDisponiblesCard() {
 
   if (error) {
     return (
-      <Card>
+      <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Cursos</CardTitle>
           <BookOpen className="text-muted-foreground h-4 w-4" />
@@ -161,7 +161,7 @@ export function CursosDisponiblesCard() {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Cursos</CardTitle>
           <BookOpen className="text-muted-foreground h-4 w-4" />
@@ -177,7 +177,7 @@ export function CursosDisponiblesCard() {
   const cursosArray = Array.isArray(data) ? data : [];
 
   return (
-    <Card>
+    <Card className="sqf-metric-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Cursos</CardTitle>
         <BookOpen className="text-muted-foreground h-4 w-4" />
@@ -196,7 +196,7 @@ export function CursosDisponiblesCard() {
 
 export function HomeCards() {
   return (
-    <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:border-0 *:data-[slot=card]:bg-[#FFEDE0] *:data-[slot=card]:shadow-xs md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs md:grid-cols-2 lg:grid-cols-4">
       <VentasTotalesCard />
       <TareasPendientesCard />
       <AsesoriasActivasCard />

@@ -23,7 +23,7 @@ interface KPIItem {
 
 function KPICard({ item }: { item: KPIItem }) {
   return (
-    <Card className="group relative overflow-hidden border-0 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+    <Card className="sqf-metric-card group relative overflow-hidden border-0 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
       <CardContent className="flex items-center gap-4 p-5">
         <div className="bg-primary text-primary-foreground flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
           <item.icon className="h-6 w-6" />
@@ -47,7 +47,7 @@ function KPICard({ item }: { item: KPIItem }) {
 
 function KPICardSkeleton() {
   return (
-    <Card className="border-0 shadow-md">
+    <Card className="sqf-metric-card border-0 shadow-md">
       <CardContent className="flex items-center gap-4 p-5">
         <Skeleton className="h-12 w-12 rounded-xl" />
         <div className="flex-1 space-y-2">
@@ -74,7 +74,7 @@ export function KPICards() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 *:data-[slot=card]:bg-[#FFEDE0] sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <KPICardSkeleton key={i} />
         ))}
@@ -84,9 +84,9 @@ export function KPICards() {
 
   if (isError || !data) {
     return (
-      <div className="grid gap-4 *:data-[slot=card]:bg-[#FFEDE0] sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="border-destructive/20 border-0 shadow-md">
+          <Card key={i} className="sqf-metric-card border-destructive/20 border-0 shadow-md">
             <CardContent className="flex items-center justify-center p-5">
               <p className="text-destructive text-sm">Error al cargar datos</p>
             </CardContent>

@@ -70,7 +70,7 @@ export const sidebarItems: NavGroup[] = [
         iconActive: "/menu-icons/cursos-active.png",
       },
       {
-        title: "Libros",
+        title: "Cocina",
         url: "/dashboard/libros",
         icon: BookOpen,
         iconNormal: "/menu-icons/libros-normal.png",
