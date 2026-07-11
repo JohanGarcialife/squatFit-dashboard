@@ -1,7 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="#363C98" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
-  <!-- Silbato de entrenador -->
-  <circle cx="156" cy="152" r="56" />
-  <circle cx="156" cy="152" r="5" fill="#363C98" stroke="none" />
-  <path d="M100 134 H48 a12 12 0 0 0 -12 12 a12 12 0 0 0 12 12 h56" />
-  <path d="M150 96 l8 -28 a14 14 0 0 1 14 -10 h6" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="#363C98" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Persona central -->
+  <circle cx="128" cy="94" r="36" />
+  <path d="M78 208 a50 50 0 0 1 100 0" />
+  <!-- Persona izquierda -->
+  <circle cx="54" cy="122" r="24" />
+  <path d="M26 196 a34 34 0 0 1 36 -32" />
+  <!-- Persona derecha -->
+  <circle cx="202" cy="122" r="24" />
+  <path d="M230 196 a34 34 0 0 0 -36 -32" />
 </svg>
