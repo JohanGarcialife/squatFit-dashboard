@@ -152,6 +152,15 @@
 .sqf-metric-card {
   background-color: #fff0e7 !important;
   border-color: transparent !important;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+}
+/* Hover: se "hunde" ligeramente hacia abajo (al revés que las KPI, que suben)
+   con una sombra inferior muy sutil, como de estar presionada. */
+.sqf-metric-card:hover {
+  transform: translateY(2px);
+  box-shadow: 0 6px 10px -4px rgb(0 0 0 / 0.12);
 }
 .sqf-metric-card .text-2xl {
   color: var(--primary);

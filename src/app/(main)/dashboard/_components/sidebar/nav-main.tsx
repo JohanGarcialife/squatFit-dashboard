@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -35,19 +34,29 @@ const IsComingSoon = () => (
   <span className="ml-auto rounded-md bg-gray-200 px-2 py-1 text-xs dark:text-gray-800">Soon</span>
 );
 
-// Icono del item: usa el PNG/SVG propio (índigo) si está definido; si no, cae
-// al icono lucide. El estado activo NO cambia el icono: se resalta con el texto
-// en índigo de marca y el fondo lavanda del item seleccionado.
-const NavIcon = ({ item }: { item: NavMainItem }) => {
+// Icono del item: usa el PNG/SVG propio si está definido; si no, cae al icono
+// lucide. Se pinta SIEMPRE en índigo de marca (#363C98) mediante mask-image, de
+// modo que la silueta se recolorea sin depender del color del archivo. En estado
+// activo se usa la versión rellena (`iconActive`); inactivo, la versión de línea
+// (`iconNormal`). Nunca naranja.
+const NavIcon = ({ item, active }: { item: NavMainItem; active: boolean }) => {
   if (item.iconNormal) {
+    const src = active && item.iconActive ? item.iconActive : item.iconNormal;
+    const maskUrl = `url(${src})`;
     return (
-      <Image
-        src={item.iconNormal}
-        alt=""
-        width={24}
-        height={24}
-        unoptimized
-        className="size-6 shrink-0 object-contain"
+      <span
+        aria-hidden
+        className="size-6 shrink-0 bg-[#363C98]"
+        style={{
+          maskImage: maskUrl,
+          WebkitMaskImage: maskUrl,
+          maskRepeat: "no-repeat",
+          WebkitMaskRepeat: "no-repeat",
+          maskPosition: "center",
+          WebkitMaskPosition: "center",
+          maskSize: "contain",
+          WebkitMaskSize: "contain",
+        }}
       />
     );
   }
@@ -73,7 +82,7 @@ const NavItemExpanded = ({
               isActive={isActive(item.url, item.subItems)}
               tooltip={item.title}
             >
-              <NavIcon item={item} />
+              <NavIcon item={item} active={isActive(item.url, item.subItems)} />
               <span>{item.title}</span>
               {item.comingSoon && <IsComingSoon />}
               <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -86,7 +95,7 @@ const NavItemExpanded = ({
               tooltip={item.title}
             >
               <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
-                <NavIcon item={item} />
+                <NavIcon item={item} active={isActive(item.url)} />
                 <span>{item.title}</span>
                 {item.comingSoon && <IsComingSoon />}
               </Link>
@@ -133,7 +142,7 @@ const NavItemCollapsed = ({
               tooltip={item.title}
               isActive={isActive(item.url, item.subItems)}
             >
-              <NavIcon item={item} />
+              <NavIcon item={item} active={isActive(item.url, item.subItems)} />
               <span>{item.title}</span>
               <ChevronRight />
             </SidebarMenuButton>
@@ -159,7 +168,7 @@ const NavItemCollapsed = ({
     <SidebarMenuItem key={item.title}>
       <Link href={item.url}>
         <SidebarMenuButton disabled={item.comingSoon} tooltip={item.title} isActive={isActive(item.url, item.subItems)}>
-          <NavIcon item={item} />
+          <NavIcon item={item} active={isActive(item.url, item.subItems)} />
           <span>{item.title}</span>
           <ChevronRight />
         </SidebarMenuButton>
