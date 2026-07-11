@@ -14,8 +14,6 @@ interface KPIItem {
   label: string;
   value: number;
   icon: React.ElementType;
-  gradient: string;
-  iconColor: string;
   description: string;
 }
 
@@ -26,13 +24,8 @@ interface KPIItem {
 function KPICard({ item }: { item: KPIItem }) {
   return (
     <Card className="group relative overflow-hidden border-0 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-      {/* Gradient accent bar */}
-      <div className={`absolute top-0 left-0 h-1 w-full ${item.gradient}`} />
-
       <CardContent className="flex items-center gap-4 p-5">
-        <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${item.iconColor} transition-transform duration-300 group-hover:scale-110`}
-        >
+        <div className="bg-primary text-primary-foreground flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
           <item.icon className="h-6 w-6" />
         </div>
         <div className="min-w-0 flex-1">
@@ -108,32 +101,24 @@ export function KPICards() {
       label: "Cursos Vendidos",
       value: data.courses,
       icon: GraduationCap,
-      gradient: "bg-gradient-to-r from-violet-500 to-purple-500",
-      iconColor: "bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400",
       description: "Total de cursos vendidos",
     },
     {
       label: "Asesorías",
       value: data.advices,
       icon: MessageSquare,
-      gradient: "bg-gradient-to-r from-sky-500 to-blue-500",
-      iconColor: "bg-sky-100 text-sky-600 dark:bg-sky-950 dark:text-sky-400",
       description: "Total de asesorías contratadas",
     },
     {
       label: "Libros",
       value: data.books,
       icon: BookOpen,
-      gradient: "bg-gradient-to-r from-amber-500 to-orange-500",
-      iconColor: "bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400",
       description: "Total de libros comprados",
     },
     {
       label: "Usuarios",
       value: data.users,
       icon: Users,
-      gradient: "bg-gradient-to-r from-emerald-500 to-green-500",
-      iconColor: "bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400",
       description: "Usuarios registrados",
     },
   ];
