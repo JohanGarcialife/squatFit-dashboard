@@ -156,3 +156,24 @@
 .sqf-metric-card .text-2xl {
   color: var(--primary);
 }
+
+/* Tarjeta KPI del home (blanca, sombra, hover sutil y línea superior de color).
+   El color de la línea y del icono se pasan por estilo en línea (son por
+   tarjeta). Reutilizable: añade `sqf-kpi-card` a la <Card>. */
+.sqf-kpi-card {
+  position: relative;
+  overflow: hidden;
+  border: 0 !important;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+}
+.sqf-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}

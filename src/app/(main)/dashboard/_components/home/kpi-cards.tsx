@@ -26,7 +26,7 @@ interface KPIItem {
 
 function KPICard({ item }: { item: KPIItem }) {
   return (
-    <Card className="group relative overflow-hidden border-0 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+    <Card className="sqf-kpi-card group">
       {/* Línea superior de color (de la paleta de marca) */}
       <div className="absolute top-0 left-0 h-1 w-full" style={{ backgroundColor: item.line }} />
 

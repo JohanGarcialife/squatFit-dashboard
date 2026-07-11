@@ -28,12 +28,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <a href="#" className="flex items-center gap-2">
                 <Image
                   src="/logo-squadfit-azul.png"
-                  width={36}
-                  height={36}
+                  width={52}
+                  height={52}
                   alt="Squad Fit"
                   className="shrink-0 rounded-md"
                 />
-                <span className="text-secondary-foreground text-sm leading-tight font-bold">
+                <span className="text-secondary-foreground text-lg leading-tight font-bold">
                   Squad Fit
                   <br />
                   Back Office

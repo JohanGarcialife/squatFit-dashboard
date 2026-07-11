@@ -4,7 +4,7 @@ import { PacksCards } from "./_components/packs-cards";
 import { PacksTable } from "./_components/packs-table";
 
 export const metadata: Metadata = {
-  title: "Packs | Squat Fit",
+  title: "Productos | Squad Fit",
   description: "Gestión de packs de libros",
 };
 
