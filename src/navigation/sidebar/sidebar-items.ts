@@ -27,6 +27,10 @@ export interface NavMainItem {
   title: string;
   url: string;
   icon?: LucideIcon;
+  // Iconos propios del diseño (PNG/SVG): normal (índigo) y activo (naranja).
+  // Si están presentes, tienen prioridad sobre `icon` (lucide).
+  iconNormal?: string;
+  iconActive?: string;
   subItems?: NavSubItem[];
   comingSoon?: boolean;
   newTab?: boolean;
@@ -48,26 +52,36 @@ export const sidebarItems: NavGroup[] = [
         title: "Inicio",
         url: "/dashboard/default",
         icon: LayoutDashboard,
+        iconNormal: "/menu-icons/inicio-normal.png",
+        iconActive: "/menu-icons/inicio-active.png",
       },
       {
         title: "Equipo",
         url: "/dashboard/entrenadores",
         icon: Users,
+        iconNormal: "/menu-icons/equipo-normal.png",
+        iconActive: "/menu-icons/equipo-active.png",
       },
       {
         title: "Cursos",
         url: "/dashboard/cursos",
         icon: GraduationCap,
+        iconNormal: "/menu-icons/cursos-normal.png",
+        iconActive: "/menu-icons/cursos-active.png",
       },
       {
         title: "Libros",
         url: "/dashboard/libros",
         icon: BookOpen,
+        iconNormal: "/menu-icons/libros-normal.png",
+        iconActive: "/menu-icons/libros-active.png",
       },
       {
-        title: "Packs",
+        title: "Productos",
         url: "/dashboard/packs",
         icon: Package,
+        iconNormal: "/menu-icons/productos-normal.svg",
+        iconActive: "/menu-icons/productos-active.svg",
       },
     ],
   },
@@ -79,11 +93,15 @@ export const sidebarItems: NavGroup[] = [
         title: "Usuarios",
         url: "/dashboard/alumnos",
         icon: Users,
+        iconNormal: "/menu-icons/usuarios-normal.png",
+        iconActive: "/menu-icons/usuarios-active.png",
       },
       {
         title: "Chat",
         url: "/dashboard/chat",
         icon: MessageSquare,
+        iconNormal: "/menu-icons/chat-normal.png",
+        iconActive: "/menu-icons/chat-active.png",
       },
       // {
       //   title: "Soporte",

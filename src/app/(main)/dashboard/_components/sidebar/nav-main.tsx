@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -35,6 +36,24 @@ const IsComingSoon = () => (
   <span className="ml-auto rounded-md bg-gray-200 px-2 py-1 text-xs dark:text-gray-800">Soon</span>
 );
 
+// Icono del item: usa el PNG/SVG propio (normal/activo) si está definido;
+// si no, cae al icono lucide. El estado activo se muestra en su versión naranja.
+const NavIcon = ({ item, active }: { item: NavMainItem; active: boolean }) => {
+  if (item.iconNormal && item.iconActive) {
+    return (
+      <Image
+        src={active ? item.iconActive : item.iconNormal}
+        alt=""
+        width={24}
+        height={24}
+        unoptimized
+        className="size-6 shrink-0 object-contain"
+      />
+    );
+  }
+  return item.icon ? <item.icon /> : null;
+};
+
 const NavItemExpanded = ({
   item,
   isActive,
@@ -55,7 +74,7 @@ const NavItemExpanded = ({
               tooltip={item.title}
               className={cn(isActive(item.url, item.subItems) && "text-primary! [&>svg]:text-primary!")}
             >
-              {item.icon && <item.icon />}
+              <NavIcon item={item} active={isActive(item.url, item.subItems)} />
               <span>{item.title}</span>
               {item.comingSoon && <IsComingSoon />}
               <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -69,7 +88,7 @@ const NavItemExpanded = ({
               className={cn(isActive(item.url) && "text-primary! [&>svg]:text-primary!")}
             >
               <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
-                {item.icon && <item.icon />}
+                <NavIcon item={item} active={isActive(item.url)} />
                 <span>{item.title}</span>
                 {item.comingSoon && <IsComingSoon />}
               </Link>
@@ -116,7 +135,7 @@ const NavItemCollapsed = ({
               tooltip={item.title}
               isActive={isActive(item.url, item.subItems)}
             >
-              {item.icon && <item.icon />}
+              <NavIcon item={item} active={isActive(item.url, item.subItems)} />
               <span>{item.title}</span>
               <ChevronRight />
             </SidebarMenuButton>
@@ -142,7 +161,7 @@ const NavItemCollapsed = ({
     <SidebarMenuItem key={item.title}>
       <Link href={item.url}>
         <SidebarMenuButton disabled={item.comingSoon} tooltip={item.title} isActive={isActive(item.url, item.subItems)}>
-          {item.icon && <item.icon />}
+          <NavIcon item={item} active={isActive(item.url, item.subItems)} />
           <span>{item.title}</span>
           <ChevronRight />
         </SidebarMenuButton>
