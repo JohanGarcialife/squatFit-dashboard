@@ -43,7 +43,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
                 <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
                 <SearchDialog />
               </div>
-              <div className="bg-sidebar-accent/80 flex items-center gap-2 rounded-lg px-2 py-1.5">
+              <div className="bg-sidebar-accent/80 flex items-center gap-2 rounded-lg border border-[#C2C0FC] px-2 py-1.5">
                 {/* <LayoutControls contentLayout={contentLayout} variant={sidebarVariant} collapsible={sidebarCollapsible} /> */}
                 <ThemeSwitcher />
                 <AccountSwitcher users={users} />

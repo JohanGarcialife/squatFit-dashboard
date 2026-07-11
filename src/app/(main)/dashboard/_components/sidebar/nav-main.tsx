@@ -25,7 +25,6 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 import { type NavGroup, type NavMainItem } from "@/navigation/sidebar/sidebar-items";
 
 interface NavMainProps {
@@ -36,13 +35,14 @@ const IsComingSoon = () => (
   <span className="ml-auto rounded-md bg-gray-200 px-2 py-1 text-xs dark:text-gray-800">Soon</span>
 );
 
-// Icono del item: usa el PNG/SVG propio (normal/activo) si está definido;
-// si no, cae al icono lucide. El estado activo se muestra en su versión naranja.
-const NavIcon = ({ item, active }: { item: NavMainItem; active: boolean }) => {
-  if (item.iconNormal && item.iconActive) {
+// Icono del item: usa el PNG/SVG propio (índigo) si está definido; si no, cae
+// al icono lucide. El estado activo NO cambia el icono: se resalta con el texto
+// en índigo de marca y el fondo lavanda del item seleccionado.
+const NavIcon = ({ item }: { item: NavMainItem }) => {
+  if (item.iconNormal) {
     return (
       <Image
-        src={active ? item.iconActive : item.iconNormal}
+        src={item.iconNormal}
         alt=""
         width={24}
         height={24}
@@ -72,9 +72,8 @@ const NavItemExpanded = ({
               disabled={item.comingSoon}
               isActive={isActive(item.url, item.subItems)}
               tooltip={item.title}
-              className={cn(isActive(item.url, item.subItems) && "text-primary! [&>svg]:text-primary!")}
             >
-              <NavIcon item={item} active={isActive(item.url, item.subItems)} />
+              <NavIcon item={item} />
               <span>{item.title}</span>
               {item.comingSoon && <IsComingSoon />}
               <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -85,10 +84,9 @@ const NavItemExpanded = ({
               aria-disabled={item.comingSoon}
               isActive={isActive(item.url)}
               tooltip={item.title}
-              className={cn(isActive(item.url) && "text-primary! [&>svg]:text-primary!")}
             >
               <Link href={item.url} target={item.newTab ? "_blank" : undefined}>
-                <NavIcon item={item} active={isActive(item.url)} />
+                <NavIcon item={item} />
                 <span>{item.title}</span>
                 {item.comingSoon && <IsComingSoon />}
               </Link>
@@ -135,7 +133,7 @@ const NavItemCollapsed = ({
               tooltip={item.title}
               isActive={isActive(item.url, item.subItems)}
             >
-              <NavIcon item={item} active={isActive(item.url, item.subItems)} />
+              <NavIcon item={item} />
               <span>{item.title}</span>
               <ChevronRight />
             </SidebarMenuButton>
@@ -161,7 +159,7 @@ const NavItemCollapsed = ({
     <SidebarMenuItem key={item.title}>
       <Link href={item.url}>
         <SidebarMenuButton disabled={item.comingSoon} tooltip={item.title} isActive={isActive(item.url, item.subItems)}>
-          <NavIcon item={item} active={isActive(item.url, item.subItems)} />
+          <NavIcon item={item} />
           <span>{item.title}</span>
           <ChevronRight />
         </SidebarMenuButton>

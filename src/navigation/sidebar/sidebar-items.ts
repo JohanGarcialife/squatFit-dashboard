@@ -59,8 +59,8 @@ export const sidebarItems: NavGroup[] = [
         title: "Equipo",
         url: "/dashboard/entrenadores",
         icon: Users,
-        iconNormal: "/menu-icons/equipo-normal.png",
-        iconActive: "/menu-icons/equipo-active.png",
+        iconNormal: "/menu-icons/equipo-normal.svg",
+        iconActive: "/menu-icons/equipo-normal.svg",
       },
       {
         title: "Cursos",
