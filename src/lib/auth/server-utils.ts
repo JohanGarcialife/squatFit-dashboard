@@ -14,7 +14,7 @@ export const setAuthTokenInCookies = async (token: string): Promise<void> => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 3600, // 1 hora
+    maxAge: 60 * 60 * 24 * 30, // 30 días (antes 1 hora; el JWT dura 90d)
     path: "/",
   });
 };
