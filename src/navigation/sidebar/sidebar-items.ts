@@ -42,15 +42,15 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    label: "Home",
+    label: "Inicio",
     items: [
       {
-        title: "Home",
+        title: "Inicio",
         url: "/dashboard/default",
         icon: LayoutDashboard,
       },
       {
-        title: "Entrenadores",
+        title: "Equipo",
         url: "/dashboard/entrenadores",
         icon: Users,
       },
