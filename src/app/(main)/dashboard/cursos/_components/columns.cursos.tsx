@@ -18,14 +18,16 @@ import {
 
 import { Curso } from "./schema";
 
+// Pastillas de estado con la paleta de marca (verde #2F855A, naranja #FF690B,
+// lavanda #EBEAF2/índigo para neutro).
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "Activo":
-      return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">{status}</Badge>;
+      return <Badge className="border-0 bg-[#E3EFE8] text-[#2F855A] hover:bg-[#E3EFE8]">{status}</Badge>;
     case "Inactivo":
-      return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">{status}</Badge>;
+      return <Badge className="border-0 bg-[#EBEAF2] text-[#363C98] hover:bg-[#EBEAF2]">{status}</Badge>;
     case "En Desarrollo":
-      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">{status}</Badge>;
+      return <Badge className="border-0 bg-[#FFF0E7] text-[#FF690B] hover:bg-[#FFF0E7]">{status}</Badge>;
     default:
       return <Badge variant="secondary">{status}</Badge>;
   }
@@ -35,19 +37,19 @@ const getLevelBadge = (level: string) => {
   switch (level) {
     case "Principiante":
       return (
-        <Badge variant="outline" className="border-blue-300 text-blue-700">
+        <Badge variant="outline" className="border-[#C2C0FC] text-[#363C98]">
           {level}
         </Badge>
       );
     case "Intermedio":
       return (
-        <Badge variant="outline" className="border-orange-300 text-orange-700">
+        <Badge variant="outline" className="border-[#FFB489] text-[#FF690B]">
           {level}
         </Badge>
       );
     case "Avanzado":
       return (
-        <Badge variant="outline" className="border-red-300 text-red-700">
+        <Badge variant="outline" className="border-[#E8D8DE] text-[#9F4E63]">
           {level}
         </Badge>
       );
