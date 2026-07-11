@@ -112,7 +112,7 @@ export function KPICards() {
       icon: GraduationCap,
       description: "Total de cursos vendidos",
       line: "#363C98",
-      iconBg: "#EBEAF2",
+      iconBg: "#E7E6FF",
       iconText: "#363C98",
     },
     {
@@ -120,9 +120,9 @@ export function KPICards() {
       value: data.advices,
       icon: MessageSquare,
       description: "Total de asesorías contratadas",
-      line: "#3B82F6",
-      iconBg: "#E4EDFC",
-      iconText: "#3B82F6",
+      line: "#9F4E63",
+      iconBg: "#E8D8DE",
+      iconText: "#9F4E63",
     },
     {
       label: "Libros",
@@ -130,7 +130,7 @@ export function KPICards() {
       icon: BookOpen,
       description: "Total de libros comprados",
       line: "#FF690B",
-      iconBg: "#FFF0E7",
+      iconBg: "#FFF7F2",
       iconText: "#FF690B",
     },
     {
@@ -138,9 +138,9 @@ export function KPICards() {
       value: data.users,
       icon: Users,
       description: "Usuarios registrados",
-      line: "#22C55E",
-      iconBg: "#E4F7EC",
-      iconText: "#16A34A",
+      line: "#2F855A",
+      iconBg: "#E3EFE8",
+      iconText: "#2F855A",
     },
   ];
 
