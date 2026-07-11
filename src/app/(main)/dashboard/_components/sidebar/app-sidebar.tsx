@@ -10,7 +10,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { APP_CONFIG } from "@/config/app-config";
 import { useAuth } from "@/contexts/auth-context";
 import { getSidebarItemsForRole } from "@/navigation/sidebar/sidebar-items";
 
@@ -25,10 +24,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
-                <Image src="/logos/Logotipo-Squat-fit-negro.png" width={25} height={25} alt="Logo Squat Fit" />
-                <span className="text-base font-semibold">{APP_CONFIG.name}</span>
+            <SidebarMenuButton asChild className="!h-auto data-[slot=sidebar-menu-button]:!p-1.5">
+              <a href="#" className="flex items-center gap-2">
+                <Image
+                  src="/logo-squadfit-azul.png"
+                  width={36}
+                  height={36}
+                  alt="Squad Fit"
+                  className="shrink-0 rounded-md"
+                />
+                <span className="text-secondary-foreground text-sm leading-tight font-bold">
+                  Squad Fit
+                  <br />
+                  Back Office
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

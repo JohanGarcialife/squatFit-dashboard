@@ -5,7 +5,7 @@
  * Muestra: Ventas Totales, Tareas Pendientes, Asesorías Activas, Cursos Disponibles
  */
 
-import { BookOpen, CheckSquare, DollarSign, Users } from "lucide-react";
+import { CheckSquare, ClipboardList, Euro, GraduationCap } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,7 +26,7 @@ export function VentasTotalesCard() {
       <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
-          <DollarSign className="text-muted-foreground h-4 w-4" />
+          <Euro className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">0</div>
@@ -41,7 +41,7 @@ export function VentasTotalesCard() {
       <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
-          <DollarSign className="text-muted-foreground h-4 w-4" />
+          <Euro className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
           <Skeleton className="h-8 w-24" />
@@ -55,7 +55,7 @@ export function VentasTotalesCard() {
     <Card className="sqf-metric-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Ventas Totales</CardTitle>
-        <DollarSign className="text-muted-foreground h-4 w-4" />
+        <Euro className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{(data?.courses ?? 0) + (data?.advices ?? 0) + (data?.books ?? 0)}</div>
@@ -97,8 +97,8 @@ export function AsesoriasActivasCard() {
     return (
       <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Asesorías</CardTitle>
-          <Users className="text-muted-foreground h-4 w-4" />
+          <CardTitle className="text-sm font-medium">Planes</CardTitle>
+          <ClipboardList className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">0</div>
@@ -112,8 +112,8 @@ export function AsesoriasActivasCard() {
     return (
       <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Asesorías</CardTitle>
-          <Users className="text-muted-foreground h-4 w-4" />
+          <CardTitle className="text-sm font-medium">Planes</CardTitle>
+          <ClipboardList className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
           <Skeleton className="h-8 w-24" />
@@ -126,8 +126,8 @@ export function AsesoriasActivasCard() {
   return (
     <Card className="sqf-metric-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Asesorías</CardTitle>
-        <Users className="text-muted-foreground h-4 w-4" />
+        <CardTitle className="text-sm font-medium">Planes</CardTitle>
+        <ClipboardList className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{data?.length ?? 0}</div>
@@ -149,7 +149,7 @@ export function CursosDisponiblesCard() {
       <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Cursos</CardTitle>
-          <BookOpen className="text-muted-foreground h-4 w-4" />
+          <GraduationCap className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">0</div>
@@ -164,7 +164,7 @@ export function CursosDisponiblesCard() {
       <Card className="sqf-metric-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Cursos</CardTitle>
-          <BookOpen className="text-muted-foreground h-4 w-4" />
+          <GraduationCap className="text-muted-foreground h-4 w-4" />
         </CardHeader>
         <CardContent>
           <Skeleton className="h-8 w-24" />
@@ -180,7 +180,7 @@ export function CursosDisponiblesCard() {
     <Card className="sqf-metric-card">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Cursos</CardTitle>
-        <BookOpen className="text-muted-foreground h-4 w-4" />
+        <GraduationCap className="text-muted-foreground h-4 w-4" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{cursosArray.length}</div>

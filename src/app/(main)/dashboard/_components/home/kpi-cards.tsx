@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpen, GraduationCap, MessageSquare, TrendingUp, Users } from "lucide-react";
+import { BookOpen, ClipboardList, GraduationCap, TrendingUp, Users } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -112,17 +112,17 @@ export function KPICards() {
       icon: GraduationCap,
       description: "Total de cursos vendidos",
       line: "#363C98",
-      iconBg: "#E7E6FF",
-      iconText: "#363C98",
+      iconBg: "#363C98",
+      iconText: "#ffffff",
     },
     {
-      label: "Asesorías",
+      label: "Planes",
       value: data.advices,
-      icon: MessageSquare,
-      description: "Total de asesorías contratadas",
-      line: "#9F4E63",
-      iconBg: "#E8D8DE",
-      iconText: "#9F4E63",
+      icon: ClipboardList,
+      description: "Total de planes contratados",
+      line: "#C2C0FC",
+      iconBg: "#C2C0FC",
+      iconText: "#363C98",
     },
     {
       label: "Libros",
@@ -130,17 +130,17 @@ export function KPICards() {
       icon: BookOpen,
       description: "Total de libros comprados",
       line: "#FF690B",
-      iconBg: "#FFF7F2",
-      iconText: "#FF690B",
+      iconBg: "#FF690B",
+      iconText: "#ffffff",
     },
     {
       label: "Usuarios",
       value: data.users,
       icon: Users,
       description: "Usuarios registrados",
-      line: "#2F855A",
-      iconBg: "#E3EFE8",
-      iconText: "#2F855A",
+      line: "#F8D5BF",
+      iconBg: "#F8D5BF",
+      iconText: "#FF690B",
     },
   ];
 

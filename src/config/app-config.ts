@@ -1,7 +1,7 @@
 import packageJson from "../../package.json";
 
 export const APP_CONFIG = {
-  name: "Squat Fit Back Office",
+  name: "Squad Fit Back Office",
   version: packageJson.version,
   meta: {
     title: "Squat Fit Back Office - with chat",
