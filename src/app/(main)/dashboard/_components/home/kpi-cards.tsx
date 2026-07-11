@@ -74,7 +74,7 @@ export function KPICards() {
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 *:data-[slot=card]:bg-[#FFEDE0] sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <KPICardSkeleton key={i} />
         ))}
@@ -84,7 +84,7 @@ export function KPICards() {
 
   if (isError || !data) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 *:data-[slot=card]:bg-[#FFEDE0] sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} className="border-destructive/20 border-0 shadow-md">
             <CardContent className="flex items-center justify-center p-5">

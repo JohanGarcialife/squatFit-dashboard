@@ -196,7 +196,7 @@ export function CursosDisponiblesCard() {
 
 export function HomeCards() {
   return (
-    <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:border-0 *:data-[slot=card]:bg-[#FFEDE0] *:data-[slot=card]:shadow-xs md:grid-cols-2 lg:grid-cols-4">
       <VentasTotalesCard />
       <TareasPendientesCard />
       <AsesoriasActivasCard />
