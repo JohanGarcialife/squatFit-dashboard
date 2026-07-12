@@ -18,6 +18,8 @@ type UseDataTableInstanceProps<TData, TValue> = {
   data: TData[];
   columns: ColumnDef<TData, TValue>[];
   enableRowSelection?: boolean;
+  /** Habilita redimensionar columnas (arrastrar el borde de la cabecera). */
+  enableColumnResizing?: boolean;
   defaultPageIndex?: number;
   defaultPageSize?: number;
   getRowId?: (row: TData, index: number) => string;
@@ -31,6 +33,7 @@ export function useDataTableInstance<TData, TValue>({
   data,
   columns,
   enableRowSelection = true,
+  enableColumnResizing = false,
   defaultPageIndex,
   defaultPageSize,
   getRowId,
@@ -41,6 +44,7 @@ export function useDataTableInstance<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnOrder, setColumnOrder] = React.useState<string[]>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: defaultPageIndex ?? 0,
     pageSize: defaultPageSize ?? 10,
@@ -49,11 +53,14 @@ export function useDataTableInstance<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
+    columnResizeMode: "onChange",
+    enableColumnResizing,
     state: {
       sorting,
       columnVisibility,
       rowSelection,
       columnFilters,
+      columnOrder,
       pagination,
       globalFilter: externalState?.globalFilter,
     },
@@ -64,6 +71,7 @@ export function useDataTableInstance<TData, TValue>({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnOrderChange: setColumnOrder,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),

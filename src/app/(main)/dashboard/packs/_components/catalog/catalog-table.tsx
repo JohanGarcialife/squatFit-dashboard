@@ -309,6 +309,7 @@ export function ProductosCatalogTable() {
   const table = useDataTableInstance({
     data,
     columns,
+    enableColumnResizing: true,
     getRowId: (row) => row.key,
     state: { globalFilter },
     onGlobalFilterChange: setGlobalFilter,
@@ -459,7 +460,7 @@ export function ProductosCatalogTable() {
                 </div>
               </div>
             ) : (
-              <DataTable table={table} columns={columns} />
+              <DataTable table={table} columns={columns} enableColumnResize enableColumnReorder />
             )}
           </div>
 
