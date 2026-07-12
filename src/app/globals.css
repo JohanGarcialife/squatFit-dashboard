@@ -234,3 +234,50 @@
     0 10px 15px -3px rgb(0 0 0 / 0.1),
     0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
+
+/* ── Modo oscuro para las superficies de marca ──────────────────────────────
+   Las clases sqf-* usaban colores claros fijos (con !important), así que en
+   dark mode quedaban como parches claros. Aquí se les da su versión oscura:
+   la tarjeta naranja pasa a una superficie cálida oscura (cifra en naranja),
+   los badges a fondos translúcidos con texto claro, y la tabla a cabecera y
+   hover oscuros. */
+.dark .sqf-metric-card {
+  background-color: #33241b !important;
+}
+.dark .sqf-kpi-card {
+  background-color: var(--card) !important;
+}
+.dark .sqf-badge-green {
+  background-color: rgba(63, 168, 118, 0.18) !important;
+  color: #7ed6a8 !important;
+  border-color: #3fa876 !important;
+}
+.dark .sqf-badge-indigo {
+  background-color: rgba(124, 134, 224, 0.2) !important;
+  color: #b9c2ff !important;
+  border-color: #7c86e0 !important;
+}
+.dark .sqf-badge-orange {
+  background-color: rgba(255, 105, 11, 0.2) !important;
+  color: #ffb488 !important;
+  border-color: #ff690b !important;
+}
+.dark .sqf-badge-wine {
+  background-color: rgba(196, 113, 137, 0.2) !important;
+  color: #e8a9ba !important;
+  border-color: #c47189 !important;
+}
+.dark .sqf-badge-muted {
+  background-color: rgba(148, 154, 166, 0.18) !important;
+  color: #c3c8d2 !important;
+  border-color: #565b66 !important;
+}
+.dark .sqf-table table thead tr {
+  background-color: #2c2e50;
+}
+.dark .sqf-table table thead th {
+  color: #b9c2ff;
+}
+.dark .sqf-table table tbody tr:hover {
+  background-color: rgba(255, 105, 11, 0.1);
+}
