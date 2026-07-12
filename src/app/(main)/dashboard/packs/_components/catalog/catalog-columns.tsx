@@ -9,6 +9,8 @@ import type { CatalogProduct } from "@/hooks/use-catalog";
 const TYPE_BADGE: Record<CatalogProduct["type"], { label: string; cls: string }> = {
   curso: { label: "Curso", cls: "sqf-badge-indigo" },
   pack: { label: "Pack", cls: "sqf-badge-wine" },
+  producto: { label: "Producto", cls: "sqf-badge-orange" },
+  suscripcion: { label: "Suscripción", cls: "sqf-badge-green" },
 };
 
 const STATUS_BADGE: Record<CatalogProduct["status"], string> = {

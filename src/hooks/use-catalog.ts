@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { useCursos } from "@/hooks/use-cursos";
 import { usePacks } from "@/hooks/use-packs";
+import { useProductos } from "@/hooks/use-productos";
 
 // ============================================================================
 // Catálogo unificado de productos
@@ -14,7 +15,7 @@ import { usePacks } from "@/hooks/use-packs";
 // sumar otra fuente al `useMemo` de abajo con el mismo shape.
 // ============================================================================
 
-export type CatalogProductType = "curso" | "pack";
+export type CatalogProductType = "curso" | "pack" | "producto" | "suscripcion";
 export type CatalogProductStatus = "Activo" | "Inactivo" | "En Desarrollo";
 
 export interface CatalogProduct {
@@ -33,6 +34,7 @@ export interface CatalogProduct {
 export function useCatalogProductos() {
   const cursosQ = useCursos();
   const packsQ = usePacks();
+  const productosQ = useProductos();
 
   const productos = useMemo<CatalogProduct[]>(() => {
     const cursos: CatalogProduct[] = (cursosQ.data ?? []).map((c) => ({
@@ -57,11 +59,24 @@ export function useCatalogProductos() {
       status: "Activo",
     }));
 
-    return [...cursos, ...packs];
-  }, [cursosQ.data, packsQ.data]);
+    const sueltos: CatalogProduct[] = (productosQ.data ?? []).map((p) => ({
+      id: p.id,
+      key: `producto-${p.id}`,
+      type: p.type === "subscription" ? "suscripcion" : "producto",
+      name: p.name,
+      description: p.description ?? "",
+      price: p.price ?? 0,
+      currency: p.currency === "eur" ? "€" : (p.currency ?? "€"),
+      status: p.active ? "Activo" : "Inactivo",
+    }));
+
+    return [...cursos, ...packs, ...sueltos];
+  }, [cursosQ.data, packsQ.data, productosQ.data]);
 
   return {
     productos,
+    // Los productos sueltos no bloquean la carga: si su endpoint aún no está
+    // desplegado (401), el catálogo sigue mostrando cursos y packs.
     isLoading: cursosQ.isLoading || packsQ.isLoading,
     isError: cursosQ.isError || packsQ.isError,
     error: cursosQ.error ?? packsQ.error,

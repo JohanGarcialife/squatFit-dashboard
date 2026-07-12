@@ -10,6 +10,16 @@ import { ExternalLink, MoreHorizontal, Pencil, Plus, Search, Trash2 } from "luci
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -22,18 +32,22 @@ import { Input } from "@/components/ui/input";
 import { useCatalogProductos, type CatalogProduct } from "@/hooks/use-catalog";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { usePacks } from "@/hooks/use-packs";
+import { useDeleteProducto, useProductos } from "@/hooks/use-productos";
 import type { Pack } from "@/lib/services/packs-service";
+import type { Producto } from "@/lib/services/products-service";
 
 import { CreatePackModal } from "../create-pack-modal";
 import { DeletePackDialog } from "../delete-pack-dialog";
 import { EditPackModal } from "../edit-pack-modal";
 
 import { catalogColumns } from "./catalog-columns";
+import { ProductFormModal } from "./product-form-modal";
 
 const TYPE_FILTERS = [
   { key: "all", label: "Todos" },
   { key: "curso", label: "Cursos" },
   { key: "pack", label: "Packs" },
+  { key: "producto", label: "Productos" },
 ] as const;
 
 type TypeFilter = (typeof TYPE_FILTERS)[number]["key"];
@@ -41,37 +55,57 @@ type TypeFilter = (typeof TYPE_FILTERS)[number]["key"];
 export function ProductosCatalogTable() {
   const { productos, isLoading, isError, error } = useCatalogProductos();
   const { data: rawPacks = [] } = usePacks();
+  const { data: rawProductos = [] } = useProductos();
+  const deleteProducto = useDeleteProducto();
 
   const [globalFilter, setGlobalFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
 
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  // Packs
+  const [isCreatePackOpen, setIsCreatePackOpen] = useState(false);
+  const [isEditPackOpen, setIsEditPackOpen] = useState(false);
+  const [isDeletePackOpen, setIsDeletePackOpen] = useState(false);
   const [selectedPack, setSelectedPack] = useState<Pack | null>(null);
+
+  // Productos sueltos
+  const [isProductFormOpen, setIsProductFormOpen] = useState(false);
+  const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null);
+  const [productoToDelete, setProductoToDelete] = useState<Producto | null>(null);
 
   const openEditPack = useCallback(
     (id: string) => {
-      const pack = rawPacks.find((p) => p.id === id) ?? null;
-      setSelectedPack(pack);
-      setIsEditOpen(true);
+      setSelectedPack(rawPacks.find((p) => p.id === id) ?? null);
+      setIsEditPackOpen(true);
     },
     [rawPacks],
   );
 
   const openDeletePack = useCallback(
     (id: string) => {
-      const pack = rawPacks.find((p) => p.id === id) ?? null;
-      setSelectedPack(pack);
-      setIsDeleteOpen(true);
+      setSelectedPack(rawPacks.find((p) => p.id === id) ?? null);
+      setIsDeletePackOpen(true);
     },
     [rawPacks],
   );
 
-  const data = useMemo(
-    () => (typeFilter === "all" ? productos : productos.filter((p) => p.type === typeFilter)),
-    [productos, typeFilter],
+  const openEditProducto = useCallback(
+    (id: string) => {
+      setSelectedProducto(rawProductos.find((p) => p.id === id) ?? null);
+      setIsProductFormOpen(true);
+    },
+    [rawProductos],
   );
+
+  const openNewProducto = useCallback(() => {
+    setSelectedProducto(null);
+    setIsProductFormOpen(true);
+  }, []);
+
+  const data = useMemo(() => {
+    if (typeFilter === "all") return productos;
+    if (typeFilter === "producto") return productos.filter((p) => p.type === "producto" || p.type === "suscripcion");
+    return productos.filter((p) => p.type === typeFilter);
+  }, [productos, typeFilter]);
 
   const columns = useMemo<ColumnDef<CatalogProduct>[]>(
     () => [
@@ -80,6 +114,7 @@ export function ProductosCatalogTable() {
         id: "actions",
         cell: ({ row }) => {
           const product = row.original;
+
           if (product.type === "curso") {
             return (
               <Button variant="ghost" size="sm" className="gap-1" asChild>
@@ -90,6 +125,9 @@ export function ProductosCatalogTable() {
               </Button>
             );
           }
+
+          const isSuelto = product.type === "producto" || product.type === "suscripcion";
+
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -99,11 +137,18 @@ export function ProductosCatalogTable() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => openEditPack(product.id)}>
+                <DropdownMenuItem onClick={() => (isSuelto ? openEditProducto(product.id) : openEditPack(product.id))}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Editar
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-[#9f4e63]" onClick={() => openDeletePack(product.id)}>
+                <DropdownMenuItem
+                  className="text-[#9f4e63]"
+                  onClick={() =>
+                    isSuelto
+                      ? setProductoToDelete(rawProductos.find((p) => p.id === product.id) ?? null)
+                      : openDeletePack(product.id)
+                  }
+                >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Eliminar
                 </DropdownMenuItem>
@@ -113,7 +158,7 @@ export function ProductosCatalogTable() {
         },
       },
     ],
-    [openEditPack, openDeletePack],
+    [openEditPack, openDeletePack, openEditProducto, rawProductos],
   );
 
   const table = useDataTableInstance({
@@ -130,12 +175,20 @@ export function ProductosCatalogTable() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
             <CardTitle>Catálogo de productos</CardTitle>
-            <CardDescription>Cursos, packs y más productos vendibles en un solo lugar</CardDescription>
+            <CardDescription>Cursos, packs y productos sueltos en un solo lugar</CardDescription>
           </div>
-          <Button className="gap-2" onClick={() => setIsCreateOpen(true)}>
-            <Plus className="h-4 w-4" />
-            Nuevo pack
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Nuevo
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={openNewProducto}>Producto / Suscripción</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setIsCreatePackOpen(true)}>Pack de libros</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
@@ -188,7 +241,7 @@ export function ProductosCatalogTable() {
               <div className="flex h-[400px] items-center justify-center">
                 <div className="flex flex-col items-center gap-2 text-center">
                   <p className="text-sm font-medium">No hay productos en esta vista</p>
-                  <p className="text-muted-foreground text-xs">Prueba con otro filtro o crea un nuevo pack</p>
+                  <p className="text-muted-foreground text-xs">Prueba con otro filtro o crea un producto nuevo</p>
                 </div>
               </div>
             ) : (
@@ -200,9 +253,35 @@ export function ProductosCatalogTable() {
         </CardContent>
       </Card>
 
-      <CreatePackModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
-      <EditPackModal pack={selectedPack} open={isEditOpen} onOpenChange={setIsEditOpen} />
-      <DeletePackDialog pack={selectedPack} open={isDeleteOpen} onOpenChange={setIsDeleteOpen} />
+      {/* Packs */}
+      <CreatePackModal open={isCreatePackOpen} onOpenChange={setIsCreatePackOpen} />
+      <EditPackModal pack={selectedPack} open={isEditPackOpen} onOpenChange={setIsEditPackOpen} />
+      <DeletePackDialog pack={selectedPack} open={isDeletePackOpen} onOpenChange={setIsDeletePackOpen} />
+
+      {/* Productos sueltos */}
+      <ProductFormModal open={isProductFormOpen} onOpenChange={setIsProductFormOpen} producto={selectedProducto} />
+      <AlertDialog open={!!productoToDelete} onOpenChange={(o) => !o && setProductoToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar &quot;{productoToDelete?.name}&quot;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El producto se eliminará del catálogo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[#9f4e63] hover:bg-[#8a4256]"
+              onClick={() => {
+                if (productoToDelete) deleteProducto.mutate(productoToDelete.id);
+                setProductoToDelete(null);
+              }}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

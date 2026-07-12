@@ -1,6 +1,6 @@
 "use client";
 
-import { Boxes, CheckCircle2, GraduationCap, Package } from "lucide-react";
+import { Boxes, GraduationCap, Package, Tag } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCatalogProductos } from "@/hooks/use-catalog";
@@ -14,13 +14,13 @@ export function ProductosCatalogCards() {
   const total = productos.length;
   const cursos = productos.filter((p) => p.type === "curso").length;
   const packs = productos.filter((p) => p.type === "pack").length;
-  const activos = productos.filter((p) => p.status === "Activo").length;
+  const sueltos = productos.filter((p) => p.type === "producto" || p.type === "suscripcion").length;
 
   const cards = [
     { title: "Total productos", value: total, icon: Boxes, sub: "En el catálogo" },
     { title: "Cursos", value: cursos, icon: GraduationCap, sub: "Publicados" },
     { title: "Packs", value: packs, icon: Package, sub: "De libros" },
-    { title: "Activos", value: activos, icon: CheckCircle2, sub: "Disponibles a la venta" },
+    { title: "Productos sueltos", value: sueltos, icon: Tag, sub: "Suscripciones y otros" },
   ];
 
   return (
