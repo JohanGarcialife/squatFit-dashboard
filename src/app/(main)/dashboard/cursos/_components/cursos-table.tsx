@@ -82,6 +82,7 @@ export function CursosTable() {
   const table = useDataTableInstance({
     data: cursos,
     columns,
+    enableColumnResizing: true,
     getRowId: (row) => row.id,
     state: {
       globalFilter,
@@ -148,7 +149,7 @@ export function CursosTable() {
                 </div>
               </div>
             ) : (
-              <DataTable table={table} columns={columns} />
+              <DataTable table={table} columns={columns} enableColumnResize enableColumnReorder />
             )}
           </div>
 

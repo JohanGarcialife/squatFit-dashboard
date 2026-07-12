@@ -79,6 +79,7 @@ export function LibrosTable() {
   const table = useDataTableInstance({
     data: libros,
     columns,
+    enableColumnResizing: true,
     getRowId: (row) => row.id,
     state: {
       globalFilter,
@@ -145,7 +146,7 @@ export function LibrosTable() {
                 </div>
               </div>
             ) : (
-              <DataTable table={table} columns={columns} />
+              <DataTable table={table} columns={columns} enableColumnResize enableColumnReorder />
             )}
           </div>
 
