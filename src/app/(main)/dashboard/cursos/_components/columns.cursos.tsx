@@ -92,6 +92,7 @@ export const cursosColumns: ColumnDef<Curso>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Nombre del Curso" />,
+    meta: { label: "Nombre del curso" },
     cell: ({ row }) => (
       <div className="flex flex-col">
         <span className="font-medium">{row.original.name}</span>
@@ -102,11 +103,13 @@ export const cursosColumns: ColumnDef<Curso>[] = [
   },
   {
     accessorKey: "instructor",
+    meta: { label: "Instructor" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Instructor" />,
     cell: ({ row }) => <span className="text-sm">{row.original.instructor}</span>,
   },
   {
     accessorKey: "category",
+    meta: { label: "Categoría" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Categoría" />,
     cell: ({ row }) => <Badge variant="outline">{row.original.category}</Badge>,
     filterFn: (row, id, value) => {
@@ -115,6 +118,7 @@ export const cursosColumns: ColumnDef<Curso>[] = [
   },
   {
     accessorKey: "level",
+    meta: { label: "Nivel" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Nivel" />,
     cell: ({ row }) => getLevelBadge(row.original.level),
     filterFn: (row, id, value) => {
@@ -124,6 +128,7 @@ export const cursosColumns: ColumnDef<Curso>[] = [
   {
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Estado" />,
+    meta: { label: "Estado" },
     cell: ({ row }) => getStatusBadge(row.original.status),
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
@@ -131,6 +136,7 @@ export const cursosColumns: ColumnDef<Curso>[] = [
   },
   {
     accessorKey: "students",
+    meta: { label: "Estudiantes" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Estudiantes" />,
     cell: ({ row }) => (
       <div className="flex items-center gap-1">
@@ -141,6 +147,7 @@ export const cursosColumns: ColumnDef<Curso>[] = [
   {
     accessorKey: "price",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Precio" />,
+    meta: { label: "Precio" },
     cell: ({ row }) => (
       <span className="font-medium tabular-nums">
         {row.original.currency}
@@ -150,11 +157,13 @@ export const cursosColumns: ColumnDef<Curso>[] = [
   },
   {
     accessorKey: "duration",
+    meta: { label: "Duración" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Duración" />,
     cell: ({ row }) => <span className="text-muted-foreground text-sm">{row.original.duration}</span>,
   },
   {
     accessorKey: "createdAt",
+    meta: { label: "Fecha" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Fecha" />,
     accessorFn: (row) => row.createdAt ?? "",
     cell: ({ row }) => <span className="text-muted-foreground text-sm">{formatCursoDate(row.original.createdAt)}</span>,

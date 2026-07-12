@@ -110,6 +110,7 @@ export function StatusBadge({ status }: { status: CatalogProduct["status"] }) {
 export const nameColumn: ColumnDef<CatalogProduct> = {
   accessorKey: "name",
   header: ({ column }) => <DataTableColumnHeader column={column} title="Producto" />,
+  meta: { label: "Producto" },
   size: 280,
   cell: ({ row }) => (
     <div className="flex flex-col">
@@ -133,6 +134,7 @@ const BILLING_SUFFIX: Record<string, string> = {
 export const priceColumn: ColumnDef<CatalogProduct> = {
   accessorKey: "price",
   header: ({ column }) => <DataTableColumnHeader column={column} title="Precio" />,
+  meta: { label: "Precio" },
   size: 120,
   cell: ({ row }) => (
     <span className="font-medium tabular-nums">

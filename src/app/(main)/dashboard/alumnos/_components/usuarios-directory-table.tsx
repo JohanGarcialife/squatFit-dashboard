@@ -3,12 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Download, Eye, Search } from "lucide-react";
+import { Download, Eye, Pencil, Search } from "lucide-react";
 
 import { BulkActionsBar } from "@/components/data-table/bulk-actions-bar";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
+import { EditUserModal } from "@/components/modals/edit-user-modal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +60,7 @@ export function UsuariosDirectoryTable() {
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [detailUser, setDetailUser] = useState<UsuarioDirectorio | null>(null);
+  const [editUser, setEditUser] = useState<UsuarioDirectorio | null>(null);
 
   // Debounce sencillo de la búsqueda (server-side)
   useEffect(() => {
@@ -95,6 +97,7 @@ export function UsuariosDirectoryTable() {
       {
         accessorKey: "name",
         header: "Nombre",
+        meta: { label: "Nombre" },
         size: 190,
         cell: ({ row }) => <span className="font-medium text-[#FF690B]">{row.original.name}</span>,
         enableHiding: false,
@@ -102,17 +105,20 @@ export function UsuariosDirectoryTable() {
       {
         accessorKey: "email",
         header: "Email",
+        meta: { label: "Email" },
         size: 210,
         cell: ({ row }) => <span className="text-sm">{row.original.email}</span>,
       },
       {
         accessorKey: "phone",
+        meta: { label: "Teléfono" },
         header: "Teléfono",
         size: 130,
         cell: ({ row }) => <span className="text-muted-foreground text-sm">{row.original.phone}</span>,
       },
       {
         id: "assigned",
+        meta: { label: "Asignados" },
         header: "Asignados",
         size: 180,
         cell: ({ row }) => {
@@ -131,6 +137,7 @@ export function UsuariosDirectoryTable() {
       },
       {
         id: "segments",
+        meta: { label: "Roles" },
         header: "Roles",
         size: 190,
         cell: ({ row }) => (
@@ -150,19 +157,31 @@ export function UsuariosDirectoryTable() {
       },
       {
         id: "accion",
+        meta: { label: "Acción" },
         header: "Acción",
-        size: 70,
+        size: 100,
         enableSorting: false,
         cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 hover:bg-[#EBEAF2]"
-            title="Ver ficha"
-            onClick={() => setDetailUser(row.original)}
-          >
-            <Eye className="h-4 w-4 text-[#363C98]" />
-          </Button>
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 hover:bg-[#EBEAF2]"
+              title="Ver ficha"
+              onClick={() => setDetailUser(row.original)}
+            >
+              <Eye className="h-4 w-4 text-[#363C98]" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 hover:bg-[#EBEAF2]"
+              title="Editar usuario"
+              onClick={() => setEditUser(row.original)}
+            >
+              <Pencil className="h-4 w-4 text-[#363C98]" />
+            </Button>
+          </div>
         ),
       },
     ],
@@ -331,6 +350,22 @@ export function UsuariosDirectoryTable() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edición de usuario (endpoint admin users/edit) */}
+      {editUser && (
+        <EditUserModal
+          open={!!editUser}
+          onOpenChange={(o) => !o && setEditUser(null)}
+          userId={editUser.id}
+          userType="usuario"
+          defaultValues={{
+            firstName: editUser.name.split(" ")[0] ?? "",
+            lastName: editUser.name.split(" ").slice(1).join(" ") || "",
+            email: editUser.email,
+            phone_number: editUser.phone !== "—" ? editUser.phone : undefined,
+          }}
+        />
+      )}
     </>
   );
 }

@@ -2,18 +2,25 @@
 
 import { useMemo, useState } from "react";
 
-import { Search } from "lucide-react";
-import { Plus } from "lucide-react";
+import { Download, Search } from "lucide-react";
 
+import { BulkActionsBar } from "@/components/data-table/bulk-actions-bar";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
 import { EditUserModal } from "@/components/modals/edit-user-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { useDeleteEntrenador, useEntrenadores } from "@/hooks/use-entrenadores";
+import { exportCSV, exportPDF, exportXLSX, type ExportColumn } from "@/lib/export/table-export";
 
 import { getEntrenadoresColumns } from "./columns.entrenadores";
 import { CreateEntrenadorModal } from "./create-entrenador-modal";
@@ -68,12 +75,41 @@ export function EntrenadoresTable() {
   const table = useDataTableInstance({
     data: entrenadores,
     columns,
+    enableColumnResizing: true,
     getRowId: (row) => row.id,
     state: {
       globalFilter,
     },
     onGlobalFilterChange: setGlobalFilter,
   });
+
+  const selected = table.getSelectedRowModel().rows.map((r) => r.original);
+
+  const EXPORT_COLUMNS: ExportColumn<EntrenadorUI>[] = [
+    { key: "fullName", label: "Nombre" },
+    { key: "email", label: "Email" },
+    { key: "phone", label: "Teléfono" },
+    { key: "status", label: "Estado" },
+  ];
+
+  const doExport = (fmt: "csv" | "xlsx" | "pdf") => {
+    const rows = selected.length ? selected : entrenadores;
+    const name = `equipo-${rows.length}`;
+    if (fmt === "csv") exportCSV(name, EXPORT_COLUMNS, rows);
+    else if (fmt === "xlsx") void exportXLSX(name, EXPORT_COLUMNS, rows);
+    else void exportPDF(name, EXPORT_COLUMNS, rows, "Equipo");
+  };
+
+  const handleBulkAction = (action: string) => {
+    if (action === "eliminar") {
+      if (confirm(`¿Eliminar ${selected.length} miembro(s) del equipo? Esta acción no se puede deshacer.`)) {
+        selected.forEach((e) => deleteEntrenador.mutate(e.id));
+        table.resetRowSelection();
+      }
+    } else if (action === "exportar") {
+      doExport("csv");
+    }
+  };
 
   return (
     <Card>
@@ -88,6 +124,16 @@ export function EntrenadoresTable() {
         </Button> */}
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Acciones en lote: siempre visibles */}
+        <BulkActionsBar
+          selectedCount={selected.length}
+          onApply={handleBulkAction}
+          actions={[
+            { value: "eliminar", label: "Eliminar" },
+            { value: "exportar", label: "Exportar selección (CSV)" },
+          ]}
+        />
+
         {/* Barra de búsqueda y controles */}
         <div className="flex items-center justify-between gap-4">
           <div className="relative flex-1">
@@ -99,6 +145,19 @@ export function EntrenadoresTable() {
               className="pl-8"
             />
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1">
+                <Download className="h-4 w-4" />
+                Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => doExport("csv")}>CSV</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => doExport("xlsx")}>Excel (XLSX)</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => doExport("pdf")}>PDF</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <DataTableViewOptions table={table} />
         </div>
 
@@ -118,8 +177,8 @@ export function EntrenadoresTable() {
         {/* Tabla */}
         {!isLoading && !error && (
           <>
-            <div className="overflow-hidden rounded-lg border">
-              <DataTable table={table} columns={columns} />
+            <div className="sqf-table overflow-hidden rounded-lg border">
+              <DataTable table={table} columns={columns} enableColumnResize enableColumnReorder />
             </div>
 
             {/* Paginación */}

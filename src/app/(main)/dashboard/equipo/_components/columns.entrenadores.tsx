@@ -76,6 +76,7 @@ export const getEntrenadoresColumns = (handlers: ColumnHandlers = {}): ColumnDef
   },
   {
     accessorKey: "fullName",
+    meta: { label: "Nombre" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Entrenador" />,
     cell: ({ row }) => {
       const initials = getInitials(row.original.firstName, row.original.lastName);
@@ -96,11 +97,13 @@ export const getEntrenadoresColumns = (handlers: ColumnHandlers = {}): ColumnDef
   },
   {
     accessorKey: "phone",
+    meta: { label: "Teléfono" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Teléfono" />,
     cell: ({ row }) => <span className="text-sm">{row.original.phone || "No disponible"}</span>,
   },
   {
     accessorKey: "description",
+    meta: { label: "Descripción" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Descripción" />,
     cell: ({ row }) => (
       <div className="max-w-[300px] truncate">
@@ -110,6 +113,7 @@ export const getEntrenadoresColumns = (handlers: ColumnHandlers = {}): ColumnDef
   },
   {
     accessorKey: "status",
+    meta: { label: "Estado" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Estado" />,
     cell: ({ row }) => getStatusBadge(row.original.status),
     filterFn: (row, id, value) => {

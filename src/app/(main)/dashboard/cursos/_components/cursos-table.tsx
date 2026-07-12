@@ -3,16 +3,24 @@
 import { useState, useMemo, useCallback } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, Search } from "lucide-react";
+import { Download, Plus, Search } from "lucide-react";
 
+import { BulkActionsBar } from "@/components/data-table/bulk-actions-bar";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useCursos, useToggleCursoStatus } from "@/hooks/use-cursos";
+import { useCursos, useDeleteCurso, useToggleCursoStatus } from "@/hooks/use-cursos";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
+import { exportCSV, exportPDF, exportXLSX, type ExportColumn } from "@/lib/export/table-export";
 
 import { CursoActions } from "./columns-actions";
 import { cursosColumns } from "./columns.cursos";
@@ -36,6 +44,7 @@ export function CursosTable() {
   const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null);
 
   const toggleStatusMutation = useToggleCursoStatus();
+  const deleteCursoMutation = useDeleteCurso();
 
   const handleEdit = useCallback((curso: Curso) => {
     setSelectedCurso(curso);
@@ -90,6 +99,39 @@ export function CursosTable() {
     onGlobalFilterChange: setGlobalFilter,
   });
 
+  const selected = table.getSelectedRowModel().rows.map((r) => r.original);
+
+  const EXPORT_COLUMNS: ExportColumn<Curso>[] = [
+    { key: "name", label: "Curso" },
+    { key: "instructor", label: "Instructor" },
+    { key: "status", label: "Estado" },
+    { key: "students", label: "Estudiantes" },
+    { key: "price", label: "Precio", value: (c) => `${c.currency}${c.price.toFixed(2)}` },
+    { key: "createdAt", label: "Fecha", value: (c) => c.createdAt ?? "" },
+  ];
+
+  const doExport = (fmt: "csv" | "xlsx" | "pdf") => {
+    const rows = selected.length ? selected : cursos;
+    const name = `cursos-${rows.length}`;
+    if (fmt === "csv") exportCSV(name, EXPORT_COLUMNS, rows);
+    else if (fmt === "xlsx") void exportXLSX(name, EXPORT_COLUMNS, rows);
+    else void exportPDF(name, EXPORT_COLUMNS, rows, "Cursos");
+  };
+
+  const handleBulkAction = (action: string) => {
+    if (action === "activar" || action === "desactivar") {
+      selected.forEach((c) =>
+        toggleStatusMutation.mutate({ id: c.id, status: action === "activar" ? "Activo" : "Inactivo" }),
+      );
+      table.resetRowSelection();
+    } else if (action === "eliminar") {
+      selected.forEach((c) => deleteCursoMutation.mutate(c.id));
+      table.resetRowSelection();
+    } else if (action === "exportar") {
+      doExport("csv");
+    }
+  };
+
   return (
     <>
       <Card>
@@ -104,6 +146,18 @@ export function CursosTable() {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Acciones en lote: siempre visibles */}
+          <BulkActionsBar
+            selectedCount={selected.length}
+            onApply={handleBulkAction}
+            actions={[
+              { value: "activar", label: "Activar" },
+              { value: "desactivar", label: "Desactivar" },
+              { value: "eliminar", label: "Eliminar" },
+              { value: "exportar", label: "Exportar selección (CSV)" },
+            ]}
+          />
+
           {/* Barra de búsqueda y controles */}
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1">
@@ -115,11 +169,24 @@ export function CursosTable() {
                 className="pl-8"
               />
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Download className="h-4 w-4" />
+                  Exportar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => doExport("csv")}>CSV</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => doExport("xlsx")}>Excel (XLSX)</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => doExport("pdf")}>PDF</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DataTableViewOptions table={table} />
           </div>
 
           {/* Tabla */}
-          <div className="overflow-hidden rounded-lg border">
+          <div className="sqf-table overflow-hidden rounded-lg border">
             {isLoading ? (
               <div className="flex h-[400px] items-center justify-center">
                 <div className="flex flex-col items-center gap-2">

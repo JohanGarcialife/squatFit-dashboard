@@ -42,6 +42,7 @@ export const librosColumns: ColumnDef<Libro>[] = [
   },
   {
     accessorKey: "image",
+    meta: { label: "Portada" },
     header: "Portada",
     cell: ({ row }) => {
       const libro = row.original;
@@ -63,6 +64,7 @@ export const librosColumns: ColumnDef<Libro>[] = [
   },
   {
     accessorKey: "title",
+    meta: { label: "Título" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Título del Libro" />,
     cell: ({ row }) => (
       <div className="flex flex-col">
@@ -74,6 +76,7 @@ export const librosColumns: ColumnDef<Libro>[] = [
   },
   {
     accessorKey: "versions",
+    meta: { label: "Versiones" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Versiones" />,
     cell: ({ row }) => {
       const versions = row.original.versions ?? [];
@@ -102,6 +105,7 @@ export const librosColumns: ColumnDef<Libro>[] = [
   },
   {
     accessorKey: "createdAt",
+    meta: { label: "Fecha" },
     header: ({ column }) => <DataTableColumnHeader column={column} title="Fecha" />,
     accessorFn: (row) => row.createdAt ?? "",
     cell: ({ row }) => <span className="text-muted-foreground text-sm">{formatLibroDate(row.original.createdAt)}</span>,

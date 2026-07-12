@@ -68,7 +68,7 @@ export function useCatalogProductos() {
       description: p.description ?? "",
       price: p.price ?? 0,
       currency: "€",
-      status: "Activo",
+      status: p.isActive === false ? "Inactivo" : "Activo",
       billingPeriod: null,
       createdAt: null,
     }));

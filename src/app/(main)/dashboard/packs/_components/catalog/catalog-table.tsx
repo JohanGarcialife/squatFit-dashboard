@@ -8,6 +8,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import {
   CheckCircle2,
   Download,
+  Eye,
   ExternalLink,
   FileSpreadsheet,
   FileText,
@@ -37,6 +38,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,14 +47,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useCatalogProductos, type CatalogProduct } from "@/hooks/use-catalog";
-import { useToggleCursoStatus } from "@/hooks/use-cursos";
+import { useCursos, useToggleCursoStatus } from "@/hooks/use-cursos";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { useDeletePack, usePacks } from "@/hooks/use-packs";
+import { useDeletePack, usePacks, useUpdatePack } from "@/hooks/use-packs";
 import { useDeleteProducto, useProductos, useToggleProductoStatus, useUpdateProducto } from "@/hooks/use-productos";
 import { exportCSV, exportPDF, exportXLSX, type ExportColumn } from "@/lib/export/table-export";
 import type { Pack } from "@/lib/services/packs-service";
 import type { Producto } from "@/lib/services/products-service";
 
+import { EditCursoModal } from "../../../cursos/_components/edit-curso-modal";
+import type { Curso } from "../../../cursos/_components/schema";
 import { CreatePackModal } from "../create-pack-modal";
 import { DeletePackDialog } from "../delete-pack-dialog";
 import { EditPackModal } from "../edit-pack-modal";
@@ -110,6 +114,8 @@ export function ProductosCatalogTable() {
   const toggleProducto = useToggleProductoStatus();
   const toggleCurso = useToggleCursoStatus();
   const deletePack = useDeletePack();
+  const updatePack = useUpdatePack();
+  const { data: rawCursos = [] } = useCursos();
   const updateProducto = useUpdateProducto();
 
   const [globalFilter, setGlobalFilter] = useState("");
@@ -120,6 +126,9 @@ export function ProductosCatalogTable() {
   const [isEditPackOpen, setIsEditPackOpen] = useState(false);
   const [isDeletePackOpen, setIsDeletePackOpen] = useState(false);
   const [selectedPack, setSelectedPack] = useState<Pack | null>(null);
+  const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null);
+  const [isEditCursoOpen, setIsEditCursoOpen] = useState(false);
+  const [quickView, setQuickView] = useState<CatalogProduct | null>(null);
 
   // Productos sueltos
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
@@ -149,6 +158,21 @@ export function ProductosCatalogTable() {
       setIsProductFormOpen(true);
     },
     [rawProductos],
+  );
+
+  /** Abre el editor correspondiente al tipo de la fila (ver/editar unificado). */
+  const openEditor = useCallback(
+    (p: CatalogProduct) => {
+      if (p.type === "curso") {
+        setSelectedCurso(rawCursos.find((c) => c.id === p.id) ?? null);
+        setIsEditCursoOpen(true);
+      } else if (p.type === "pack") {
+        openEditPack(p.id);
+      } else {
+        openEditProducto(p.id);
+      }
+    },
+    [rawCursos, openEditPack, openEditProducto],
   );
 
   const openNewProducto = useCallback(() => {
@@ -192,6 +216,7 @@ export function ProductosCatalogTable() {
         // suscripción, el periodo se ve en el precio ("/mes", "/año"...).
         accessorKey: "area",
         header: "Categoría",
+        meta: { label: "Categoría" },
         size: 150,
         cell: ({ row }) => {
           const p = row.original;
@@ -227,6 +252,7 @@ export function ProductosCatalogTable() {
         accessorKey: "status",
         header: "Estado",
         size: 130,
+        meta: { label: "Estado" },
         cell: ({ row }) => {
           const p = row.original;
           // Cursos: el backend soporta activar/desactivar → píldora editable.
@@ -243,7 +269,20 @@ export function ProductosCatalogTable() {
               </EditablePill>
             );
           }
-          // Packs: el backend no expone activar/desactivar packs → estático.
+          // Packs: activar/desactivar vía PUT book/packs/:id (is_active)
+          if (p.type === "pack") {
+            return (
+              <EditablePill
+                options={[
+                  { value: "true", label: "Activo" },
+                  { value: "false", label: "Inactivo" },
+                ]}
+                onSelect={(v) => updatePack.mutate({ id: p.id, data: { is_active: v === "true" } })}
+              >
+                <StatusBadge status={p.status} />
+              </EditablePill>
+            );
+          }
           if (!isSuelto(p)) return <StatusBadge status={p.status} />;
           return (
             <EditablePill
@@ -261,6 +300,7 @@ export function ProductosCatalogTable() {
       {
         id: "createdAt",
         size: 120,
+        meta: { label: "Fecha" },
         accessorFn: (row) => row.createdAt ?? "",
         header: ({ column }) => (
           <button
@@ -277,12 +317,74 @@ export function ProductosCatalogTable() {
       },
       {
         id: "actions",
-        size: 90,
+        size: 130,
+        meta: { label: "Acciones" },
         cell: ({ row }) => {
           const product = row.original;
+          // Ojo = vista rápida con todos los datos; lápiz = editar (mismo editor)
+          const quickButtons = (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 hover:bg-[#EBEAF2]"
+                title="Vista rápida"
+                onClick={() => setQuickView(product)}
+              >
+                <Eye className="h-4 w-4 text-[#363C98]" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-7 hover:bg-[#EBEAF2]"
+                title="Editar"
+                onClick={() => openEditor(product)}
+              >
+                <Pencil className="h-4 w-4 text-[#363C98]" />
+              </Button>
+            </>
+          );
 
           if (product.type === "curso") {
             return (
+              <div className="flex items-center gap-0.5">
+                {quickButtons}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Acciones</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/cursos">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Ver en Cursos
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() =>
+                        toggleCurso.mutate({
+                          id: product.id,
+                          status: product.status === "Activo" ? "Inactivo" : "Activo",
+                        })
+                      }
+                    >
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      {product.status === "Activo" ? "Desactivar" : "Activar"}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            );
+          }
+
+          const suelto = isSuelto(product);
+
+          return (
+            <div className="flex items-center gap-0.5">
+              {quickButtons}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="size-8">
@@ -291,61 +393,39 @@ export function ProductosCatalogTable() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard/cursos">
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Ver en Cursos
-                    </Link>
+                  <DropdownMenuItem onClick={() => (suelto ? openEditProducto(product.id) : openEditPack(product.id))}>
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Editar
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    className="text-[#9f4e63]"
                     onClick={() =>
-                      toggleCurso.mutate({
-                        id: product.id,
-                        status: product.status === "Activo" ? "Inactivo" : "Activo",
-                      })
+                      suelto
+                        ? setProductoToDelete(rawProductos.find((p) => p.id === product.id) ?? null)
+                        : openDeletePack(product.id)
                     }
                   >
-                    <CheckCircle2 className="mr-2 h-4 w-4" />
-                    {product.status === "Activo" ? "Desactivar" : "Activar"}
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Eliminar
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            );
-          }
-
-          const suelto = isSuelto(product);
-
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-8">
-                  <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Acciones</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => (suelto ? openEditProducto(product.id) : openEditPack(product.id))}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Editar
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-[#9f4e63]"
-                  onClick={() =>
-                    suelto
-                      ? setProductoToDelete(rawProductos.find((p) => p.id === product.id) ?? null)
-                      : openDeletePack(product.id)
-                  }
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Eliminar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            </div>
           );
         },
       },
     ],
-    [openEditPack, openDeletePack, openEditProducto, rawProductos, toggleProducto, toggleCurso, updateProducto],
+    [
+      openEditPack,
+      openDeletePack,
+      openEditProducto,
+      openEditor,
+      rawProductos,
+      toggleProducto,
+      toggleCurso,
+      updateProducto,
+      updatePack,
+    ],
   );
 
   const table = useDataTableInstance({
@@ -532,6 +612,57 @@ export function ProductosCatalogTable() {
 
       {/* Productos sueltos */}
       <ProductFormModal open={isProductFormOpen} onOpenChange={setIsProductFormOpen} producto={selectedProducto} />
+
+      {/* Cursos: editor completo reutilizado de la pestaña Cursos */}
+      <EditCursoModal curso={selectedCurso} open={isEditCursoOpen} onOpenChange={setIsEditCursoOpen} />
+
+      {/* Vista rápida: todos los datos de la fila + acceso directo a editar */}
+      <Dialog open={!!quickView} onOpenChange={(o) => !o && setQuickView(null)}>
+        <DialogContent className="sm:max-w-[460px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {quickView?.name}
+              {quickView && <StatusBadge status={quickView.status} />}
+            </DialogTitle>
+            <DialogDescription>{quickView?.description || "Sin descripción"}</DialogDescription>
+          </DialogHeader>
+          {quickView && (
+            <div className="grid gap-2 text-sm">
+              <p>
+                <span className="text-muted-foreground">Categoría:</span>{" "}
+                {quickView.type === "pack" ? "Pack de libros" : quickView.type === "curso" ? "Cursos" : quickView.area}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Tipo de venta:</span>{" "}
+                {quickView.type === "suscripcion" ? "Suscripción" : "Pago único"}
+                {quickView.billingPeriod ? ` (${quickView.billingPeriod})` : ""}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Precio:</span> {quickView.currency}
+                {quickView.price.toFixed(2)}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Creado:</span>{" "}
+                {quickView.createdAt ? new Date(quickView.createdAt).toLocaleDateString("es-ES") : "—"}
+              </p>
+              <p className="text-muted-foreground text-xs">ID: {quickView.id}</p>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => {
+                    const p = quickView;
+                    setQuickView(null);
+                    openEditor(p);
+                  }}
+                >
+                  <Pencil className="h-4 w-4" /> Editar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       <AlertDialog open={!!productoToDelete} onOpenChange={(o) => !o && setProductoToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

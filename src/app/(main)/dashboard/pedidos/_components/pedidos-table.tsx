@@ -174,6 +174,7 @@ export function PedidosTable() {
       },
       {
         id: "customer",
+        meta: { label: "Nombre y email" },
         accessorFn: (p) => `${p.customerName} ${p.customerEmail}`,
         header: "Nombre, Email",
         size: 220,
@@ -187,6 +188,7 @@ export function PedidosTable() {
       },
       {
         id: "idFecha",
+        meta: { label: "ID y fecha" },
         accessorFn: (p) => p.createdAt,
         header: "ID, Fecha",
         size: 150,
@@ -206,6 +208,7 @@ export function PedidosTable() {
       },
       {
         id: "acciones",
+        meta: { label: "Acciones" },
         header: "Acciones",
         size: 170,
         enableSorting: false,
@@ -221,6 +224,7 @@ export function PedidosTable() {
       {
         accessorKey: "status",
         header: "Estado",
+        meta: { label: "Estado" },
         size: 140,
         cell: ({ row }) => (
           <EditablePill
@@ -234,6 +238,7 @@ export function PedidosTable() {
       {
         accessorKey: "total",
         header: "Total",
+        meta: { label: "Total" },
         size: 110,
         cell: ({ row }) => {
           const struck = row.original.status === "refunded" || row.original.status === "cancelled";
@@ -246,6 +251,7 @@ export function PedidosTable() {
       },
       {
         accessorKey: "paymentMethod",
+        meta: { label: "Pago" },
         header: "Pago",
         size: 120,
         cell: ({ row }) => (
@@ -259,6 +265,7 @@ export function PedidosTable() {
       },
       {
         accessorKey: "productsSummary",
+        meta: { label: "Productos" },
         header: "Productos",
         size: 200,
         cell: ({ row }) => <span className="line-clamp-2 text-sm">{row.original.productsSummary}</span>,
@@ -266,6 +273,7 @@ export function PedidosTable() {
       {
         accessorKey: "origin",
         header: "Origen",
+        meta: { label: "Origen" },
         size: 160,
         cell: ({ row }) => <span className="text-muted-foreground line-clamp-2 text-sm">{row.original.origin}</span>,
       },
