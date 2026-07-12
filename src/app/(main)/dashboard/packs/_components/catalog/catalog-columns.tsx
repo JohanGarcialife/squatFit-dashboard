@@ -21,17 +21,20 @@ export function EditablePill({
   children,
   options,
   onSelect,
+  disabledNote,
 }: {
   children: React.ReactNode;
   options: { value: string; label: string }[];
-  onSelect: (value: string) => void;
+  onSelect?: (value: string) => void;
+  /** Si se pasa, el desplegable solo muestra esta nota (valor fijo, no editable) */
+  disabledNote?: string;
 }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          title="Editar"
+          title={disabledNote ?? "Editar"}
           className="inline-flex items-center gap-1 rounded-md outline-none hover:opacity-80 focus-visible:ring-2 focus-visible:ring-[#363C98]"
         >
           {children}
@@ -39,11 +42,17 @@ export function EditablePill({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
-        {options.map((o) => (
-          <DropdownMenuItem key={o.value} onClick={() => onSelect(o.value)}>
-            {o.label}
+        {disabledNote ? (
+          <DropdownMenuItem disabled className="text-muted-foreground max-w-[240px] text-xs whitespace-normal">
+            {disabledNote}
           </DropdownMenuItem>
-        ))}
+        ) : (
+          options.map((o) => (
+            <DropdownMenuItem key={o.value} onClick={() => onSelect?.(o.value)}>
+              {o.label}
+            </DropdownMenuItem>
+          ))
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

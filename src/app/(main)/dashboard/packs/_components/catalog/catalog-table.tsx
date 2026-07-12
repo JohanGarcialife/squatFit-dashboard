@@ -18,7 +18,9 @@ import {
   Trash2,
   XCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 
+import { BulkActionsBar } from "@/components/data-table/bulk-actions-bar";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
@@ -45,7 +47,7 @@ import { Input } from "@/components/ui/input";
 import { useCatalogProductos, type CatalogProduct } from "@/hooks/use-catalog";
 import { useToggleCursoStatus } from "@/hooks/use-cursos";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { usePacks } from "@/hooks/use-packs";
+import { useDeletePack, usePacks } from "@/hooks/use-packs";
 import { useDeleteProducto, useProductos, useToggleProductoStatus, useUpdateProducto } from "@/hooks/use-productos";
 import { exportCSV, exportPDF, exportXLSX, type ExportColumn } from "@/lib/export/table-export";
 import type { Pack } from "@/lib/services/packs-service";
@@ -107,6 +109,7 @@ export function ProductosCatalogTable() {
   const deleteProducto = useDeleteProducto();
   const toggleProducto = useToggleProductoStatus();
   const toggleCurso = useToggleCursoStatus();
+  const deletePack = useDeletePack();
   const updateProducto = useUpdateProducto();
 
   const [globalFilter, setGlobalFilter] = useState("");
@@ -192,8 +195,23 @@ export function ProductosCatalogTable() {
         size: 150,
         cell: ({ row }) => {
           const p = row.original;
-          if (p.type === "pack") return <TypeBadge type="pack" />;
-          if (p.type === "curso") return <AreaBadge area="cursos" />;
+          if (p.type === "pack") {
+            return (
+              <EditablePill options={[]} disabledNote="Los packs de libros pertenecen siempre a la categoría Libros">
+                <TypeBadge type="pack" />
+              </EditablePill>
+            );
+          }
+          if (p.type === "curso") {
+            return (
+              <EditablePill
+                options={[]}
+                disabledNote="La categoría de un curso es fija (Cursos); edítalo desde la pestaña Cursos"
+              >
+                <AreaBadge area="cursos" />
+              </EditablePill>
+            );
+          }
           return (
             <EditablePill
               options={AREA_OPTIONS.map((a) => ({ value: a.value, label: a.label }))}
@@ -265,12 +283,33 @@ export function ProductosCatalogTable() {
 
           if (product.type === "curso") {
             return (
-              <Button variant="ghost" size="sm" className="gap-1" asChild>
-                <Link href="/dashboard/cursos">
-                  <ExternalLink className="h-4 w-4" />
-                  Ver en Cursos
-                </Link>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="size-8">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Acciones</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/cursos">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Ver en Cursos
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      toggleCurso.mutate({
+                        id: product.id,
+                        status: product.status === "Activo" ? "Inactivo" : "Activo",
+                      })
+                    }
+                  >
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    {product.status === "Activo" ? "Desactivar" : "Activar"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             );
           }
 
@@ -318,21 +357,47 @@ export function ProductosCatalogTable() {
     onGlobalFilterChange: setGlobalFilter,
   });
 
-  // Filas seleccionadas que son productos sueltos (las únicas con acciones en lote)
-  const selectedSueltos = table
-    .getSelectedRowModel()
-    .rows.map((r) => r.original)
-    .filter(isSuelto);
+  const selectedRows = table.getSelectedRowModel().rows.map((r) => r.original);
+  const selectedSueltos = selectedRows.filter(isSuelto);
 
+  /** Activar/desactivar en lote: productos sueltos + cursos (packs no tienen estado en el backend). */
   const bulkSetActive = (active: boolean) => {
-    selectedSueltos.forEach((p) => toggleProducto.mutate({ id: p.id, active }));
+    let skipped = 0;
+    selectedRows.forEach((p) => {
+      if (isSuelto(p)) toggleProducto.mutate({ id: p.id, active });
+      else if (p.type === "curso") toggleCurso.mutate({ id: p.id, status: active ? "Activo" : "Inactivo" });
+      else skipped += 1;
+    });
+    if (skipped) toast.info(`${skipped} pack(s) omitido(s): no tienen estado activable`);
     table.resetRowSelection();
   };
 
+  /** Cambiar categoría en lote: solo aplica a productos sueltos. */
+  const bulkSetArea = (area: string) => {
+    const skipped = selectedRows.length - selectedSueltos.length;
+    selectedSueltos.forEach((p) => updateProducto.mutate({ id: p.id, data: { area } }));
+    if (skipped) toast.info(`${skipped} curso(s)/pack(s) omitido(s): su categoría es fija`);
+    table.resetRowSelection();
+  };
+
+  /** Eliminar en lote: productos sueltos y packs (los cursos se gestionan en su pestaña). */
   const bulkDelete = () => {
-    selectedSueltos.forEach((p) => deleteProducto.mutate(p.id));
+    let skipped = 0;
+    selectedRows.forEach((p) => {
+      if (isSuelto(p)) deleteProducto.mutate(p.id);
+      else if (p.type === "pack") deletePack.mutate(p.id);
+      else skipped += 1;
+    });
+    if (skipped) toast.info(`${skipped} curso(s) omitido(s): elimínalos desde la pestaña Cursos`);
     table.resetRowSelection();
     setBulkDeleteOpen(false);
+  };
+
+  const handleBulkAction = (action: string) => {
+    if (action === "activar") bulkSetActive(true);
+    else if (action === "desactivar") bulkSetActive(false);
+    else if (action === "eliminar") setBulkDeleteOpen(true);
+    else if (action.startsWith("categoria:")) bulkSetArea(action.split(":")[1]);
   };
 
   // Exporta la selección (o todo lo visible si no hay selección)
@@ -380,28 +445,17 @@ export function ProductosCatalogTable() {
             ))}
           </div>
 
-          {/* Barra de acciones en lote */}
-          {selectedSueltos.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-[#EBEAF2] px-3 py-2">
-              <span className="text-sm font-medium text-[#363C98]">{selectedSueltos.length} seleccionado(s)</span>
-              <div className="ml-auto flex gap-2">
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => bulkSetActive(true)}>
-                  <CheckCircle2 className="h-4 w-4" /> Activar
-                </Button>
-                <Button size="sm" variant="outline" className="gap-1" onClick={() => bulkSetActive(false)}>
-                  <XCircle className="h-4 w-4" /> Desactivar
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1 border-[#9f4e63] text-[#9f4e63]"
-                  onClick={() => setBulkDeleteOpen(true)}
-                >
-                  <Trash2 className="h-4 w-4" /> Eliminar
-                </Button>
-              </div>
-            </div>
-          )}
+          {/* Acciones en lote: siempre visibles (diseño), Aplicar se activa al seleccionar */}
+          <BulkActionsBar
+            selectedCount={selectedRows.length}
+            onApply={handleBulkAction}
+            actions={[
+              { value: "activar", label: "Activar" },
+              { value: "desactivar", label: "Desactivar" },
+              { value: "eliminar", label: "Eliminar" },
+              ...AREA_OPTIONS.map((a) => ({ value: `categoria:${a.value}`, label: `Categoría → ${a.label}` })),
+            ]}
+          />
 
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1">

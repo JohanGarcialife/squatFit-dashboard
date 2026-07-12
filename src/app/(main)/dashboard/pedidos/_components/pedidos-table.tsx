@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 import { CheckCircle2, Download, Eye, Mail, ReceiptText, Search, Truck, UserRound } from "lucide-react";
 
+import { BulkActionsBar } from "@/components/data-table/bulk-actions-bar";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
@@ -288,6 +289,16 @@ export function PedidosTable() {
     table.resetRowSelection();
   };
 
+  const handleBulkAction = (action: string) => {
+    if (action.startsWith("estado:")) bulkSetStatus(action.split(":")[1] as PedidoStatus);
+    else if (action === "email") {
+      selected.forEach((p) => sendEmail.mutate({ id: p.id }));
+      table.resetRowSelection();
+    } else if (action === "exportar") {
+      doExport("csv");
+    }
+  };
+
   const doExport = (fmt: "csv" | "xlsx" | "pdf") => {
     const rows = selected.length ? selected : pedidos;
     const name = `pedidos-${rows.length}`;
@@ -328,28 +339,16 @@ export function PedidosTable() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Barra de acciones en lote (aparece al seleccionar filas) */}
-          {selected.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-[#EBEAF2] px-3 py-2">
-              <span className="text-sm font-medium text-[#363C98]">{selected.length} seleccionado(s)</span>
-              <div className="ml-auto flex flex-wrap gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size="sm" variant="outline">
-                      Cambiar estado
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {STATUS_OPTIONS.map((s) => (
-                      <DropdownMenuItem key={s.value} onClick={() => bulkSetStatus(s.value)}>
-                        {s.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          )}
+          {/* Acciones en lote: siempre visibles (diseño), Aplicar se activa al seleccionar */}
+          <BulkActionsBar
+            selectedCount={selected.length}
+            onApply={handleBulkAction}
+            actions={[
+              ...STATUS_OPTIONS.map((s) => ({ value: `estado:${s.value}`, label: `Cambiar a ${s.label}` })),
+              { value: "email", label: "Enviar email de estado" },
+              { value: "exportar", label: "Exportar selección (CSV)" },
+            ]}
+          />
 
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1">
