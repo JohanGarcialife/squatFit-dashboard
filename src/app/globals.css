@@ -166,6 +166,31 @@
   color: var(--primary);
 }
 
+/* Badges/pills de estado en paleta de marca. Sustituyen a los antiguos
+   green/blue/purple/red/amber-50/200/700 (fuera de paleta). Definidos fuera de
+   @layer para ganar a las utilidades de Tailwind del variant "outline". */
+.sqf-badge-green {
+  background-color: #e4f0ea !important;
+  color: #2f855a !important;
+  border-color: #2f855a !important;
+}
+.sqf-badge-indigo {
+  background-color: #e7e6ff !important;
+  color: #363c98 !important;
+  border-color: #363c98 !important;
+}
+.sqf-badge-orange {
+  /* fondo blanco (no peach) para que contraste sobre las tarjetas peach */
+  background-color: #ffffff !important;
+  color: #ff690b !important;
+  border-color: #ff690b !important;
+}
+.sqf-badge-wine {
+  background-color: #e8d8de !important;
+  color: #9f4e63 !important;
+  border-color: #9f4e63 !important;
+}
+
 /* Tarjeta KPI del home (blanca, sombra, hover sutil y línea superior de color).
    El color de la línea y del icono se pasan por estilo en línea (son por
    tarjeta). Reutilizable: añade `sqf-kpi-card` a la <Card>. */
