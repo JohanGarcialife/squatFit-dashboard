@@ -56,6 +56,13 @@ export const sidebarItems: NavGroup[] = [
         iconActive: "/menu-icons/inicio-active.png",
       },
       {
+        title: "Pedidos",
+        url: "/dashboard/pedidos",
+        icon: Package,
+        iconNormal: "/menu-icons/pedidos-normal.svg",
+        iconActive: "/menu-icons/pedidos-active.svg",
+      },
+      {
         title: "Equipo",
         url: "/dashboard/equipo",
         icon: Users,
@@ -187,6 +194,7 @@ export const getSidebarItemsForRole = (userRole: string | null | undefined): Nav
             ...group,
             items: group.items.filter(
               (item) =>
+                item.url !== "/dashboard/pedidos" &&
                 item.url !== "/dashboard/equipo" &&
                 item.url !== "/dashboard/cursos" &&
                 item.url !== "/dashboard/libros" &&
@@ -221,6 +229,7 @@ export const getSidebarItemsForRole = (userRole: string | null | undefined): Nav
           ...group,
           items: group.items.filter(
             (item) =>
+              item.url !== "/dashboard/pedidos" &&
               item.url !== "/dashboard/equipo" &&
               item.url !== "/dashboard/cursos" &&
               item.url !== "/dashboard/libros" &&
@@ -249,6 +258,7 @@ export const getSidebarItemsForRole = (userRole: string | null | undefined): Nav
           ...group,
           items: group.items.filter(
             (item) =>
+              item.url !== "/dashboard/pedidos" &&
               item.url !== "/dashboard/equipo" &&
               item.url !== "/dashboard/cursos" &&
               item.url !== "/dashboard/libros" &&
