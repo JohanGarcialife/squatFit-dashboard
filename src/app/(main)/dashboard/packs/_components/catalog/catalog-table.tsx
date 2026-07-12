@@ -5,7 +5,19 @@ import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { CheckCircle2, ExternalLink, MoreHorizontal, Pencil, Plus, Search, Trash2, XCircle } from "lucide-react";
+import {
+  CheckCircle2,
+  Download,
+  ExternalLink,
+  FileSpreadsheet,
+  FileText,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
@@ -34,6 +46,7 @@ import { useCatalogProductos, type CatalogProduct } from "@/hooks/use-catalog";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { usePacks } from "@/hooks/use-packs";
 import { useDeleteProducto, useProductos, useToggleProductoStatus, useUpdateProducto } from "@/hooks/use-productos";
+import { exportCSV, exportPDF, exportXLSX, type ExportColumn } from "@/lib/export/table-export";
 import type { Pack } from "@/lib/services/packs-service";
 import type { Producto } from "@/lib/services/products-service";
 
@@ -41,8 +54,32 @@ import { CreatePackModal } from "../create-pack-modal";
 import { DeletePackDialog } from "../delete-pack-dialog";
 import { EditPackModal } from "../edit-pack-modal";
 
-import { AREA_OPTIONS, AreaBadge, nameColumn, priceColumn, StatusBadge, TypeBadge } from "./catalog-columns";
+import {
+  AREA_OPTIONS,
+  AreaBadge,
+  EditablePill,
+  nameColumn,
+  priceColumn,
+  StatusBadge,
+  TypeBadge,
+} from "./catalog-columns";
 import { ProductFormModal } from "./product-form-modal";
+
+const TYPE_LABEL: Record<CatalogProduct["type"], string> = {
+  curso: "Curso",
+  pack: "Pack",
+  producto: "Producto",
+  suscripcion: "Suscripción",
+};
+
+const EXPORT_COLUMNS: ExportColumn<CatalogProduct>[] = [
+  { key: "name", label: "Producto" },
+  { key: "type", label: "Tipo", value: (r) => TYPE_LABEL[r.type] },
+  { key: "area", label: "Área" },
+  { key: "price", label: "Precio", value: (r) => `${r.currency}${r.price.toFixed(2)}` },
+  { key: "status", label: "Estado" },
+  { key: "createdAt", label: "Fecha", value: (r) => r.createdAt ?? "" },
+];
 
 const TYPE_FILTERS = [
   { key: "all", label: "Todos" },
@@ -149,27 +186,20 @@ export function ProductosCatalogTable() {
           const p = row.original;
           if (!isSuelto(p)) return <TypeBadge type={p.type} />;
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="cursor-pointer" title="Cambiar tipo">
-                <TypeBadge type={p.type} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem
-                  onClick={() =>
-                    updateProducto.mutate({ id: p.id, data: { type: "product", billing_period: "one_time" } })
-                  }
-                >
-                  Producto
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    updateProducto.mutate({ id: p.id, data: { type: "subscription", billing_period: "monthly" } })
-                  }
-                >
-                  Suscripción
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <EditablePill
+              options={[
+                { value: "product", label: "Producto" },
+                { value: "subscription", label: "Suscripción" },
+              ]}
+              onSelect={(v) =>
+                updateProducto.mutate({
+                  id: p.id,
+                  data: { type: v, billing_period: v === "subscription" ? "monthly" : "one_time" },
+                })
+              }
+            >
+              <TypeBadge type={p.type} />
+            </EditablePill>
           );
         },
       },
@@ -180,21 +210,12 @@ export function ProductosCatalogTable() {
           const p = row.original;
           if (!isSuelto(p)) return <AreaBadge area={p.area} />;
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="cursor-pointer" title="Cambiar área">
-                <AreaBadge area={p.area} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {AREA_OPTIONS.map((a) => (
-                  <DropdownMenuItem
-                    key={a.value}
-                    onClick={() => updateProducto.mutate({ id: p.id, data: { area: a.value } })}
-                  >
-                    {a.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <EditablePill
+              options={AREA_OPTIONS.map((a) => ({ value: a.value, label: a.label }))}
+              onSelect={(v) => updateProducto.mutate({ id: p.id, data: { area: v } })}
+            >
+              <AreaBadge area={p.area} />
+            </EditablePill>
           );
         },
       },
@@ -206,19 +227,15 @@ export function ProductosCatalogTable() {
           const p = row.original;
           if (!isSuelto(p)) return <StatusBadge status={p.status} />;
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger className="cursor-pointer" title="Cambiar estado">
-                <StatusBadge status={p.status} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem onClick={() => toggleProducto.mutate({ id: p.id, active: true })}>
-                  Activo
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toggleProducto.mutate({ id: p.id, active: false })}>
-                  Inactivo
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <EditablePill
+              options={[
+                { value: "true", label: "Activo" },
+                { value: "false", label: "Inactivo" },
+              ]}
+              onSelect={(v) => toggleProducto.mutate({ id: p.id, active: v === "true" })}
+            >
+              <StatusBadge status={p.status} />
+            </EditablePill>
           );
         },
       },
@@ -314,6 +331,16 @@ export function ProductosCatalogTable() {
     setBulkDeleteOpen(false);
   };
 
+  // Exporta la selección (o todo lo visible si no hay selección)
+  const doExport = (fmt: "csv" | "xlsx" | "pdf") => {
+    const selected = table.getSelectedRowModel().rows.map((r) => r.original);
+    const rows = selected.length ? selected : data;
+    const name = `catalogo-productos-${rows.length}`;
+    if (fmt === "csv") exportCSV(name, EXPORT_COLUMNS, rows);
+    else if (fmt === "xlsx") void exportXLSX(name, EXPORT_COLUMNS, rows);
+    else void exportPDF(name, EXPORT_COLUMNS, rows, "Catálogo de productos");
+  };
+
   return (
     <>
       <Card>
@@ -382,6 +409,25 @@ export function ProductosCatalogTable() {
                 className="pl-8"
               />
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-1">
+                  <Download className="h-4 w-4" />
+                  Exportar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => doExport("csv")}>
+                  <FileText className="mr-2 h-4 w-4" /> CSV
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => doExport("xlsx")}>
+                  <FileSpreadsheet className="mr-2 h-4 w-4" /> Excel (XLSX)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => doExport("pdf")}>
+                  <FileText className="mr-2 h-4 w-4" /> PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DataTableViewOptions table={table} />
           </div>
 
