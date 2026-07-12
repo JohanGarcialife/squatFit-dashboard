@@ -183,6 +183,7 @@ export function CursosTable() {
   const table = useDataTableInstance({
     data: cursos,
     columns,
+    persistKey: "cursos",
     enableColumnResizing: true,
     getRowId: (row) => row.id,
     state: {

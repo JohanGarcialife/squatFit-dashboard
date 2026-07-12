@@ -284,6 +284,7 @@ export function PedidosTable() {
   const table = useDataTableInstance({
     data: pedidos,
     columns,
+    persistKey: "pedidos",
     enableColumnResizing: true,
     getRowId: (row) => row.id,
     state: { globalFilter },

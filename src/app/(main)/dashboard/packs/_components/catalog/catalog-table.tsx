@@ -431,6 +431,7 @@ export function ProductosCatalogTable() {
   const table = useDataTableInstance({
     data,
     columns,
+    persistKey: "catalogo",
     enableColumnResizing: true,
     getRowId: (row) => row.key,
     state: { globalFilter },

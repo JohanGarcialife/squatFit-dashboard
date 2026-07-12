@@ -202,6 +202,7 @@ export function UsuariosDirectoryTable() {
   const table = useDataTableInstance({
     data: usuarios,
     columns,
+    persistKey: "usuarios-directory",
     enableColumnResizing: true,
     getRowId: (row) => row.id,
   });

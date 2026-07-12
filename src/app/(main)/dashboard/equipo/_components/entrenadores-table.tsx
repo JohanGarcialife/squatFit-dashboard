@@ -100,6 +100,7 @@ export function EntrenadoresTable() {
   const table = useDataTableInstance({
     data: entrenadores,
     columns,
+    persistKey: "equipo",
     enableColumnResizing: true,
     getRowId: (row) => row.id,
     state: {
