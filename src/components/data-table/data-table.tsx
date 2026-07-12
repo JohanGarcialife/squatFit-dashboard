@@ -41,11 +41,14 @@ function renderTableBody<TData, TValue>({
   columns,
   dndEnabled,
   dataIds,
+  sizedCells,
 }: {
   table: TanStackTable<TData>;
   columns: ColumnDef<TData, TValue>[];
   dndEnabled: boolean;
   dataIds: UniqueIdentifier[];
+  /** true cuando el resize de columnas está activo: fija el ancho de cada celda */
+  sizedCells?: boolean;
 }) {
   if (!table.getRowModel().rows.length) {
     return (
@@ -68,7 +71,14 @@ function renderTableBody<TData, TValue>({
   return table.getRowModel().rows.map((row) => (
     <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
       {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+        <TableCell
+          key={cell.id}
+          // Con table-layout fixed, el ancho de la celda debe acompañar al de
+          // su columna para que el redimensionado no tenga tope de contenido.
+          style={sizedCells ? { width: cell.column.getSize(), overflow: "hidden" } : undefined}
+        >
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </TableCell>
       ))}
     </TableRow>
   ));
@@ -133,14 +143,18 @@ export function DataTable<TData, TValue>({
   };
 
   const tableContent = (
-    <Table>
+    <Table
+      // table-layout fixed permite encoger columnas por debajo del ancho de su
+      // contenido (sin esto el navegador impone un mínimo y el resize "se atasca").
+      style={enableColumnResize ? { tableLayout: "fixed", width: table.getTotalSize(), minWidth: "100%" } : undefined}
+    >
       <TableHeader className="bg-muted sticky top-0 z-10">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>{headerCells(headerGroup.headers)}</TableRow>
         ))}
       </TableHeader>
       <TableBody className="**:data-[slot=table-cell]:first:w-8">
-        {renderTableBody({ table, columns, dndEnabled, dataIds })}
+        {renderTableBody({ table, columns, dndEnabled, dataIds, sizedCells: enableColumnResize })}
       </TableBody>
     </Table>
   );

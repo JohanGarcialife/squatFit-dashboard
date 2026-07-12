@@ -33,6 +33,8 @@ export interface CatalogProduct {
   price: number;
   currency: string;
   status: CatalogProductStatus;
+  /** periodo de facturación si es suscripción (monthly/quarterly/yearly); null si pago único */
+  billingPeriod: string | null;
   /** fecha de creación ISO (null si la entidad no la expone) */
   createdAt: string | null;
 }
@@ -53,6 +55,7 @@ export function useCatalogProductos() {
       price: c.price ?? 0,
       currency: c.currency ?? "€",
       status: (c.status as CatalogProductStatus) ?? "Activo",
+      billingPeriod: null,
       createdAt: (c as { createdAt?: string; created_at?: string }).createdAt ?? null,
     }));
 
@@ -66,6 +69,7 @@ export function useCatalogProductos() {
       price: p.price ?? 0,
       currency: "€",
       status: "Activo",
+      billingPeriod: null,
       createdAt: null,
     }));
 
@@ -79,6 +83,7 @@ export function useCatalogProductos() {
       price: p.price ?? 0,
       currency: p.currency === "eur" ? "€" : (p.currency ?? "€"),
       status: p.active ? "Activo" : "Inactivo",
+      billingPeriod: p.type === "subscription" ? (p.billingPeriod ?? "monthly") : null,
       createdAt: p.createdAt,
     }));
 

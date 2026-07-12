@@ -101,6 +101,7 @@ export function StatusBadge({ status }: { status: CatalogProduct["status"] }) {
 export const nameColumn: ColumnDef<CatalogProduct> = {
   accessorKey: "name",
   header: ({ column }) => <DataTableColumnHeader column={column} title="Producto" />,
+  size: 280,
   cell: ({ row }) => (
     <div className="flex flex-col">
       <span className="font-medium">{row.original.name}</span>
@@ -112,13 +113,27 @@ export const nameColumn: ColumnDef<CatalogProduct> = {
   enableHiding: false,
 };
 
+/** Sufijo del periodo de facturación para suscripciones (ej. "€9.99 /mes"). */
+const BILLING_SUFFIX: Record<string, string> = {
+  monthly: "/mes",
+  quarterly: "/trim",
+  "half-yearly": "/sem",
+  yearly: "/año",
+};
+
 export const priceColumn: ColumnDef<CatalogProduct> = {
   accessorKey: "price",
   header: ({ column }) => <DataTableColumnHeader column={column} title="Precio" />,
+  size: 120,
   cell: ({ row }) => (
     <span className="font-medium tabular-nums">
       {row.original.currency}
       {row.original.price.toFixed(2)}
+      {row.original.billingPeriod && (
+        <span className="text-muted-foreground ml-0.5 text-xs font-normal">
+          {BILLING_SUFFIX[row.original.billingPeriod] ?? ""}
+        </span>
+      )}
     </span>
   ),
 };

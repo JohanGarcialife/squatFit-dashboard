@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useCatalogProductos, type CatalogProduct } from "@/hooks/use-catalog";
+import { useToggleCursoStatus } from "@/hooks/use-cursos";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { usePacks } from "@/hooks/use-packs";
 import { useDeleteProducto, useProductos, useToggleProductoStatus, useUpdateProducto } from "@/hooks/use-productos";
@@ -75,7 +76,7 @@ const TYPE_LABEL: Record<CatalogProduct["type"], string> = {
 const EXPORT_COLUMNS: ExportColumn<CatalogProduct>[] = [
   { key: "name", label: "Producto" },
   { key: "type", label: "Tipo", value: (r) => TYPE_LABEL[r.type] },
-  { key: "area", label: "Área" },
+  { key: "area", label: "Categoría" },
   { key: "price", label: "Precio", value: (r) => `${r.currency}${r.price.toFixed(2)}` },
   { key: "status", label: "Estado" },
   { key: "createdAt", label: "Fecha", value: (r) => r.createdAt ?? "" },
@@ -105,6 +106,7 @@ export function ProductosCatalogTable() {
   const { data: rawProductos = [] } = useProductos();
   const deleteProducto = useDeleteProducto();
   const toggleProducto = useToggleProductoStatus();
+  const toggleCurso = useToggleCursoStatus();
   const updateProducto = useUpdateProducto();
 
   const [globalFilter, setGlobalFilter] = useState("");
@@ -177,38 +179,21 @@ export function ProductosCatalogTable() {
         ),
         enableSorting: false,
         enableHiding: false,
+        size: 44,
       },
       nameColumn,
       {
-        accessorKey: "type",
-        header: "Tipo",
-        cell: ({ row }) => {
-          const p = row.original;
-          if (!isSuelto(p)) return <TypeBadge type={p.type} />;
-          return (
-            <EditablePill
-              options={[
-                { value: "product", label: "Producto" },
-                { value: "subscription", label: "Suscripción" },
-              ]}
-              onSelect={(v) =>
-                updateProducto.mutate({
-                  id: p.id,
-                  data: { type: v, billing_period: v === "subscription" ? "monthly" : "one_time" },
-                })
-              }
-            >
-              <TypeBadge type={p.type} />
-            </EditablePill>
-          );
-        },
-      },
-      {
+        // Categoría única (fusiona las antiguas Tipo y Área): a qué parte del
+        // negocio pertenece el producto. En packs es fija (Pack de libros) y en
+        // cursos también (Cursos); en productos sueltos es editable. Si es
+        // suscripción, el periodo se ve en el precio ("/mes", "/año"...).
         accessorKey: "area",
-        header: "Área",
+        header: "Categoría",
+        size: 150,
         cell: ({ row }) => {
           const p = row.original;
-          if (!isSuelto(p)) return <AreaBadge area={p.area} />;
+          if (p.type === "pack") return <TypeBadge type="pack" />;
+          if (p.type === "curso") return <AreaBadge area="cursos" />;
           return (
             <EditablePill
               options={AREA_OPTIONS.map((a) => ({ value: a.value, label: a.label }))}
@@ -223,8 +208,24 @@ export function ProductosCatalogTable() {
       {
         accessorKey: "status",
         header: "Estado",
+        size: 130,
         cell: ({ row }) => {
           const p = row.original;
+          // Cursos: el backend soporta activar/desactivar → píldora editable.
+          if (p.type === "curso") {
+            return (
+              <EditablePill
+                options={[
+                  { value: "Activo", label: "Activo" },
+                  { value: "Inactivo", label: "Inactivo" },
+                ]}
+                onSelect={(v) => toggleCurso.mutate({ id: p.id, status: v as "Activo" | "Inactivo" })}
+              >
+                <StatusBadge status={p.status} />
+              </EditablePill>
+            );
+          }
+          // Packs: el backend no expone activar/desactivar packs → estático.
           if (!isSuelto(p)) return <StatusBadge status={p.status} />;
           return (
             <EditablePill
@@ -241,6 +242,7 @@ export function ProductosCatalogTable() {
       },
       {
         id: "createdAt",
+        size: 120,
         accessorFn: (row) => row.createdAt ?? "",
         header: ({ column }) => (
           <button
@@ -257,6 +259,7 @@ export function ProductosCatalogTable() {
       },
       {
         id: "actions",
+        size: 90,
         cell: ({ row }) => {
           const product = row.original;
 
@@ -303,7 +306,7 @@ export function ProductosCatalogTable() {
         },
       },
     ],
-    [openEditPack, openDeletePack, openEditProducto, rawProductos, toggleProducto, updateProducto],
+    [openEditPack, openDeletePack, openEditProducto, rawProductos, toggleProducto, toggleCurso, updateProducto],
   );
 
   const table = useDataTableInstance({

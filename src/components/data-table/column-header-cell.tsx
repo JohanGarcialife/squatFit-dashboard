@@ -28,6 +28,8 @@ export function ColumnHeaderCell<TData>({
     transition: reorder ? sortable.transition : undefined,
     opacity: reorder && sortable.isDragging ? 0.7 : 1,
     whiteSpace: "nowrap",
+    // Permite encoger la columna por debajo del ancho de su contenido
+    overflow: "hidden",
   };
 
   return (
