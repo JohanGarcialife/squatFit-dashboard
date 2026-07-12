@@ -9,6 +9,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { Libro } from "./schema";
 
+function formatLibroDate(iso?: string): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 export const librosColumns: ColumnDef<Libro>[] = [
   {
     id: "select",
@@ -92,6 +99,12 @@ export const librosColumns: ColumnDef<Libro>[] = [
         </div>
       );
     },
+  },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Fecha" />,
+    accessorFn: (row) => row.createdAt ?? "",
+    cell: ({ row }) => <span className="text-muted-foreground text-sm">{formatLibroDate(row.original.createdAt)}</span>,
   },
   {
     id: "actions",

@@ -244,6 +244,7 @@ export class CursosService {
       // El estado se lee del campo `active` que ahora devuelve el backend
       // (antes estaba hardcodeado a "Activo", por eso el toggle no persistía).
       status: (apiCurso as { active?: boolean }).active === false ? "Inactivo" : "Activo",
+      createdAt: (apiCurso as { created_at?: string }).created_at,
       students,
       duration: "8 semanas", // Valor por defecto
       level: "Principiante", // Valor por defecto

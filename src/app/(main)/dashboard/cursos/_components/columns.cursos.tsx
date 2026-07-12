@@ -18,6 +18,13 @@ import {
 
 import { Curso } from "./schema";
 
+function formatCursoDate(iso?: string): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 // Pastillas de estado con la paleta de marca (verde #2F855A, naranja #FF690B,
 // lavanda #EBEAF2/índigo para neutro).
 const getStatusBadge = (status: string) => {
@@ -145,6 +152,12 @@ export const cursosColumns: ColumnDef<Curso>[] = [
     accessorKey: "duration",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Duración" />,
     cell: ({ row }) => <span className="text-muted-foreground text-sm">{row.original.duration}</span>,
+  },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Fecha" />,
+    accessorFn: (row) => row.createdAt ?? "",
+    cell: ({ row }) => <span className="text-muted-foreground text-sm">{formatCursoDate(row.original.createdAt)}</span>,
   },
   {
     id: "actions",
