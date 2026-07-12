@@ -1,6 +1,3 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="#FF690B">
-  <!-- Tres caras de la caja separadas por huecos vacíos (sin líneas blancas) -->
-  <path d="M128 26 L214 75 L128 118 L42 75 Z" />
-  <path d="M39 79 L122 124 L122 228 L39 178 Z" />
-  <path d="M217 79 L134 124 L134 228 L217 178 Z" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="#000000" stroke="#000000" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M128 26 L214 75 V181 L128 230 L42 181 V75 Z" />
 </svg>
