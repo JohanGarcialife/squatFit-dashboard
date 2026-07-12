@@ -32,7 +32,7 @@ const getStatusBadge = (status: string) => {
     case "Activo":
       return <Badge className="border-0 bg-[#E3EFE8] text-[#2F855A] hover:bg-[#E3EFE8]">{status}</Badge>;
     case "Inactivo":
-      return <Badge className="border-0 bg-[#EBEAF2] text-[#363C98] hover:bg-[#EBEAF2]">{status}</Badge>;
+      return <Badge className="border-0 bg-[#E8D8DE] text-[#9F4E63] hover:bg-[#E8D8DE]">{status}</Badge>;
     case "En Desarrollo":
       return <Badge className="border-0 bg-[#FFF0E7] text-[#FF690B] hover:bg-[#FFF0E7]">{status}</Badge>;
     default:

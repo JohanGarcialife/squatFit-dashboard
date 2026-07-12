@@ -11,6 +11,7 @@ import { DataTableViewOptions } from "@/components/data-table/data-table-view-op
 import { EditUserModal } from "@/components/modals/edit-user-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +20,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { useDeleteEntrenador, useEntrenadores } from "@/hooks/use-entrenadores";
+import { useDeleteEntrenador, useEntrenadores, useToggleEntrenadorStatus } from "@/hooks/use-entrenadores";
 import { exportCSV, exportPDF, exportXLSX, type ExportColumn } from "@/lib/export/table-export";
 
-import { getEntrenadoresColumns } from "./columns.entrenadores";
+import { getEntrenadoresColumns, getEquipoRol } from "./columns.entrenadores";
 import { CreateEntrenadorModal } from "./create-entrenador-modal";
 import { EntrenadorUI } from "./schema";
 
@@ -35,6 +36,8 @@ export function EntrenadoresTable() {
   // Obtener entrenadores del API
   const { data: entrenadoresData, isLoading, error } = useEntrenadores();
   const deleteEntrenador = useDeleteEntrenador();
+  const toggleEntrenador = useToggleEntrenadorStatus();
+  const [viewUser, setViewUser] = useState<EntrenadorUI | null>(null);
 
   // Handlers del modal de edición
   const handleEditUser = (entrenador: EntrenadorUI) => {
@@ -69,8 +72,23 @@ export function EntrenadoresTable() {
     }));
   }, [entrenadoresData]);
 
+  // Activar/desactivar (píldora de estado y menú)
+  const handleToggleStatus = (e: EntrenadorUI) => {
+    toggleEntrenador.mutate({ id: e.id, status: e.status === "Activo" ? "Inactivo" : "Activo" });
+  };
+
   // Generar columnas con handlers
-  const columns = useMemo(() => getEntrenadoresColumns({ onEdit: handleEditUser, onDelete: handleDeleteUser }), []);
+  const columns = useMemo(
+    () =>
+      getEntrenadoresColumns({
+        onEdit: handleEditUser,
+        onDelete: handleDeleteUser,
+        onToggleStatus: handleToggleStatus,
+        onView: (e) => setViewUser(e),
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   const table = useDataTableInstance({
     data: entrenadores,
@@ -207,6 +225,45 @@ export function EntrenadoresTable() {
 
       {/* Modal de Creación */}
       <CreateEntrenadorModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
+
+      {/* Ficha rápida del miembro del equipo */}
+      <Dialog open={!!viewUser} onOpenChange={(o) => !o && setViewUser(null)}>
+        <DialogContent className="sm:max-w-[440px]">
+          <DialogHeader>
+            <DialogTitle>{viewUser?.fullName}</DialogTitle>
+            <DialogDescription>{viewUser?.email}</DialogDescription>
+          </DialogHeader>
+          {viewUser && (
+            <div className="grid gap-2 text-sm">
+              <p>
+                <span className="text-muted-foreground">Rol:</span> {getEquipoRol(viewUser)}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Teléfono:</span> {viewUser.phone || "—"}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Estado:</span> {viewUser.status}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Descripción:</span> {viewUser.description || "—"}
+              </p>
+              <p className="text-muted-foreground text-xs">ID: {viewUser.id}</p>
+              <div className="flex justify-end pt-2">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const u = viewUser;
+                    setViewUser(null);
+                    handleEditUser(u);
+                  }}
+                >
+                  Editar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

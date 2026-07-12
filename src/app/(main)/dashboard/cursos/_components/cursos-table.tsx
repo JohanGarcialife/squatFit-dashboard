@@ -3,14 +3,16 @@
 import { useState, useMemo, useCallback } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Download, Plus, Search } from "lucide-react";
+import { Download, Eye, Pencil, Plus, Search } from "lucide-react";
 
 import { BulkActionsBar } from "@/components/data-table/bulk-actions-bar";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,9 +20,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { useCursos, useDeleteCurso, useToggleCursoStatus } from "@/hooks/use-cursos";
+import { useCursos, useDeleteCurso, useToggleCursoStatus, useUpdateCurso } from "@/hooks/use-cursos";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { exportCSV, exportPDF, exportXLSX, type ExportColumn } from "@/lib/export/table-export";
+
+import { EditablePill } from "../../packs/_components/catalog/catalog-columns";
 
 import { CursoActions } from "./columns-actions";
 import { cursosColumns } from "./columns.cursos";
@@ -42,9 +46,11 @@ export function CursosTable() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUploadVideoModalOpen, setIsUploadVideoModalOpen] = useState(false);
   const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null);
+  const [quickView, setQuickView] = useState<Curso | null>(null);
 
   const toggleStatusMutation = useToggleCursoStatus();
   const deleteCursoMutation = useDeleteCurso();
+  const updateCategoryMutation = useUpdateCurso();
 
   const handleEdit = useCallback((curso: Curso) => {
     setSelectedCurso(curso);
@@ -69,24 +75,110 @@ export function CursosTable() {
     setIsUploadVideoModalOpen(true);
   }, []);
 
+  /** Opciones de categoría: las del negocio + las que ya existan en los datos. */
+  const categoryOptions = useMemo(() => {
+    const base = ["General", "Nutrición", "Entrenamiento", "Nutrición mujer", "Perder grasa", "Ganar músculo"];
+    const existing = cursos.map((c) => c.category).filter(Boolean);
+    return [...new Set([...base, ...existing])];
+  }, [cursos]);
+
   // Columnas con acciones inyectadas
   const columns = useMemo<ColumnDef<Curso>[]>(() => {
+    // Se parte de las columnas base y se sustituyen Estado y Categoría por
+    // versiones editables con desplegable (consistentes con el resto del panel)
+    const base = cursosColumns.slice(0, -1).map((col) => {
+      const key = (col as { accessorKey?: string }).accessorKey;
+      if (key === "status") {
+        return {
+          ...col,
+          cell: ({ row }: { row: { original: Curso } }) => (
+            <EditablePill
+              options={[
+                { value: "Activo", label: "Activo" },
+                { value: "Inactivo", label: "Inactivo" },
+              ]}
+              onSelect={(v) => toggleStatusMutation.mutate({ id: row.original.id, status: v as "Activo" | "Inactivo" })}
+            >
+              <Badge
+                variant="outline"
+                className={row.original.status === "Activo" ? "sqf-badge-green" : "sqf-badge-wine"}
+              >
+                {row.original.status}
+              </Badge>
+            </EditablePill>
+          ),
+        } as ColumnDef<Curso>;
+      }
+      if (key === "category") {
+        return {
+          ...col,
+          cell: ({ row }: { row: { original: Curso } }) => (
+            <EditablePill
+              options={[
+                ...categoryOptions.map((c) => ({ value: c, label: c })),
+                { value: "__nueva__", label: "+ Nueva categoría..." },
+              ]}
+              onSelect={(v) => {
+                const category = v === "__nueva__" ? window.prompt("Nombre de la nueva categoría:")?.trim() : v;
+                if (category) updateCategoryMutation.mutate({ id: row.original.id, data: { category } });
+              }}
+            >
+              <Badge variant="outline" className="sqf-badge-indigo">
+                {row.original.category || "General"}
+              </Badge>
+            </EditablePill>
+          ),
+        } as ColumnDef<Curso>;
+      }
+      return col;
+    });
+
     return [
-      ...cursosColumns.slice(0, -1),
+      ...base,
       {
         id: "actions",
+        size: 130,
+        meta: { label: "Acciones" },
         cell: ({ row }) => (
-          <CursoActions
-            curso={row.original}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onToggleStatus={handleToggleStatus}
-            onUploadVideo={handleUploadVideo}
-          />
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 hover:bg-[#EBEAF2]"
+              title="Vista rápida"
+              onClick={() => setQuickView(row.original)}
+            >
+              <Eye className="h-4 w-4 text-[#363C98]" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 hover:bg-[#EBEAF2]"
+              title="Editar curso"
+              onClick={() => handleEdit(row.original)}
+            >
+              <Pencil className="h-4 w-4 text-[#363C98]" />
+            </Button>
+            <CursoActions
+              curso={row.original}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onToggleStatus={handleToggleStatus}
+              onUploadVideo={handleUploadVideo}
+            />
+          </div>
         ),
       },
     ];
-  }, [handleEdit, handleDelete, handleToggleStatus, handleUploadVideo]);
+  }, [
+    handleEdit,
+    handleDelete,
+    handleToggleStatus,
+    handleUploadVideo,
+    toggleStatusMutation,
+    updateCategoryMutation,
+    categoryOptions,
+  ]);
 
   const table = useDataTableInstance({
     data: cursos,
@@ -230,6 +322,61 @@ export function CursosTable() {
       <EditCursoModal curso={selectedCurso} open={isEditModalOpen} onOpenChange={setIsEditModalOpen} />
       <DeleteCursoDialog curso={selectedCurso} open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} />
       <UploadVideoModal curso={selectedCurso} open={isUploadVideoModalOpen} onOpenChange={setIsUploadVideoModalOpen} />
+
+      {/* Vista rápida del curso: todos los datos + acceso directo a editar */}
+      <Dialog open={!!quickView} onOpenChange={(o) => !o && setQuickView(null)}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {quickView?.name}
+              {quickView && (
+                <Badge
+                  variant="outline"
+                  className={quickView.status === "Activo" ? "sqf-badge-green" : "sqf-badge-wine"}
+                >
+                  {quickView.status}
+                </Badge>
+              )}
+            </DialogTitle>
+            <DialogDescription>{quickView?.description}</DialogDescription>
+          </DialogHeader>
+          {quickView && (
+            <div className="grid gap-2 text-sm">
+              <p>
+                <span className="text-muted-foreground">Instructor:</span> {quickView.instructor}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Categoría:</span> {quickView.category || "General"}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Precio:</span> {quickView.currency}
+                {quickView.price.toFixed(2)}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Estudiantes:</span> {quickView.students}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Creado:</span>{" "}
+                {quickView.createdAt ? new Date(quickView.createdAt).toLocaleDateString("es-ES") : "—"}
+              </p>
+              <p className="text-muted-foreground text-xs">ID: {quickView.id}</p>
+              <div className="flex justify-end pt-2">
+                <Button
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => {
+                    const c = quickView;
+                    setQuickView(null);
+                    handleEdit(c);
+                  }}
+                >
+                  <Pencil className="h-4 w-4" /> Editar
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
