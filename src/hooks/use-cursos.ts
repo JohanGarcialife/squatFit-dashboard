@@ -322,3 +322,64 @@ export function useLinkCursoVideo() {
     },
   });
 }
+
+/**
+ * Hook para eliminar un video de un curso
+ * Endpoint: DELETE /api/v1/course/videos/{video_id}
+ */
+export function useDeleteCursoVideo() {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ message: string }, Error, { videoId: string; courseId: string }>({
+    mutationFn: ({ videoId }) => CursosService.deleteCursoVideo(videoId),
+    onMutate: ({ videoId }) => {
+      toast.loading("Eliminando video...", { id: `delete-video-${videoId}` });
+    },
+    onSuccess: (response, { videoId, courseId }) => {
+      // Invalidar las queries para recargar los datos
+      queryClient.invalidateQueries({ queryKey: cursosKeys.detail(courseId) });
+      queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
+      toast.success(response.message ?? "Video eliminado exitosamente", {
+        id: `delete-video-${videoId}`,
+      });
+    },
+    onError: (error, { videoId }) => {
+      console.error("Error eliminando video:", error);
+      toast.error(error.message || "Error al eliminar el video", {
+        id: `delete-video-${videoId}`,
+      });
+    },
+  });
+}
+
+/**
+ * Hook para actualizar los metadatos de un video de un curso
+ * Endpoint: PUT /api/v1/course/videos/{video_id}/metadata
+ */
+export function useUpdateCursoVideoMetadata() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    { message: string },
+    Error,
+    { videoId: string; courseId: string; data: import("@/lib/services/cursos-service").UpdateVideoMetadataDto }
+  >({
+    mutationFn: ({ videoId, data }) => CursosService.updateCursoVideoMetadata(videoId, data),
+    onMutate: ({ videoId }) => {
+      toast.loading("Actualizando metadatos del video...", { id: `update-video-${videoId}` });
+    },
+    onSuccess: (response, { videoId, courseId }) => {
+      queryClient.invalidateQueries({ queryKey: cursosKeys.detail(courseId) });
+      queryClient.invalidateQueries({ queryKey: cursosKeys.lists() });
+      toast.success(response.message ?? "Metadatos actualizados exitosamente", {
+        id: `update-video-${videoId}`,
+      });
+    },
+    onError: (error, { videoId }) => {
+      console.error("Error actualizando metadatos del video:", error);
+      toast.error(error.message || "Error al actualizar los metadatos", {
+        id: `update-video-${videoId}`,
+      });
+    },
+  });
+}

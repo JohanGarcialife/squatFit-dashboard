@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-
 import {
   Sidebar,
   SidebarContent,
@@ -22,13 +20,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="pt-10 pb-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
-                <Image src="/logos/Logotipo-Squat-fit-negro.png" width={25} height={25} alt="Logo Squat Fit" />
-                <span className="text-base font-semibold">{APP_CONFIG.name}</span>
+            <SidebarMenuButton asChild className="h-auto hover:bg-transparent active:bg-transparent">
+              <a href="#" className="flex flex-col items-center justify-center gap-3">
+                <div className="flex flex-col items-center justify-center font-black tracking-normal select-none">
+                  <span className="text-[2.25rem] leading-none text-[#3b46c2] group-data-[collapsible=icon]:text-[1.5rem]">
+                    SQ
+                  </span>
+                  <span className="mt-2 text-[2.25rem] leading-none text-[#ff6a00] group-data-[collapsible=icon]:mt-1 group-data-[collapsible=icon]:text-[1.5rem]">
+                    FT
+                  </span>
+                </div>
+                <span className="text-center text-lg leading-tight font-bold group-data-[collapsible=icon]:hidden">
+                  {APP_CONFIG.name}
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

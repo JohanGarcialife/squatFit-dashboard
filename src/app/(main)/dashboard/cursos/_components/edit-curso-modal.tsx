@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useUpdateCurso } from "@/hooks/use-cursos";
+import { useUpdateCurso, useCurso } from "@/hooks/use-cursos";
 
 import { CreateCursoForm } from "./create-curso-form";
 import { createCursoFormSchema, CreateCursoFormValues, createCursoDefaultValues } from "./create-curso-schema";
@@ -21,24 +21,40 @@ interface EditCursoModalProps {
 export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProps) {
   const updateCursoMutation = useUpdateCurso();
 
+  console.log("Información del curso a editar:", curso);
+
+  // Cargar detalles completos del curso (incluyendo array de videos)
+  const { data: cursoDetail } = useCurso(curso?.id ?? "");
+
   const form = useForm<CreateCursoFormValues>({
     resolver: zodResolver(createCursoFormSchema),
     defaultValues: createCursoDefaultValues,
   });
 
-  // Prellenar el formulario cuando se selecciona un curso
+  // Prellenar el formulario priorizando los detalles completos de la API
   useEffect(() => {
-    if (curso && open) {
-      form.reset({
-        name: curso.name,
-        description: curso.description,
-        instructor: curso.tutorId ?? curso.instructor ?? "",
-        price: curso.price,
-        image: curso.thumbnail ?? "",
-        video_presentation: curso.videoPresentation ?? "",
-      });
+    if (open) {
+      if (cursoDetail) {
+        form.reset({
+          name: cursoDetail.title || "",
+          description: cursoDetail.subtitle || "",
+          instructor: cursoDetail.tutor_id || cursoDetail.tutor?.id || "",
+          price: parseFloat(cursoDetail.price) || 0,
+          image: cursoDetail.image || "",
+          video_presentation: cursoDetail.video_presentation || "",
+        });
+      } else if (curso) {
+        form.reset({
+          name: curso.name,
+          description: curso.description,
+          instructor: curso.tutorId ?? curso.instructor ?? "",
+          price: curso.price,
+          image: curso.thumbnail ?? "",
+          video_presentation: curso.videoPresentation ?? "",
+        });
+      }
     }
-  }, [curso, open, form]);
+  }, [curso, cursoDetail, open, form]);
 
   const handleSubmit = async (values: CreateCursoFormValues) => {
     if (!curso) return;
@@ -63,8 +79,8 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleCancel()}>
+      <DialogContent className="max-h-[90vh] w-full overflow-x-hidden overflow-y-auto sm:max-w-[650px]">
         <DialogHeader>
           <DialogTitle>Editar Curso</DialogTitle>
           <DialogDescription>
@@ -79,6 +95,9 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
           onCancel={handleCancel}
           submitLabel="Actualizar Curso"
           loadingLabel="Actualizando..."
+          currentVideos={cursoDetail?.videos}
+          videoPresentationUrl={form.watch("video_presentation")}
+          cursoId={curso?.id}
         />
       </DialogContent>
     </Dialog>

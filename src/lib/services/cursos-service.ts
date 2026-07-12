@@ -67,6 +67,12 @@ export interface LinkVideoDto {
   priority?: number;
 }
 
+export interface UpdateVideoMetadataDto {
+  title?: string;
+  description?: string;
+  priority?: number;
+}
+
 // ============================================================================
 // SERVICIO DE CURSOS
 // ============================================================================
@@ -328,7 +334,7 @@ export class CursosService {
 
   /**
    * Obtiene un curso por ID
-   * Endpoint: GET /api/v1/courses/{id}
+   * Endpoint: GET /api/v1/course/detail/{id}
    */
   static async getCursoById(id: string): Promise<Curso> {
     if (!id) {
@@ -336,8 +342,14 @@ export class CursosService {
     }
 
     try {
-      const response = await this.makeRequest<ApiResponse<Curso>>(`/api/v1/courses/${id}`);
-      return response.data;
+      console.log(`📡 Llamando endpoint de detalle de curso: /api/v1/course/detail/${id}`);
+      const response = await this.makeRequest<any>(`/api/v1/course/detail/${id}`);
+
+      console.log("=== RESPUESTA ENDPOINT /api/v1/course/detail ===");
+      console.log(response);
+      console.log("==================================================");
+
+      return response.data || response;
     } catch (error) {
       console.error("Error obteniendo curso:", error);
       throw error;
@@ -588,6 +600,55 @@ export class CursosService {
       return response;
     } catch (error) {
       console.error("Error vinculando video externo:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina un video del currículo de un curso
+   * Endpoint: DELETE /api/v1/course/videos/{video_id}
+   */
+  static async deleteCursoVideo(videoId: string): Promise<{ message: string }> {
+    if (!videoId) {
+      throw new Error("ID de video requerido");
+    }
+
+    try {
+      console.log("🗑️ CursosService: Eliminando video:", videoId);
+
+      const response = await this.makeRequest<{ message: string }>(`/api/v1/course/videos/${videoId}`, {
+        method: "DELETE",
+      });
+
+      console.log("✅ CursosService: Video eliminado exitosamente");
+      return response;
+    } catch (error) {
+      console.error("Error eliminando video:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualiza los metadatos de un video (título, descripción, prioridad)
+   * Endpoint: PUT /api/v1/course/videos/{video_id}/metadata
+   */
+  static async updateCursoVideoMetadata(videoId: string, data: UpdateVideoMetadataDto): Promise<{ message: string }> {
+    if (!videoId) {
+      throw new Error("ID de video requerido");
+    }
+
+    try {
+      console.log("✏️ CursosService: Actualizando metadatos de video:", videoId);
+
+      const response = await this.makeRequest<{ message: string }>(`/api/v1/course/videos/${videoId}/metadata`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+
+      console.log("✅ CursosService: Metadatos de video actualizados exitosamente");
+      return response;
+    } catch (error) {
+      console.error("Error actualizando metadatos de video:", error);
       throw error;
     }
   }

@@ -77,7 +77,7 @@ export function CreateCursoModal({ open, onOpenChange }: CreateCursoModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
+      <DialogContent className="max-h-[90vh] w-full overflow-x-hidden overflow-y-auto sm:max-w-[650px]">
         <DialogHeader>
           <DialogTitle>Crear Nuevo Curso</DialogTitle>
           <DialogDescription>

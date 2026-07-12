@@ -2,16 +2,37 @@
 
 import { useState } from "react";
 
-import { X, FileVideo, Upload, Link2 } from "lucide-react";
+import { X, FileVideo, Upload, Link2, Trash2, Edit2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 
 import { InstructorSelect } from "@/components/forms/instructor-select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { PriceInput } from "@/components/ui/price-input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useDeleteCursoVideo, useUpdateCursoVideoMetadata } from "@/hooks/use-cursos";
 
 import { CreateCursoFormValues } from "./create-curso-schema";
 
@@ -22,6 +43,15 @@ interface CreateCursoFormProps {
   onCancel: () => void;
   submitLabel?: string;
   loadingLabel?: string;
+  currentVideos?: Array<{
+    video_id: string;
+    video_title: string;
+    video_url: string;
+    video_description?: string;
+    video_priority?: number;
+  }>;
+  videoPresentationUrl?: string;
+  cursoId?: string;
 }
 
 export function CreateCursoForm({
@@ -31,7 +61,20 @@ export function CreateCursoForm({
   onCancel,
   submitLabel = "Crear Curso",
   loadingLabel = "Creando...",
+  currentVideos,
+  videoPresentationUrl,
+  cursoId,
 }: CreateCursoFormProps) {
+  const deleteVideoMutation = useDeleteCursoVideo();
+  const updateVideoMetadataMutation = useUpdateCursoVideoMetadata();
+  const [videoToDelete, setVideoToDelete] = useState<string | null>(null);
+  const [videoToEdit, setVideoToEdit] = useState<{
+    id: string;
+    title: string;
+    description: string;
+    priority: number;
+  } | null>(null);
+
   const addVideo = form.watch("add_course_video");
   const videoType = form.watch("course_video_type");
 
@@ -352,6 +395,87 @@ export function CreateCursoForm({
           )}
         </div>
 
+        {/* Videos Cargados */}
+        {((videoPresentationUrl && videoPresentationUrl.trim() !== "") ||
+          (currentVideos && currentVideos.length > 0)) && (
+          <div className="border-border/70 bg-background space-y-4 rounded-lg border p-4">
+            <p className="text-muted-foreground text-sm font-medium">Videos cargados en este curso</p>
+            <div className="grid gap-3">
+              {/* Video de presentación */}
+              {videoPresentationUrl && videoPresentationUrl.trim() !== "" && (
+                <div className="flex min-w-0 items-center justify-between gap-3 rounded-lg border p-3 text-sm">
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <div className="bg-primary/10 shrink-0 rounded-md p-2">
+                      <FileVideo className="text-primary h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-primary truncate text-xs font-semibold tracking-wide uppercase">
+                        Video de Presentación
+                      </p>
+                      <p className="text-muted-foreground truncate text-xs">{videoPresentationUrl}</p>
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="shrink-0">
+                    Presentación
+                  </Badge>
+                </div>
+              )}
+
+              {/* Videos del currículo */}
+              {currentVideos?.map((video) => (
+                <div
+                  key={video.video_id}
+                  className="flex min-w-0 items-center justify-between gap-3 rounded-lg border p-3 text-sm"
+                >
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
+                    <div className="bg-primary/10 shrink-0 rounded-md p-2">
+                      <FileVideo className="text-primary h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-semibold">{video.video_title}</p>
+                      <p className="text-muted-foreground truncate text-xs">{video.video_url}</p>
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Badge variant="outline">Prioridad: {video.video_priority ?? 0}</Badge>
+                    {cursoId && (
+                      <div className="flex items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-primary hover:text-primary hover:bg-primary/10 h-8 w-8"
+                          onClick={() =>
+                            setVideoToEdit({
+                              id: video.video_id,
+                              title: video.video_title,
+                              description: video.video_description ?? "",
+                              priority: video.video_priority ?? 0,
+                            })
+                          }
+                          disabled={isLoading || deleteVideoMutation.isPending || updateVideoMetadataMutation.isPending}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive h-8 w-8"
+                          onClick={() => setVideoToDelete(video.video_id)}
+                          disabled={isLoading || deleteVideoMutation.isPending || updateVideoMetadataMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Botones de Acción */}
         <div className="flex justify-end gap-3 pt-6">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
@@ -362,6 +486,97 @@ export function CreateCursoForm({
           </Button>
         </div>
       </form>
+
+      {/* Alerta de eliminación */}
+      <AlertDialog open={!!videoToDelete} onOpenChange={(open) => !open && setVideoToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro de eliminar este video?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El video se eliminará permanentemente de la base de datos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => {
+                if (videoToDelete && cursoId) {
+                  deleteVideoMutation.mutate({ videoId: videoToDelete, courseId: cursoId });
+                }
+              }}
+            >
+              Sí, eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal de edición de video */}
+      <Dialog open={!!videoToEdit} onOpenChange={(open) => !open && setVideoToEdit(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar metadatos del video</DialogTitle>
+            <DialogDescription>
+              Modifica la información del video. Haz clic en guardar cuando termines.
+            </DialogDescription>
+          </DialogHeader>
+          {videoToEdit && (
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="title">Título</Label>
+                <Input
+                  id="title"
+                  value={videoToEdit.title}
+                  onChange={(e) => setVideoToEdit({ ...videoToEdit, title: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea
+                  id="description"
+                  value={videoToEdit.description}
+                  onChange={(e) => setVideoToEdit({ ...videoToEdit, description: e.target.value })}
+                  className="resize-none"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="priority">Prioridad</Label>
+                <Input
+                  id="priority"
+                  type="number"
+                  value={videoToEdit.priority}
+                  onChange={(e) => setVideoToEdit({ ...videoToEdit, priority: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setVideoToEdit(null)}>
+              Cancelar
+            </Button>
+            <Button
+              disabled={updateVideoMetadataMutation.isPending || !videoToEdit?.title}
+              onClick={async () => {
+                if (videoToEdit && cursoId) {
+                  await updateVideoMetadataMutation.mutateAsync({
+                    videoId: videoToEdit.id,
+                    courseId: cursoId,
+                    data: {
+                      title: videoToEdit.title,
+                      description: videoToEdit.description,
+                      priority: videoToEdit.priority,
+                    },
+                  });
+                  setVideoToEdit(null);
+                }
+              }}
+            >
+              {updateVideoMetadataMutation.isPending ? "Guardando..." : "Guardar cambios"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Form>
   );
 }
