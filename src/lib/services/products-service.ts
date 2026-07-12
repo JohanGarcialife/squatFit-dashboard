@@ -15,6 +15,7 @@ export interface ProductApi {
   price: string;
   currency: string;
   type: string; // product | subscription
+  area?: string | null; // cursos | cocina | planes | libros | otros
   billing_period?: string | null;
   stripe_price_id?: string | null;
   active: boolean;
@@ -29,9 +30,11 @@ export interface Producto {
   price: number;
   currency: string;
   type: string;
+  area: string;
   billingPeriod: string | null;
   stripePriceId: string | null;
   active: boolean;
+  createdAt: string | null;
 }
 
 export interface CreateProductoDto {
@@ -40,6 +43,7 @@ export interface CreateProductoDto {
   price: string;
   currency?: string;
   type?: string;
+  area?: string;
   billing_period?: string;
   stripe_price_id?: string;
 }
@@ -97,9 +101,11 @@ export class ProductsService {
       price: parseFloat(api.price) || 0,
       currency: api.currency ?? "eur",
       type: api.type ?? "product",
+      area: api.area ?? "otros",
       billingPeriod: api.billing_period ?? null,
       stripePriceId: api.stripe_price_id ?? null,
       active: api.active ?? true,
+      createdAt: api.created_at ?? null,
     };
   }
 

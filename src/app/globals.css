@@ -208,6 +208,11 @@
   color: #9f4e63 !important;
   border-color: #9f4e63 !important;
 }
+.sqf-badge-muted {
+  background-color: #f1f0f6 !important;
+  color: #6c727e !important;
+  border-color: #c2c0fc !important;
+}
 
 /* Tarjeta KPI del home (blanca, sombra, hover sutil y línea superior de color).
    El color de la línea y del icono se pasan por estilo en línea (son por

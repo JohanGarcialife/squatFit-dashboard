@@ -18,17 +18,23 @@ import { useProductos } from "@/hooks/use-productos";
 export type CatalogProductType = "curso" | "pack" | "producto" | "suscripcion";
 export type CatalogProductStatus = "Activo" | "Inactivo" | "En Desarrollo";
 
+export type CatalogArea = "cursos" | "cocina" | "planes" | "libros" | "otros";
+
 export interface CatalogProduct {
   /** id original de la entidad */
   id: string;
   /** clave única en el catálogo (type+id), para getRowId */
   key: string;
   type: CatalogProductType;
+  /** categoría de negocio; en cursos/packs es inherente, en sueltos es editable */
+  area: CatalogArea;
   name: string;
   description: string;
   price: number;
   currency: string;
   status: CatalogProductStatus;
+  /** fecha de creación ISO (null si la entidad no la expone) */
+  createdAt: string | null;
 }
 
 export function useCatalogProductos() {
@@ -41,33 +47,39 @@ export function useCatalogProductos() {
       id: c.id,
       key: `curso-${c.id}`,
       type: "curso",
+      area: "cursos",
       name: c.name,
       description: c.description ?? "",
       price: c.price ?? 0,
       currency: c.currency ?? "€",
       status: (c.status as CatalogProductStatus) ?? "Activo",
+      createdAt: (c as { createdAt?: string; created_at?: string }).createdAt ?? null,
     }));
 
     const packs: CatalogProduct[] = (packsQ.data ?? []).map((p) => ({
       id: p.id,
       key: `pack-${p.id}`,
       type: "pack",
+      area: "libros",
       name: p.name,
       description: p.description ?? "",
       price: p.price ?? 0,
       currency: "€",
       status: "Activo",
+      createdAt: null,
     }));
 
     const sueltos: CatalogProduct[] = (productosQ.data ?? []).map((p) => ({
       id: p.id,
       key: `producto-${p.id}`,
       type: p.type === "subscription" ? "suscripcion" : "producto",
+      area: (["cursos", "cocina", "planes", "libros", "otros"].includes(p.area) ? p.area : "otros") as CatalogArea,
       name: p.name,
       description: p.description ?? "",
       price: p.price ?? 0,
       currency: p.currency === "eur" ? "€" : (p.currency ?? "€"),
       status: p.active ? "Activo" : "Inactivo",
+      createdAt: p.createdAt,
     }));
 
     return [...cursos, ...packs, ...sueltos];

@@ -4,7 +4,26 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
-import type { CatalogProduct } from "@/hooks/use-catalog";
+import type { CatalogArea, CatalogProduct } from "@/hooks/use-catalog";
+
+export const AREA_OPTIONS: { value: CatalogArea; label: string; cls: string }[] = [
+  { value: "cursos", label: "Cursos", cls: "sqf-badge-indigo" },
+  { value: "cocina", label: "Cocina", cls: "sqf-badge-orange" },
+  { value: "planes", label: "Planes", cls: "sqf-badge-green" },
+  { value: "libros", label: "Libros", cls: "sqf-badge-wine" },
+  { value: "otros", label: "Otros", cls: "sqf-badge-muted" },
+];
+
+const AREA_MAP = Object.fromEntries(AREA_OPTIONS.map((a) => [a.value, a]));
+
+export function AreaBadge({ area }: { area: CatalogArea }) {
+  const a = AREA_MAP[area] ?? AREA_OPTIONS[4];
+  return (
+    <Badge variant="outline" className={a.cls}>
+      {a.label}
+    </Badge>
+  );
+}
 
 export const TYPE_BADGE: Record<CatalogProduct["type"], { label: string; cls: string }> = {
   curso: { label: "Curso", cls: "sqf-badge-indigo" },
