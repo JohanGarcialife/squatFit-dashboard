@@ -146,6 +146,23 @@
   }
 }
 
+/* Tabla del diseño de marca: cabecera lavanda con texto índigo, filas con hover
+   melocotón muy suave y separadores tenues. Reutilizable en cualquier tabla
+   (catálogo, pedidos, etc.): envolver el contenedor de la tabla con `sqf-table`. */
+.sqf-table table thead tr {
+  background-color: #ebeaf2;
+}
+.sqf-table table thead th {
+  color: #363c98;
+  font-weight: 600;
+}
+.sqf-table table tbody tr {
+  transition: background-color 0.15s;
+}
+.sqf-table table tbody tr:hover {
+  background-color: #fff7f2;
+}
+
 /* Tarjeta de métrica del diseño de María: fondo naranja suave (#FFF0E7),
    sin borde y con la cifra principal en naranja. Reutilizable en otras
    pestañas: basta con añadir la clase `sqf-metric-card` a la <Card>. */

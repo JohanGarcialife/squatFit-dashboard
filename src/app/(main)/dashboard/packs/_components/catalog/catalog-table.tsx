@@ -32,7 +32,7 @@ import { Input } from "@/components/ui/input";
 import { useCatalogProductos, type CatalogProduct } from "@/hooks/use-catalog";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
 import { usePacks } from "@/hooks/use-packs";
-import { useDeleteProducto, useProductos } from "@/hooks/use-productos";
+import { useDeleteProducto, useProductos, useToggleProductoStatus, useUpdateProducto } from "@/hooks/use-productos";
 import type { Pack } from "@/lib/services/packs-service";
 import type { Producto } from "@/lib/services/products-service";
 
@@ -40,7 +40,7 @@ import { CreatePackModal } from "../create-pack-modal";
 import { DeletePackDialog } from "../delete-pack-dialog";
 import { EditPackModal } from "../edit-pack-modal";
 
-import { catalogColumns } from "./catalog-columns";
+import { nameColumn, priceColumn, StatusBadge, TypeBadge } from "./catalog-columns";
 import { ProductFormModal } from "./product-form-modal";
 
 const TYPE_FILTERS = [
@@ -57,6 +57,8 @@ export function ProductosCatalogTable() {
   const { data: rawPacks = [] } = usePacks();
   const { data: rawProductos = [] } = useProductos();
   const deleteProducto = useDeleteProducto();
+  const toggleProducto = useToggleProductoStatus();
+  const updateProducto = useUpdateProducto();
 
   const [globalFilter, setGlobalFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
@@ -107,9 +109,66 @@ export function ProductosCatalogTable() {
     return productos.filter((p) => p.type === typeFilter);
   }, [productos, typeFilter]);
 
+  const isSuelto = (p: CatalogProduct) => p.type === "producto" || p.type === "suscripcion";
+
   const columns = useMemo<ColumnDef<CatalogProduct>[]>(
     () => [
-      ...catalogColumns,
+      nameColumn,
+      {
+        accessorKey: "type",
+        header: "Tipo",
+        cell: ({ row }) => {
+          const p = row.original;
+          if (!isSuelto(p)) return <TypeBadge type={p.type} />;
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="cursor-pointer" title="Cambiar tipo">
+                <TypeBadge type={p.type} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateProducto.mutate({ id: p.id, data: { type: "product", billing_period: "one_time" } })
+                  }
+                >
+                  Producto
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    updateProducto.mutate({ id: p.id, data: { type: "subscription", billing_period: "monthly" } })
+                  }
+                >
+                  Suscripción
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+      priceColumn,
+      {
+        accessorKey: "status",
+        header: "Estado",
+        cell: ({ row }) => {
+          const p = row.original;
+          if (!isSuelto(p)) return <StatusBadge status={p.status} />;
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="cursor-pointer" title="Cambiar estado">
+                <StatusBadge status={p.status} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => toggleProducto.mutate({ id: p.id, active: true })}>
+                  Activo
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => toggleProducto.mutate({ id: p.id, active: false })}>
+                  Inactivo
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
       {
         id: "actions",
         cell: ({ row }) => {
@@ -158,7 +217,7 @@ export function ProductosCatalogTable() {
         },
       },
     ],
-    [openEditPack, openDeletePack, openEditProducto, rawProductos],
+    [openEditPack, openDeletePack, openEditProducto, rawProductos, toggleProducto, updateProducto],
   );
 
   const table = useDataTableInstance({
@@ -217,7 +276,7 @@ export function ProductosCatalogTable() {
             <DataTableViewOptions table={table} />
           </div>
 
-          <div className="overflow-hidden rounded-lg border">
+          <div className="sqf-table overflow-hidden rounded-lg border">
             {isLoading ? (
               <div className="flex h-[400px] items-center justify-center">
                 <div className="flex flex-col items-center gap-2">
