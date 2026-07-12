@@ -41,8 +41,15 @@ const getStatusBadge = (status: string) => {
   }
 };
 
-/** Rol del miembro del equipo derivado de su descripción (Nutri/Trainer/Preparador). */
+/** Roles formales del staff (Doc 0 cap. 1.1), editables desde la píldora Rol. */
+export const STAFF_ROLES = ["Nutri", "Trainer", "Psicóloga", "Soporte", "Ventas", "Admin"] as const;
+
+/**
+ * Rol del miembro del equipo: primero el campo formal `staff_role` (BD) y,
+ * si aún no está asignado, se deriva de la descripción como hasta ahora.
+ */
 export const getEquipoRol = (e: EntrenadorUI): string => {
+  if (e.staff_role) return e.staff_role;
   const d = (e.description || "").toLowerCase();
   if (/nutri|dietista|dieta/.test(d)) return "Nutri";
   if (/trainer|entrena|entreno/.test(d)) return "Trainer";
@@ -67,6 +74,7 @@ interface ColumnHandlers {
   onDelete?: (entrenador: EntrenadorUI) => void;
   onToggleStatus?: (entrenador: EntrenadorUI) => void;
   onView?: (entrenador: EntrenadorUI) => void;
+  onChangeRol?: (entrenador: EntrenadorUI, rol: string) => void;
 }
 
 // ============================================================================
@@ -138,12 +146,22 @@ export const getEntrenadoresColumns = (handlers: ColumnHandlers = {}): ColumnDef
     id: "rol",
     meta: { label: "Rol" },
     header: "Rol",
-    size: 120,
-    cell: ({ row }) => (
-      <Badge variant="outline" className="sqf-badge-indigo">
-        {getEquipoRol(row.original)}
-      </Badge>
-    ),
+    size: 130,
+    cell: ({ row }) => {
+      const current = getEquipoRol(row.original);
+      return (
+        <EditablePill
+          options={STAFF_ROLES.map((r) => ({ value: r, label: r }))}
+          onSelect={(v) => {
+            if (v !== row.original.staff_role) handlers.onChangeRol?.(row.original, v);
+          }}
+        >
+          <Badge variant="outline" className="sqf-badge-indigo">
+            {current}
+          </Badge>
+        </EditablePill>
+      );
+    },
   },
   {
     accessorKey: "status",

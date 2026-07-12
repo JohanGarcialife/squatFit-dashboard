@@ -86,6 +86,28 @@ export function useCreateEntrenador() {
 }
 
 /**
+ * Hook para cambiar el rol formal del staff (píldora Rol de la tabla Equipo).
+ * Usa el endpoint admin users/edit (campo user.staff_role).
+ */
+export function useUpdateEntrenadorRol() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, rol }: { userId: string; rol: string }) => {
+      const { UsersService } = await import("@/lib/services/users-service");
+      return UsersService.updateUser({ user_id: userId, staff_role: rol });
+    },
+    onSuccess: (_data, { rol }) => {
+      queryClient.invalidateQueries({ queryKey: entrenadoresKeys.lists() });
+      toast.success(`Rol cambiado a ${rol}`);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Error al cambiar el rol");
+    },
+  });
+}
+
+/**
  * Hook para actualizar un entrenador existente
  */
 export function useUpdateEntrenador() {

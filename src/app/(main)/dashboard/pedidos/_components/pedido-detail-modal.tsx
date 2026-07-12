@@ -89,6 +89,35 @@ export function PedidoDetailModal({
             </div>
           </div>
 
+          {pedido.shippingAddress && (
+            <div className="rounded-lg border border-[#EBEAF2] bg-[#FAFAFE] p-3">
+              <p className="text-muted-foreground text-xs">Dirección de envío</p>
+              <p className="font-medium">
+                {[pedido.shippingAddress.firstName, pedido.shippingAddress.lastName].filter(Boolean).join(" ") ||
+                  pedido.customerName}
+              </p>
+              <p>
+                {[pedido.shippingAddress.address, pedido.shippingAddress.apartment].filter(Boolean).join(", ")}
+                {" · "}
+                {[pedido.shippingAddress.postalCode, pedido.shippingAddress.city].filter(Boolean).join(" ")}
+                {pedido.shippingAddress.country ? ` · ${pedido.shippingAddress.country}` : ""}
+              </p>
+              {(pedido.shippingAddress.phone ?? pedido.shippingAddress.dni_cif) && (
+                <p className="text-muted-foreground">
+                  {[
+                    pedido.shippingAddress.phone,
+                    pedido.shippingAddress.dni_cif ? `DNI/CIF: ${pedido.shippingAddress.dni_cif}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              )}
+              {pedido.shippingAddress.notes && (
+                <p className="text-muted-foreground italic">“{pedido.shippingAddress.notes}”</p>
+              )}
+            </div>
+          )}
+
           <div className="rounded-lg border">
             <table className="w-full text-sm">
               <thead className="bg-[#EBEAF2] text-left text-[#363C98]">

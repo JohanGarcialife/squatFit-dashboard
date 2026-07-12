@@ -8,6 +8,19 @@ import { getAuthToken } from "@/lib/auth/auth-utils";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cyrc2g3zra-no.a.run.app";
 const REQUEST_TIMEOUT = 15000;
 
+export interface ShippingAddress {
+  firstName?: string;
+  lastName?: string;
+  address?: string;
+  apartment?: string;
+  postalCode?: string;
+  city?: string;
+  country?: string;
+  phone?: string;
+  dni_cif?: string;
+  notes?: string;
+}
+
 export interface UsuarioDirectorioApi {
   id: string;
   firstName: string | null;
@@ -18,6 +31,7 @@ export interface UsuarioDirectorioApi {
   role_name: string | null;
   assigned: { name: string; type: string }[];
   segments: string[];
+  shipping_address?: ShippingAddress | null;
   created_at?: string;
 }
 
@@ -30,7 +44,16 @@ export interface UsuarioDirectorio {
   roleName: string;
   assigned: { name: string; type: string }[];
   segments: string[];
+  /** Última dirección de envío usada en un pedido, formateada en una línea. */
+  address: string;
   createdAt: string | null;
+}
+
+/** "Calle Mayor 12, 3.º B, 28013 Madrid, ES" a partir del JSON del pedido. */
+export function formatShippingAddress(a?: ShippingAddress | null): string {
+  if (!a) return "—";
+  const cityLine = [a.postalCode, a.city].filter(Boolean).join(" ");
+  return [a.address, a.apartment, cityLine, a.country].filter(Boolean).join(", ") || "—";
 }
 
 export interface UsuariosDirectoryCounts {
@@ -96,6 +119,7 @@ export class UsuariosDirectoryService {
       roleName: api.role_name ?? "—",
       assigned: api.assigned ?? [],
       segments: api.segments ?? [],
+      address: formatShippingAddress(api.shipping_address),
       createdAt: api.created_at ?? null,
     };
   }

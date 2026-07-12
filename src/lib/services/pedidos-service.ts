@@ -31,10 +31,25 @@ export interface PedidoApi {
   payment_method: string | null;
   origin: string | null;
   refund_reason: string | null;
+  shipping_address?: PedidoShippingAddress | null;
   stripe_payment_intent_id: string | null;
   items: PedidoItem[];
   created_at: string;
   updated_at: string;
+}
+
+/** Dirección de envío del pedido (JSON del formulario del checkout de la web). */
+export interface PedidoShippingAddress {
+  firstName?: string;
+  lastName?: string;
+  address?: string;
+  apartment?: string;
+  postalCode?: string;
+  city?: string;
+  country?: string;
+  phone?: string;
+  dni_cif?: string;
+  notes?: string;
 }
 
 export interface Pedido {
@@ -50,6 +65,7 @@ export interface Pedido {
   paymentMethod: string | null;
   origin: string;
   refundReason: string | null;
+  shippingAddress: PedidoShippingAddress | null;
   hasStripePayment: boolean;
   items: PedidoItem[];
   /** Resumen "Asesorías M, Cursos H" para la columna Productos */
@@ -137,6 +153,7 @@ export class PedidosService {
       paymentMethod: api.payment_method,
       origin: api.origin ?? "Desconocido",
       refundReason: api.refund_reason,
+      shippingAddress: api.shipping_address ?? null,
       hasStripePayment: !!api.stripe_payment_intent_id,
       items: api.items,
       productsSummary: summary,

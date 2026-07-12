@@ -117,6 +117,17 @@ export function UsuariosDirectoryTable() {
         cell: ({ row }) => <span className="text-muted-foreground text-sm">{row.original.phone}</span>,
       },
       {
+        accessorKey: "address",
+        meta: { label: "Dirección" },
+        header: "Dirección",
+        size: 220,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground text-sm" title={row.original.address}>
+            {row.original.address}
+          </span>
+        ),
+      },
+      {
         id: "assigned",
         meta: { label: "Asignados" },
         header: "Asignados",
@@ -327,6 +338,9 @@ export function UsuariosDirectoryTable() {
               </p>
               <p>
                 <span className="text-muted-foreground">Rol:</span> {detailUser.roleName}
+              </p>
+              <p>
+                <span className="text-muted-foreground">Dirección:</span> {detailUser.address}
               </p>
               <div className="flex flex-wrap items-center gap-1">
                 <span className="text-muted-foreground">Asignados:</span>

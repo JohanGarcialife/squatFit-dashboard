@@ -20,7 +20,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { useDeleteEntrenador, useEntrenadores, useToggleEntrenadorStatus } from "@/hooks/use-entrenadores";
+import {
+  useDeleteEntrenador,
+  useEntrenadores,
+  useToggleEntrenadorStatus,
+  useUpdateEntrenadorRol,
+} from "@/hooks/use-entrenadores";
 import { exportCSV, exportPDF, exportXLSX, type ExportColumn } from "@/lib/export/table-export";
 
 import { getEntrenadoresColumns, getEquipoRol } from "./columns.entrenadores";
@@ -37,6 +42,7 @@ export function EntrenadoresTable() {
   const { data: entrenadoresData, isLoading, error } = useEntrenadores();
   const deleteEntrenador = useDeleteEntrenador();
   const toggleEntrenador = useToggleEntrenadorStatus();
+  const updateRol = useUpdateEntrenadorRol();
   const [viewUser, setViewUser] = useState<EntrenadorUI | null>(null);
 
   // Handlers del modal de edición
@@ -85,6 +91,7 @@ export function EntrenadoresTable() {
         onDelete: handleDeleteUser,
         onToggleStatus: handleToggleStatus,
         onView: (e) => setViewUser(e),
+        onChangeRol: (e, rol) => updateRol.mutate({ userId: e.user_id, rol }),
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
