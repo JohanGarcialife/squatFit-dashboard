@@ -51,9 +51,7 @@ const CardDetails: React.FC = () => {
               </div>{" "}
               My Cards
             </CardTitle>
-            <Button className="text-foreground border border-orange-300 bg-white py-0 hover:bg-white">
-              + Add Card
-            </Button>
+            <Button className="text-foreground border border-[#FF690B] bg-white py-0 hover:bg-white">+ Add Card</Button>
           </div>
 
           <TabsList className="grid w-full grid-cols-2 rounded-md bg-[#FFF0E7]">
@@ -77,7 +75,7 @@ const CardDetails: React.FC = () => {
           {" "}
           <TabsContent value="virtual" className="w-full">
             <div className="flex flex-col gap-4">
-              <Card className="w-full overflow-hidden rounded-xl bg-gradient-to-r from-gray-100 to-orange-300 text-white shadow-sm">
+              <Card className="from-muted w-full overflow-hidden rounded-xl bg-gradient-to-r to-[#FFDCC6] text-white shadow-sm">
                 <CardContent>
                   <div className="mb-3 flex items-center gap-2">
                     <div className="h-3 w-3 rounded-full border-2 bg-green-700 shadow" />
@@ -112,7 +110,7 @@ const CardDetails: React.FC = () => {
                 </CardContent>
               </Card>
 
-              <div className="w-full space-y-2 rounded-2xl bg-gradient-to-br from-orange-50 to-white p-5 shadow-lg">
+              <div className="w-full space-y-2 rounded-2xl bg-gradient-to-br from-[#FFF7F2] to-white p-5 shadow-lg">
                 {/* Available */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -121,21 +119,21 @@ const CardDetails: React.FC = () => {
                   </div>
                   <span className="text-sm font-bold text-[#2f855a]">$8,996.24</span>
                 </div>
-                <div className="border-t border-orange-200" />
+                <div className="border-t border-[#FFDCC6]" />
 
                 {/* Pending */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-lg bg-orange-300 p-2 text-[#FF690B]"></div>
+                    <div className="rounded-lg bg-[#FFDCC6] p-2 text-[#FF690B]"></div>
                     <span className="text-foreground text-sm font-medium">Pending</span>
                   </div>
                   <span className="text-sm font-semibold text-[#FF690B]">$208.40</span>
                 </div>
-                <div className="border-t border-orange-200" />
+                <div className="border-t border-[#FFDCC6]" />
                 {/* Daily Limit */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="text-foreground rounded-lg bg-gray-300 p-2"></div>
+                    <div className="text-foreground bg-muted rounded-lg p-2"></div>
                     <span className="text-foreground text-sm font-medium">Daily Limit</span>
                   </div>
                   <span className="text-foreground text-sm font-semibold">$1,500.00</span>

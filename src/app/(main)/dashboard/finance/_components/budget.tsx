@@ -14,8 +14,8 @@ const data = [
     label: "Income",
     amount: "$9600K",
     icon: <TrendingUp className="h-5 w-5 text-[#2f855a]" />,
-    from: "from-green-100",
-    to: "to-green-300",
+    from: "from-[#e4f0ea]",
+    to: "to-[#e4f0ea]",
     labelColor: "text-[#2f855a]",
     amountColor: "text-foreground",
   },
@@ -23,8 +23,8 @@ const data = [
     label: "Expenses",
     amount: "$24000K",
     icon: <TrendingDown className="h-5 w-5 text-[#FF690B]" />,
-    from: "from-orange-100",
-    to: "to-orange-300",
+    from: "from-[#FFF0E7]",
+    to: "to-[#FFDCC6]",
     labelColor: "text-[#FF690B]",
     amountColor: "text-foreground",
   },
@@ -32,8 +32,8 @@ const data = [
     label: "Scheduled",
     amount: "$14000K",
     icon: <CalendarCheck className="text-muted-foreground h-5 w-5" />,
-    from: "from-gray-100",
-    to: "to-gray-300",
+    from: "from-muted",
+    to: "to-muted",
     labelColor: "text-muted-foreground",
     amountColor: "text-foreground",
   },
@@ -89,18 +89,18 @@ const Budget: React.FC = () => {
                 <span className="text-muted-foreground text-xs">Income</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-orange-300" />
+                <div className="h-2 w-2 rounded-full bg-[#FFDCC6]" />
                 <span className="text-muted-foreground text-xs">Expenses</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="h-2 w-2 rounded-full bg-gray-300" />
+                <div className="bg-muted h-2 w-2 rounded-full" />
                 <span className="text-muted-foreground text-xs">Scheduled</span>
               </div>
             </div>
 
             {/* Dropdown */}
             <Select defaultValue="last-year">
-              <SelectTrigger className="h-8 w-[150px] border border-orange-500 bg-none text-sm shadow-none focus:border-orange-500 focus:ring-0">
+              <SelectTrigger className="h-8 w-[150px] border border-[#FF690B] bg-none text-sm shadow-none focus:border-[#FF690B] focus:ring-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

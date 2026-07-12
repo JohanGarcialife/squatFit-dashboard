@@ -26,7 +26,7 @@ const Summary: React.FC = () => {
               <span className="text-foreground text-base font-semibold">Spending Summary</span>
             </div>
             <Select defaultValue="last-week">
-              <SelectTrigger className="h-8 border border-orange-500 bg-none text-sm shadow-none focus:border-orange-500 focus:ring-0">
+              <SelectTrigger className="h-8 border border-[#FF690B] bg-none text-sm shadow-none focus:border-[#FF690B] focus:ring-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -85,9 +85,7 @@ const Summary: React.FC = () => {
               </div>
               <span className="text-foreground text-base font-semibold">Exchange</span>
             </div>
-            <Button className="text-foreground border border-orange-300 bg-white py-0 hover:bg-white">
-              Currencies
-            </Button>
+            <Button className="text-foreground border border-[#FF690B] bg-white py-0 hover:bg-white">Currencies</Button>
           </CardHeader>
 
           <CardContent>
@@ -128,7 +126,7 @@ const Summary: React.FC = () => {
 
               {/* Footer */}
               <Separator orientation="horizontal" className="m-0" />
-              <div className="flex h-10 w-full items-center justify-center bg-gradient-to-br from-orange-100 to-white">
+              <div className="flex h-10 w-full items-center justify-center bg-gradient-to-br from-[#FFF0E7] to-white">
                 <p className="m-0 w-full text-center text-sm leading-none">
                   1 USD = <span className="font-semibold">0.94 Eur</span>
                 </p>
@@ -151,7 +149,7 @@ const Summary: React.FC = () => {
                 90.7
               </span>
             </p>
-            <Button className="text-foreground w-full border border-orange-300 bg-white pt-2 font-semibold hover:bg-white">
+            <Button className="text-foreground w-full border border-[#FF690B] bg-white pt-2 font-semibold hover:bg-white">
               <RefreshCw className="h-5 w-5" />
               <span>Exchange</span>
             </Button>

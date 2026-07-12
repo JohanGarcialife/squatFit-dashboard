@@ -39,7 +39,7 @@ function SupportPageContent() {
         </div>
 
         {/* Información del agente */}
-        <div className="rounded-lg bg-purple-50 p-3 dark:bg-purple-900/20">
+        <div className="rounded-lg bg-[#e8d8de] p-3 dark:bg-purple-900/20">
           <p className="text-xs font-medium text-[#9f4e63] dark:text-[#9f4e63]">Agente de Soporte</p>
           <p className="text-sm text-[#9f4e63] dark:text-[#9f4e63]">{user?.email ?? "Cargando..."}</p>
         </div>

@@ -116,10 +116,10 @@ export default function Chat() {
         </div>
         {[...Array(5)].map((_, i) => (
           <div key={`loading-${i}`} className="flex animate-pulse items-center gap-3 rounded-lg p-2.5">
-            <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700" />
+            <div className="bg-muted h-10 w-10 rounded-full dark:bg-gray-700" />
             <div className="flex-grow">
-              <div className="mb-1 h-4 rounded bg-gray-200 dark:bg-gray-700" />
-              <div className="h-3 w-2/3 rounded bg-gray-200 dark:bg-gray-700" />
+              <div className="bg-muted mb-1 h-4 rounded dark:bg-gray-700" />
+              <div className="bg-muted h-3 w-2/3 rounded dark:bg-gray-700" />
             </div>
           </div>
         ))}
@@ -162,12 +162,12 @@ export default function Chat() {
   // Renderizar avatar del chat
   const renderChatAvatar = (chat: Conversation) => (
     <div className="relative flex-shrink-0">
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-sm font-semibold text-white">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-[#9f4e63] text-sm font-semibold text-white">
         {getInitials(chat.name)}
       </div>
       {/* Indicador de actividad */}
       {chat.isActive && (
-        <div className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white bg-green-500 dark:border-gray-900" />
+        <div className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white bg-[#2f855a] dark:border-gray-900" />
       )}
     </div>
   );
@@ -204,7 +204,7 @@ export default function Chat() {
                   return "bg-[#FFF0E7] text-[#FF690B] dark:bg-orange-900/30 dark:text-[#FF690B]";
                 case "sales":
                 case "ventas":
-                  return "bg-yellow-100 text-[#FF690B] dark:bg-yellow-900/30 dark:text-[#FF690B]";
+                  return "bg-[#FFF0E7] text-[#FF690B] dark:bg-yellow-900/30 dark:text-[#FF690B]";
                 default:
                   return "bg-muted text-foreground dark:bg-gray-800 dark:text-muted-foreground";
               }
@@ -245,7 +245,7 @@ export default function Chat() {
       )}
 
       {chat.unread > 0 && (
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-sm">
+        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#9f4e63] text-xs font-bold text-white shadow-sm">
           {chat.unread > 99 ? "99+" : chat.unread}
         </div>
       )}
@@ -265,9 +265,9 @@ export default function Chat() {
         className={clsx("flex cursor-pointer items-center gap-3 rounded-lg p-2.5 transition-all duration-150", {
           "bg-[#e7e6ff]/70 shadow-sm dark:bg-blue-900/40": selectedConversation?.id === chat.id,
           "hover:bg-muted/80 dark:hover:bg-gray-800/60": selectedConversation?.id !== chat.id,
-          "border-l-2 border-blue-500": chat.unread > 0,
+          "border-l-2 border-[#363C98]": chat.unread > 0,
           // ✅ Color diferenciado para chats professional_professional
-          "bg-purple-50 dark:bg-purple-900/20":
+          "bg-[#e8d8de] dark:bg-purple-900/20":
             chat.chat_type === "professional_professional" && selectedConversation?.id !== chat.id,
           "hover:bg-[#e8d8de]/80 dark:hover:bg-purple-800/30":
             chat.chat_type === "professional_professional" && selectedConversation?.id !== chat.id,

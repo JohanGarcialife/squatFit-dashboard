@@ -311,7 +311,7 @@ export default function FichaTecnica() {
     try {
       const token = getAuthToken();
       if (token) {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode<{ sub?: string; id?: string; role?: string }>(token);
         return (decoded.sub as string) ?? (decoded.id as string);
       }
     } catch (error) {
@@ -332,7 +332,7 @@ export default function FichaTecnica() {
     try {
       const token = getAuthToken();
       if (token) {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode<{ sub?: string; id?: string; role?: string }>(token);
 
         // Permitir si es admin
         if (decoded.role === "admin") return true;
@@ -454,7 +454,7 @@ export default function FichaTecnica() {
         return "bg-[#FFF0E7] text-[#FF690B] dark:bg-orange-900/30 dark:text-[#FF690B]";
       case "sales":
       case "ventas":
-        return "bg-yellow-100 text-[#FF690B] dark:bg-yellow-900/30 dark:text-[#FF690B]";
+        return "bg-[#FFF0E7] text-[#FF690B] dark:bg-yellow-900/30 dark:text-[#FF690B]";
       default:
         return "bg-muted text-foreground dark:bg-gray-800 dark:text-muted-foreground";
     }
@@ -508,7 +508,7 @@ export default function FichaTecnica() {
 
       {/* Información del Usuario */}
       <div className="flex flex-col items-center gap-2 text-center">
-        <Avatar className="h-20 w-20 bg-gradient-to-br from-orange-500 to-red-500">
+        <Avatar className="from-[#FFF7F2]0 h-20 w-20 bg-gradient-to-br to-[#9f4e63]">
           <AvatarFallback className="bg-transparent text-2xl font-bold text-white">{fichaData.initials}</AvatarFallback>
         </Avatar>
         <p className="text-foreground text-lg font-bold dark:text-gray-100">{fichaData.name}</p>
@@ -758,7 +758,7 @@ export default function FichaTecnica() {
               disabled={
                 (completingChat && isCompleteButton) || (reassigningTicket && (isReassignTicket || isReassignChat))
               }
-              className="w-full justify-center bg-orange-400/20 text-[#FF690B] hover:bg-orange-400/30 hover:text-[#FF690B] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-orange-500/20 dark:text-[#FF690B] dark:hover:bg-orange-500/30"
+              className="w-full justify-center bg-[#FF690B]/20 text-[#FF690B] hover:bg-[#FF690B]/30 hover:text-[#FF690B] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#FF690B]/20 dark:text-[#FF690B] dark:hover:bg-[#FF690B]/30"
             >
               {completingChat && isCompleteButton ? (
                 <>
@@ -780,7 +780,7 @@ export default function FichaTecnica() {
 
       {/* Mensaje de error */}
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
+        <div className="rounded-lg bg-[#e8d8de] p-3 dark:bg-red-900/20">
           <p className="text-sm text-[#9f4e63] dark:text-[#9f4e63]">Error cargando información</p>
         </div>
       )}

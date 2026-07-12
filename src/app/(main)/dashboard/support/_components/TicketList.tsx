@@ -66,7 +66,7 @@ export default function TicketList() {
 
     return (
       <div className="relative flex-shrink-0">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-600 text-sm font-semibold text-white">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-[#9f4e63] text-sm font-semibold text-white">
           {getInitials(ticket.user?.email ?? ticket.title)}
         </div>
         {/* Indicador de prioridad */}
@@ -108,7 +108,7 @@ export default function TicketList() {
   const renderTicketMetadata = (ticket: any) => (
     <div className="ml-2 flex flex-shrink-0 flex-col items-end gap-y-1">
       {(ticket.unread ?? 0) > 0 && (
-        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white shadow-sm">
+        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#9f4e63] text-xs font-bold text-white shadow-sm">
           {ticket.unread > 99 ? "99+" : ticket.unread}
         </div>
       )}
@@ -125,10 +125,10 @@ export default function TicketList() {
         </div>
         {[...Array(5)].map((_, i) => (
           <div key={`loading-${i}`} className="flex animate-pulse items-center gap-3 rounded-lg p-2.5">
-            <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700" />
+            <div className="bg-muted h-10 w-10 rounded-full dark:bg-gray-700" />
             <div className="flex-grow">
-              <div className="mb-1 h-4 rounded bg-gray-200 dark:bg-gray-700" />
-              <div className="h-3 w-2/3 rounded bg-gray-200 dark:bg-gray-700" />
+              <div className="bg-muted mb-1 h-4 rounded dark:bg-gray-700" />
+              <div className="bg-muted h-3 w-2/3 rounded dark:bg-gray-700" />
             </div>
           </div>
         ))}
@@ -193,7 +193,7 @@ export default function TicketList() {
           className={clsx("flex cursor-pointer items-center gap-3 rounded-lg p-2.5 transition-all duration-150", {
             "bg-[#e8d8de]/70 shadow-sm dark:bg-purple-900/40": selectedTicket?.id === ticket.id,
             "hover:bg-muted/80 dark:hover:bg-gray-800/60": selectedTicket?.id !== ticket.id,
-            "border-l-2 border-red-500": (ticket.unread ?? 0) > 0,
+            "border-l-2 border-[#9f4e63]": (ticket.unread ?? 0) > 0,
           })}
           onClick={() => selectTicket(ticket.id)}
         >

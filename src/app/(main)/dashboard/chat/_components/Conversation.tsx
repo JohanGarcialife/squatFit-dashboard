@@ -190,16 +190,16 @@ const generateColorFromId = (id: string): string => {
 
   // Paleta de colores profesionales (evitando gris y naranja que ya usamos)
   const colors = [
-    "bg-blue-500",
-    "bg-purple-500",
-    "bg-green-500",
+    "bg-[#363C98]",
+    "bg-[#9f4e63]",
+    "bg-[#2f855a]",
     "bg-indigo-500",
     "bg-pink-500",
     "bg-teal-500",
     "bg-cyan-500",
     "bg-violet-500",
     "bg-fuchsia-500",
-    "bg-emerald-500",
+    "bg-[#2f855a]",
   ];
 
   const index = Math.abs(hash) % colors.length;
@@ -512,7 +512,7 @@ export default function Conversation() {
         <div className="flex-grow">
           <div className="flex items-center gap-2">
             <h2 className="text-foreground text-lg font-bold dark:text-gray-100">{selectedConversation.name}</h2>
-            {selectedConversation.isActive && <div className="h-2 w-2 rounded-full bg-green-500" />}
+            {selectedConversation.isActive && <div className="h-2 w-2 rounded-full bg-[#2f855a]" />}
           </div>
           <p className="text-primary dark:text-primary-400 text-sm">
             {selectedConversation.tags.length > 0
@@ -525,7 +525,7 @@ export default function Conversation() {
         <div className="flex items-center gap-2">
           {!isConnected && (
             <div className="flex items-center gap-1 text-xs text-[#9f4e63]">
-              <div className="h-2 w-2 rounded-full bg-red-500" />
+              <div className="h-2 w-2 rounded-full bg-[#9f4e63]" />
               Sin conexión
             </div>
           )}
@@ -639,10 +639,10 @@ export default function Conversation() {
           <div className="flex flex-col gap-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="flex animate-pulse items-end gap-2">
-                <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700" />
-                <div className="max-w-md rounded-lg bg-gray-200 p-3 dark:bg-gray-700">
-                  <div className="mb-1 h-4 rounded bg-gray-300 dark:bg-gray-600" />
-                  <div className="h-3 w-1/3 rounded bg-gray-300 dark:bg-gray-600" />
+                <div className="bg-muted h-8 w-8 rounded-full dark:bg-gray-700" />
+                <div className="bg-muted max-w-md rounded-lg p-3 dark:bg-gray-700">
+                  <div className="bg-muted mb-1 h-4 rounded dark:bg-gray-600" />
+                  <div className="bg-muted h-3 w-1/3 rounded dark:bg-gray-600" />
                 </div>
               </div>
             ))}
@@ -657,16 +657,16 @@ export default function Conversation() {
               const messageTyped = message as any;
               const msgContent = message.content ?? "";
               if (msgContent.includes("desde") || msgContent.includes("adviser") || msgContent.includes("dietista")) {
-                let bgClass = "bg-gray-200";
+                let bgClass = "bg-muted";
                 let messageType = "unknown";
                 if (message.isFromMe) {
-                  bgClass = "bg-orange-500";
+                  bgClass = "bg-[#FF690B]";
                   messageType = "Profesional actual";
                 } else if (messageTyped.isFromMainUser) {
-                  bgClass = "bg-gray-200";
+                  bgClass = "bg-muted";
                   messageType = `${messageTyped.senderName as string} (${messageTyped.senderRole as string})`;
                 } else if (messageTyped.isFromOtherProfessional) {
-                  bgClass = (messageTyped.dynamicColor as string) ?? "bg-blue-500";
+                  bgClass = (messageTyped.dynamicColor as string) ?? "bg-[#363C98]";
                   messageType = `${messageTyped.senderName as string} (Colaborador)`;
                 }
                 const alignment = message.isFromMe ? "justify-end" : "justify-start";
@@ -676,9 +676,9 @@ export default function Conversation() {
               }
 
               // Determinar clase de color para el mensaje
-              let messageColorClass = "bg-gray-200 text-foreground dark:bg-gray-700 dark:text-gray-100";
+              let messageColorClass = "bg-muted text-foreground dark:bg-gray-700 dark:text-gray-100";
               if (message.isFromMe) {
-                messageColorClass = "bg-orange-500 text-white";
+                messageColorClass = "bg-[#FF690B] text-white";
               } else if (messageTyped.isFromOtherProfessional && messageTyped.dynamicColor) {
                 messageColorClass = `${messageTyped.dynamicColor as string} text-white`;
               }
@@ -687,7 +687,7 @@ export default function Conversation() {
                 <React.Fragment key={message.stableKey}>
                   {showDateSeparator && (
                     <div className="my-2 flex justify-center">
-                      <span className="text-muted-foreground rounded-full bg-gray-200 px-3 py-1 text-xs dark:bg-gray-700 dark:text-gray-300">
+                      <span className="text-muted-foreground bg-muted rounded-full px-3 py-1 text-xs dark:bg-gray-700 dark:text-gray-300">
                         {formatDate(message.created_at)}
                       </span>
                     </div>
@@ -824,7 +824,7 @@ export default function Conversation() {
         )}
 
         {error && (
-          <div className="mt-4 rounded-lg bg-red-50 p-3 dark:bg-red-900/20">
+          <div className="mt-4 rounded-lg bg-[#e8d8de] p-3 dark:bg-red-900/20">
             <p className="text-sm text-[#9f4e63] dark:text-[#9f4e63]">{error}</p>
           </div>
         )}

@@ -82,7 +82,7 @@ export function OverviewCards() {
 
       <Card className="border-primary">
         <CardHeader>
-          <div className="w-fit rounded-lg bg-green-500/10 p-2">
+          <div className="w-fit rounded-lg bg-[#2f855a]/10 p-2">
             <Wallet className="size-5 text-[#2f855a]" />
           </div>
         </CardHeader>
@@ -92,7 +92,7 @@ export function OverviewCards() {
             <CardDescription>Last 6 Months</CardDescription>
           </div>
           <p className="text-2xl font-medium tabular-nums">$56,050</p>
-          <div className="w-fit rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-[#2f855a]">+22.2%</div>
+          <div className="w-fit rounded-md bg-[#2f855a]/10 px-2 py-1 text-xs font-medium text-[#2f855a]">+22.2%</div>
         </CardContent>
       </Card>
 
