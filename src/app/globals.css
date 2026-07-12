@@ -180,8 +180,9 @@
   border-color: #363c98 !important;
 }
 .sqf-badge-orange {
-  /* fondo blanco (no peach) para que contraste sobre las tarjetas peach */
-  background-color: #ffffff !important;
+  /* naranja suave (más oscuro que el peach de las tarjetas, para contrastar
+     sin quedar blanco) */
+  background-color: #ffdcc6 !important;
   color: #ff690b !important;
   border-color: #ff690b !important;
 }
