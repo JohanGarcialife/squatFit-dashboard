@@ -258,6 +258,7 @@ export class CursosService {
       tutorLastName: apiCurso.tutor?.lastName,
       tutorProfilePicture: apiCurso.tutor?.profile_picture,
       videoPresentation: apiCurso.video_presentation || undefined,
+      videos: (apiCurso as any).videos || undefined,
     };
   }
 
@@ -348,8 +349,8 @@ export class CursosService {
       console.log("=== RESPUESTA ENDPOINT /api/v1/course/detail ===");
       console.log(response);
       console.log("==================================================");
-
-      return response.data || response;
+      const rawData = response.data || response;
+      return this.transformCursoFromApi(rawData);
     } catch (error) {
       console.error("Error obteniendo curso:", error);
       throw error;

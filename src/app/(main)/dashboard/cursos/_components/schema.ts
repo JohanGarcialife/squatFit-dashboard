@@ -42,6 +42,7 @@ export const cursoSchema = z.object({
   tutorLastName: z.string().optional(),
   tutorProfilePicture: z.string().optional(),
   videoPresentation: z.string().optional(),
+  videos: z.array(z.any()).optional(), // Se añade arreglo de videos de manera flexible
 });
 
 export type CursoApi = z.infer<typeof cursoApiSchema>;

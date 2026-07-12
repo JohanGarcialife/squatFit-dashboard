@@ -36,12 +36,12 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
     if (open) {
       if (cursoDetail) {
         form.reset({
-          name: cursoDetail.title || "",
-          description: cursoDetail.subtitle || "",
-          instructor: cursoDetail.tutor_id || cursoDetail.tutor?.id || "",
-          price: parseFloat(cursoDetail.price) || 0,
-          image: cursoDetail.image || "",
-          video_presentation: cursoDetail.video_presentation || "",
+          name: cursoDetail.name || "",
+          description: cursoDetail.description || "",
+          instructor: cursoDetail.tutorId || cursoDetail.instructor || "",
+          price: cursoDetail.price || 0,
+          image: cursoDetail.thumbnail || "",
+          video_presentation: cursoDetail.videoPresentation || "",
         });
       } else if (curso) {
         form.reset({
