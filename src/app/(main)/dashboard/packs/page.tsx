@@ -1,18 +1,18 @@
 import { Metadata } from "next";
 
-import { PacksCards } from "./_components/packs-cards";
-import { PacksTable } from "./_components/packs-table";
+import { ProductosCatalogCards } from "./_components/catalog/catalog-cards";
+import { ProductosCatalogTable } from "./_components/catalog/catalog-table";
 
 export const metadata: Metadata = {
   title: "Productos | Squad Fit",
-  description: "Gestión de packs de libros",
+  description: "Catálogo unificado de productos vendibles",
 };
 
-export default function PacksPage() {
+export default function ProductosPage() {
   return (
     <div className="@container/main flex flex-col gap-4 md:gap-6">
-      <PacksCards />
-      <PacksTable />
+      <ProductosCatalogCards />
+      <ProductosCatalogTable />
     </div>
   );
 }
