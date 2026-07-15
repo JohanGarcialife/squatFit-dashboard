@@ -61,6 +61,14 @@ export interface UsuariosDirectoryCounts {
   admins: number;
   subscribers: number;
   students: number;
+  trash: number;
+}
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  staff_role: string | null;
+  role_name: string | null;
 }
 
 export interface UsuariosDirectoryResult {
@@ -69,7 +77,7 @@ export interface UsuariosDirectoryResult {
   counts: UsuariosDirectoryCounts;
 }
 
-export type UsuariosTab = "all" | "admin" | "subscriber" | "student";
+export type UsuariosTab = "all" | "admin" | "subscriber" | "student" | "trash";
 
 export interface GetUsuariosDirectoryParams {
   tab?: UsuariosTab;
@@ -138,7 +146,54 @@ export class UsuariosDirectoryService {
     return {
       usuarios: (res.data ?? []).map((u) => this.transform(u)),
       total: res.total ?? 0,
-      counts: res.counts ?? { all: 0, admins: 0, subscribers: 0, students: 0 },
+      counts: res.counts ?? { all: 0, admins: 0, subscribers: 0, students: 0, trash: 0 },
     };
+  }
+
+  /** POST autenticado a un endpoint del admin-panel. */
+  private static async post<T>(endpoint: string, body: unknown): Promise<T> {
+    const token = getAuthToken();
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "POST",
+      headers: this.getDefaultHeaders(token),
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 401 || res.status === 403) throw new Error("Unauthorized");
+      throw new Error(err.message ?? `Error ${res.status}`);
+    }
+    return res.json();
+  }
+
+  static getStaff(): Promise<StaffMember[]> {
+    return this.makeRequest<StaffMember[]>("/api/v1/admin-panel/users/staff");
+  }
+
+  static bulkAssign(userIds: string[], professionalId: string, professionalType: string) {
+    return this.post("/api/v1/admin-panel/users/bulk-assign", {
+      user_ids: userIds,
+      professional_id: professionalId,
+      professional_type: professionalType,
+    });
+  }
+
+  static bulkUnassign(userIds: string[], professionalType: string) {
+    return this.post("/api/v1/admin-panel/users/bulk-unassign", {
+      user_ids: userIds,
+      professional_type: professionalType,
+    });
+  }
+
+  static bulkTrash(userIds: string[]) {
+    return this.post("/api/v1/admin-panel/users/bulk-trash", { user_ids: userIds });
+  }
+
+  static bulkRestore(userIds: string[]) {
+    return this.post("/api/v1/admin-panel/users/bulk-restore", { user_ids: userIds });
+  }
+
+  static bulkDelete(userIds: string[]) {
+    return this.post("/api/v1/admin-panel/users/bulk-delete", { user_ids: userIds });
   }
 }

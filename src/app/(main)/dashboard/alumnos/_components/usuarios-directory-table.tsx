@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ColumnDef } from "@tanstack/react-table";
 import { Download, Eye, Pencil, Search } from "lucide-react";
+import { toast } from "sonner";
 
 import { BulkActionsBar } from "@/components/data-table/bulk-actions-bar";
 import { DataTable } from "@/components/data-table/data-table";
@@ -23,9 +25,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useDataTableInstance } from "@/hooks/use-data-table-instance";
-import { useUsuariosDirectory } from "@/hooks/use-usuarios-directory";
+import { useUsuariosDirectory, usuariosDirectoryKeys } from "@/hooks/use-usuarios-directory";
 import { exportCSV, exportPDF, exportXLSX, type ExportColumn } from "@/lib/export/table-export";
-import type { UsuarioDirectorio, UsuariosTab } from "@/lib/services/usuarios-directory-service";
+import { UsuariosDirectoryService } from "@/lib/services/usuarios-directory-service";
+import type { UsuarioDirectorio, UsuariosTab, StaffMember } from "@/lib/services/usuarios-directory-service";
 
 /** Pestañas del diseño con su recuento. */
 const TABS: { key: UsuariosTab; label: string }[] = [
@@ -33,7 +36,16 @@ const TABS: { key: UsuariosTab; label: string }[] = [
   { key: "admin", label: "Admin" },
   { key: "subscriber", label: "Suscriptores" },
   { key: "student", label: "Alumnos" },
+  { key: "trash", label: "Papelera" },
 ];
+
+/** Roles asignables (etiqueta, tipo que se guarda, y staff_role del equipo). */
+const ASSIGN_ROLES = [
+  { label: "Admin", type: "admin", staffRole: "Admin" },
+  { label: "Nutri", type: "nutritionist", staffRole: "Nutri" },
+  { label: "Trainer", type: "trainer", staffRole: "Trainer" },
+  { label: "Ventas", type: "sales", staffRole: "Ventas" },
+] as const;
 
 /** Etiqueta de los profesionales asignados según su tipo. */
 const ASSIGNED_LABEL: Record<string, string> = {
@@ -208,6 +220,24 @@ export function UsuariosDirectoryTable() {
   });
 
   const selected = table.getSelectedRowModel().rows.map((r) => r.original);
+  const selectedIds = selected.map((u) => u.id);
+
+  const queryClient = useQueryClient();
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: usuariosDirectoryKeys.all });
+    table.resetRowSelection();
+  };
+
+  // Equipo (para el selector al asignar). Se carga una vez.
+  const { data: staff = [] } = useQuery({
+    queryKey: ["staff-list"],
+    queryFn: () => UsuariosDirectoryService.getStaff(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Diálogo del selector de persona al "Añadir asignado: X"
+  const [assignPicker, setAssignPicker] = useState<(typeof ASSIGN_ROLES)[number] | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const doExport = (fmt: "csv" | "xlsx" | "pdf") => {
     const rows = selected.length ? selected : usuarios;
@@ -217,11 +247,78 @@ export function UsuariosDirectoryTable() {
     else void exportPDF(name, EXPORT_COLUMNS, rows, "Usuarios");
   };
 
+  /** Ficha de envío en texto plano de los usuarios seleccionados. */
+  const downloadShipping = () => {
+    const rows = selected.length ? selected : usuarios;
+    const lines = rows.map(
+      (u) =>
+        `${u.name}\t${u.email}\t${u.phone !== "—" ? u.phone : ""}\t${u.address !== "—" ? u.address : "(sin dirección)"}`,
+    );
+    const content = ["Nombre\tEmail\tTeléfono\tDirección de envío", ...lines].join("\n");
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `envio-usuarios-${rows.length}.txt`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  const runMutation = async (fn: () => Promise<unknown>, okMsg: string) => {
+    try {
+      await fn();
+      toast.success(okMsg);
+      refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "No se pudo completar la acción");
+    }
+  };
+
+  const onApplyBulk = (a: string) => {
+    if (a === "exportar-xlsx") return doExport("xlsx");
+    if (a === "exportar-csv") return doExport("csv");
+    if (a === "envio") return downloadShipping();
+    if (a === "trash")
+      return void runMutation(() => UsuariosDirectoryService.bulkTrash(selectedIds), "Movidos a la papelera");
+    if (a === "restore")
+      return void runMutation(() => UsuariosDirectoryService.bulkRestore(selectedIds), "Restaurados");
+    if (a === "delete-forever") return setConfirmDelete(true);
+    if (a.startsWith("assign:")) {
+      const role = ASSIGN_ROLES.find((r) => r.type === a.slice(7));
+      if (role) setAssignPicker(role);
+      return;
+    }
+    if (a.startsWith("unassign:")) {
+      const type = a.slice(9);
+      const role = ASSIGN_ROLES.find((r) => r.type === type);
+      return void runMutation(
+        () => UsuariosDirectoryService.bulkUnassign(selectedIds, type),
+        `Quitado el asignado ${role?.label ?? ""}`.trim(),
+      );
+    }
+  };
+
+  // Acciones del desplegable según la pestaña (normal vs papelera)
+  const bulkActions =
+    tab === "trash"
+      ? [
+          { value: "restore", label: "♻️ Restaurar" },
+          { value: "delete-forever", label: "🗑️ Borrar definitivamente" },
+          { value: "exportar-xlsx", label: "⬇️ Exportar como XLSX" },
+        ]
+      : [
+          ...ASSIGN_ROLES.map((r) => ({ value: `assign:${r.type}`, label: `✅ Añadir asignado: ${r.label}` })),
+          ...ASSIGN_ROLES.map((r) => ({ value: `unassign:${r.type}`, label: `❌ Eliminar asignado: ${r.label}` })),
+          { value: "exportar-xlsx", label: "⬇️ Exportar como XLSX" },
+          { value: "envio", label: "🚚 Descargar info de envío" },
+          { value: "trash", label: "🗑️ Mover a la papelera" },
+        ];
+
   const tabCount = (key: UsuariosTab): number | null => {
     if (!counts) return null;
     if (key === "all") return counts.all;
     if (key === "admin") return counts.admins;
     if (key === "subscriber") return counts.subscribers;
+    if (key === "trash") return counts.trash;
     return counts.students;
   };
 
@@ -251,17 +348,7 @@ export function UsuariosDirectoryTable() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <BulkActionsBar
-            selectedCount={selected.length}
-            onApply={(a) => {
-              if (a === "exportar-csv") doExport("csv");
-              else if (a === "exportar-xlsx") doExport("xlsx");
-            }}
-            actions={[
-              { value: "exportar-csv", label: "Exportar selección (CSV)" },
-              { value: "exportar-xlsx", label: "Exportar selección (Excel)" },
-            ]}
-          />
+          <BulkActionsBar selectedCount={selected.length} onApply={onApplyBulk} actions={bulkActions} />
 
           <div className="flex items-center justify-between gap-4">
             <div className="relative flex-1">
@@ -381,6 +468,77 @@ export function UsuariosDirectoryTable() {
           }}
         />
       )}
+
+      {/* Selector de persona al "Añadir asignado: X" */}
+      <Dialog open={!!assignPicker} onOpenChange={(o) => !o && setAssignPicker(null)}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle>Añadir asignado: {assignPicker?.label}</DialogTitle>
+            <DialogDescription>
+              Se asignará a {selectedIds.length} usuario(s). Elige a la persona del equipo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-1">
+            {(() => {
+              const people = staff.filter(
+                (s) => (s.staff_role ?? "").toLowerCase() === assignPicker?.staffRole.toLowerCase(),
+              );
+              if (!people.length)
+                return (
+                  <p className="text-muted-foreground text-sm">
+                    No hay nadie del equipo con el rol {assignPicker?.label}. Asígnalo primero en la pestaña Equipo.
+                  </p>
+                );
+              return people.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => {
+                    const role = assignPicker!;
+                    setAssignPicker(null);
+                    void runMutation(
+                      () => UsuariosDirectoryService.bulkAssign(selectedIds, p.id, role.type),
+                      `${p.name} asignado como ${role.label}`,
+                    );
+                  }}
+                  className="hover:bg-muted flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm"
+                >
+                  <span className="font-medium text-[#363C98]">{p.name}</span>
+                  <Badge variant="outline" className="sqf-badge-indigo">
+                    {assignPicker?.label}
+                  </Badge>
+                </button>
+              ));
+            })()}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmación de borrado definitivo */}
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <DialogContent className="sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle className="text-[#9f4e63]">Borrar definitivamente</DialogTitle>
+            <DialogDescription>
+              Vas a borrar {selectedIds.length} usuario(s) de forma permanente. Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setConfirmDelete(false)}>
+              Cancelar
+            </Button>
+            <Button
+              className="bg-[#9f4e63] hover:bg-[#8a4356]"
+              onClick={() => {
+                setConfirmDelete(false);
+                void runMutation(() => UsuariosDirectoryService.bulkDelete(selectedIds), "Borrados definitivamente");
+              }}
+            >
+              Borrar definitivamente
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
