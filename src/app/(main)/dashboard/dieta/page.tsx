@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 
-import { CalendarDays, Apple, ChefHat, Upload, ArrowLeftRight } from "lucide-react";
+import { Apple, ChefHat, ArrowLeftRight } from "lucide-react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BrandTabs } from "@/components/brand-tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 import { BancoRecetas } from "./_components/banco-recetas";
 import { CargaMasiva } from "./_components/carga-masiva";
@@ -29,51 +30,18 @@ export default function DietaPage() {
       {/* Cards de resumen */}
       <DietaCards />
 
-      {/* Tabs de navegación */}
+      {/* Submenú de marca */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="border-b">
-          <TabsList className="h-auto flex-wrap justify-start gap-1 rounded-none bg-transparent p-0">
-            {/* TODO: Generador de Menús - Pendiente de implementación backend
-            <TabsTrigger
-              value="generador"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <CalendarDays className="mr-2 size-4" />
-              Generador de Menús
-            </TabsTrigger>
-            */}
-            <TabsTrigger
-              value="alimentos"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <Apple className="mr-2 size-4" />
-              Lista de Alimentos
-            </TabsTrigger>
-            <TabsTrigger
-              value="recetas"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <ChefHat className="mr-2 size-4" />
-              Banco de Recetas
-            </TabsTrigger>
-            {/* TODO: Carga Masiva - Pendiente de implementación backend
-            <TabsTrigger
-              value="carga-masiva"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <Upload className="mr-2 size-4" />
-              Carga Masiva
-            </TabsTrigger>
-            */}
-            <TabsTrigger
-              value="sustituciones"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <ArrowLeftRight className="mr-2 size-4" />
-              Sustituciones
-            </TabsTrigger>
-          </TabsList>
-        </div>
+        <BrandTabs
+          tabs={[
+            // TODO: Generador de Menús y Carga Masiva — pendientes de implementación backend
+            { id: "alimentos", label: "Lista de Alimentos", icon: <Apple className="size-4" /> },
+            { id: "recetas", label: "Banco de Recetas", icon: <ChefHat className="size-4" /> },
+            { id: "sustituciones", label: "Sustituciones", icon: <ArrowLeftRight className="size-4" /> },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
 
         {/* TODO: Generador de Menús - Pendiente de implementación backend
         <TabsContent value="generador" className="mt-6">

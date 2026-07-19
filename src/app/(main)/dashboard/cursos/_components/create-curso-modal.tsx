@@ -25,12 +25,18 @@ export function CreateCursoModal({ open, onOpenChange }: CreateCursoModalProps) 
 
   const handleSubmit = async (values: CreateCursoFormValues) => {
     try {
+      // Si el admin eligió un archivo de portada, súbelo primero para obtener su URL.
+      let imageUrl = values.image;
+      if (values.image_file instanceof File) {
+        imageUrl = await CursosService.uploadCursoImage(values.image_file);
+      }
+
       const createdCurso = await createCursoMutation.mutateAsync({
         name: values.name,
         description: values.description,
         instructor: values.instructor,
         price: values.price,
-        image: values.image,
+        image: imageUrl,
         video_presentation: values.video_presentation,
       });
 

@@ -9,6 +9,18 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cy
 const REQUEST_TIMEOUT = 10000;
 
 // ============================================================================
+// PORTADA DE CURSO (subida de archivo)
+// ----------------------------------------------------------------------------
+// El backend aún NO expone un endpoint para subir la imagen de portada de un
+// curso (a día de hoy `POST/PUT admin-panel/courses` solo acepta `image` como
+// URL string). Cuando la Fase 2/backend cree el endpoint multipart (patrón de
+// libros: `FileInterceptor('image')` → GCS), poner aquí su ruta y el uploader
+// del catálogo funcionará sin más cambios. Mientras sea `null`, el campo de
+// portada de curso funciona en modo URL.
+// ============================================================================
+const COURSE_COVER_UPLOAD_ENDPOINT: string | null = null; // p.ej. "/api/v1/admin-panel/courses/image"
+
+// ============================================================================
 // TIPOS
 // ============================================================================
 
@@ -574,6 +586,46 @@ export class CursosService {
     } catch (error) {
       this.handleRequestError(error, timeoutId);
     }
+  }
+
+  /**
+   * Sube la imagen de portada de un curso y devuelve su URL pública (la que lee
+   * el carrito de la web). Requiere que el backend exponga el endpoint multipart
+   * indicado en `COURSE_COVER_UPLOAD_ENDPOINT` (ver nota arriba). Si aún no
+   * existe, lanza un error claro para que el back office use el modo URL.
+   */
+  static async uploadCursoImage(file: File): Promise<string> {
+    if (!file) {
+      throw new Error("Archivo de imagen requerido");
+    }
+    if (!COURSE_COVER_UPLOAD_ENDPOINT) {
+      throw new Error(
+        "La subida de portada de curso aún no está disponible en el backend. Pega la URL de la imagen (Storage) mientras tanto.",
+      );
+    }
+
+    const token = getAuthToken() ?? (typeof window !== "undefined" ? localStorage.getItem("authToken") : null);
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await fetch(`${API_BASE_URL}${COURSE_COVER_UPLOAD_ENDPOINT}`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      await this.handleResponseError(response);
+    }
+
+    const result = await response.json();
+    // El backend puede devolver { image } | { url } | { data: { image } }
+    return result?.image ?? result?.url ?? result?.data?.image ?? "";
   }
 
   /**

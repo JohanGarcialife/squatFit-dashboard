@@ -2,12 +2,15 @@
 
 import { useMemo, useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import { Search } from "lucide-react";
 
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/data-table-pagination";
 import { DataTableViewOptions } from "@/components/data-table/data-table-view-options";
 import { EditUserModal } from "@/components/modals/edit-user-modal";
+import { GrantProductDialog } from "@/components/modals/grant-product-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useAlumnos } from "@/hooks/use-alumnos";
@@ -17,9 +20,12 @@ import { getAlumnosColumns } from "./columns.alumnos";
 import { AlumnoUI } from "./schema";
 
 export function AlumnosTable() {
+  const router = useRouter();
   const [globalFilter, setGlobalFilter] = useState("");
   const [editingUser, setEditingUser] = useState<AlumnoUI | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [grantingUser, setGrantingUser] = useState<AlumnoUI | null>(null);
+  const [isGrantModalOpen, setIsGrantModalOpen] = useState(false);
 
   // Obtener alumnos del API
   const { data: alumnosData, isLoading, error } = useAlumnos({ page: 1, limit: 1000 });
@@ -33,6 +39,11 @@ export function AlumnosTable() {
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setEditingUser(null);
+  };
+
+  const handleGrantProduct = (alumno: AlumnoUI) => {
+    setGrantingUser(alumno);
+    setIsGrantModalOpen(true);
   };
 
   // Transformar datos del API a formato UI
@@ -52,9 +63,9 @@ export function AlumnosTable() {
     () =>
       getAlumnosColumns({
         onEdit: handleEditUser,
+        onGrantProduct: handleGrantProduct,
         onViewProfile: (alumno) => {
-          console.log("Ver perfil de:", alumno);
-          // Aquí puedes implementar la navegación al perfil
+          router.push(`/dashboard/alumnos/${alumno.id}`);
         },
         onDelete: (alumno) => {
           console.log("Eliminar alumno:", alumno);
@@ -134,6 +145,19 @@ export function AlumnosTable() {
             email: editingUser.email,
             birth: editingUser.birth ?? undefined,
           }}
+        />
+      )}
+
+      {/* Diálogo: Añadir producto al usuario */}
+      {grantingUser && (
+        <GrantProductDialog
+          open={isGrantModalOpen}
+          onOpenChange={(open) => {
+            setIsGrantModalOpen(open);
+            if (!open) setGrantingUser(null);
+          }}
+          userId={grantingUser.id}
+          userName={grantingUser.fullName}
         />
       )}
     </Card>

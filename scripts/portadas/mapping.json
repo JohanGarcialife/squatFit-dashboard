@@ -1,0 +1,27 @@
+{
+  "_comment": "Mapa portada (archivo de Figma) -> producto del catálogo, asociado por nombre. Rutas relativas a la carpeta de Drive 'Portadas productos' (raíz y subcarpeta 'Módulos'). 'match' es el texto que se busca (normalizado, sin acentos/mayúsculas) dentro del nombre del producto devuelto por la API. 'kind' indica en qué catálogo vive el producto.",
+  "drive_root": "/Users/squatfit/Library/CloudStorage/GoogleDrive-mcasas.mcf@gmail.com/Mi unidad/07 Web Squad Fit/Diseño nueva web/0 Otras Imagenes web/0 Capturas de figma/Portadas productos",
+  "items": [
+    { "file": "Libro 1 espiral mock up.png", "kind": "book", "match": ["libro 1", "volumen 1", "vol 1"] },
+    { "file": "Libro 2 espiral mock up.png", "kind": "book", "match": ["libro 2", "volumen 2", "vol 2"] },
+    { "file": "Libro 1 y 2 impreso.png", "kind": "book", "match": ["libros fisicos", "libro 1 y 2", "impreso"] },
+    { "file": "Libro 1 impreso.png", "kind": "book", "match": ["libro 1 impreso"] },
+    { "file": "Módulos/Libro 2 impreso.png", "kind": "book", "match": ["libro 2 impreso"] },
+    { "file": "Libro 1 biblioteca.png", "kind": "book", "match": ["biblioteca"] },
+    { "file": "Módulos/Libro cocina 1  digital.png", "kind": "book", "match": ["cocina 1", "cocina volumen 1", "cocina digital 1"] },
+    { "file": "Módulos/Libro cocina 2 digital.png", "kind": "book", "match": ["cocina 2", "cocina volumen 2", "cocina digital 2"] },
+    { "file": "Cocina-Landing.png", "kind": "book", "match": ["cocina mensual", "cocina"] },
+    { "file": "Libro 1y2 Super Pack.png", "kind": "pack", "match": ["super pack", "superpack", "pack 1 y 2"] },
+    { "file": "Curso La Mujer parte 1.png", "kind": "course", "match": ["la mujer parte 1", "mujer p1", "mujer 1"] },
+    { "file": "Curso La Mujer parte 2.png", "kind": "course", "match": ["la mujer parte 2", "mujer p2", "mujer 2"] },
+    { "file": "Curso La Mujer-Landing.png", "kind": "course", "match": ["la mujer"] },
+    { "file": "Fuerte y Definid@-Landing.png", "kind": "course", "match": ["fuerte y definid", "fuerte y definida", "fuerte y definido"] },
+    { "file": "Módulos/TMV premium.png", "kind": "course", "match": ["tmv premium", "tu mejor version premium"] },
+    { "file": "Módulos/TMV original.png", "kind": "course", "match": ["tmv original", "tu mejor version original"] },
+    { "file": "Módulos/TMV entreno.png", "kind": "course", "match": ["tmv entreno", "tmv entrenamiento"] },
+    { "file": "Módulos/TMV nutricion.png", "kind": "course", "match": ["tmv nutricion"] },
+    { "file": "Módulos/Módulo Entrenamiento para Ganar musculo.png", "kind": "course", "match": ["ganar musculo", "entrenamiento para ganar"] },
+    { "file": "Módulos/Módulo Nutrición para Perder grasa.png", "kind": "course", "match": ["perder grasa", "nutricion para perder"] },
+    { "file": "Módulos/Módulo de entreno - Entrena en casa.png", "kind": "course", "match": ["entrena en casa", "entreno en casa"] }
+  ]
+}

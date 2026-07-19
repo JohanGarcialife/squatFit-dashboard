@@ -1,0 +1,256 @@
+"use client";
+
+import { useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import {
+  ArrowLeft,
+  User2,
+  ShoppingBag,
+  HeartPulse,
+  ClipboardList,
+  Mail,
+  AtSign,
+  Cake,
+  ShieldCheck,
+} from "lucide-react";
+
+import { BrandTabs } from "@/components/brand-tabs";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useClientProfile } from "@/hooks/use-client-profile";
+
+const TABS = [
+  { id: "datos", label: "Datos de usuario", icon: <User2 className="size-4" /> },
+  { id: "compras", label: "Compras", icon: <ShoppingBag className="size-4" /> },
+  { id: "salud", label: "Medidas y salud", icon: <HeartPulse className="size-4" /> },
+  { id: "formularios", label: "Formularios", icon: <ClipboardList className="size-4" /> },
+];
+
+function DataRow({ icon, label, value }: { icon?: React.ReactNode; label: string; value?: React.ReactNode }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-b py-2.5 last:border-0">
+      <span className="text-muted-foreground flex items-center gap-2 text-sm">
+        {icon}
+        {label}
+      </span>
+      <span className="text-right text-sm font-medium">
+        {value ?? <span className="text-muted-foreground">—</span>}
+      </span>
+    </div>
+  );
+}
+
+function BackendPending({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-md border border-dashed p-4 text-sm">
+      <p className="text-muted-foreground">{children}</p>
+    </div>
+  );
+}
+
+interface ClientProfileViewProps {
+  userId: string;
+}
+
+export function ClientProfileView({ userId }: ClientProfileViewProps) {
+  const router = useRouter();
+  const [tab, setTab] = useState("datos");
+  const { data, isLoading, error } = useClientProfile(userId);
+
+  const user = data?.user;
+  const fullName = user ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "Cliente";
+  const initials =
+    user && user.firstName ? `${user.firstName.charAt(0)}${user.lastName?.charAt(0) ?? ""}`.toUpperCase() : "?";
+
+  return (
+    <div className="@container/main flex flex-col gap-6">
+      {/* Cabecera */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
+          <ArrowLeft className="size-5" />
+        </Button>
+        <Avatar className="size-12">
+          <AvatarFallback className="bg-blue-100 font-semibold text-blue-700">{initials}</AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col">
+          {isLoading ? (
+            <Skeleton className="h-6 w-40" />
+          ) : (
+            <h1 className="text-2xl font-bold tracking-tight">{fullName}</h1>
+          )}
+          <p className="text-muted-foreground text-sm">{user?.email ?? (isLoading ? "" : "Usuario")}</p>
+        </div>
+      </div>
+
+      {error && (
+        <Card>
+          <CardContent className="text-destructive py-6 text-sm">
+            No se pudieron cargar los datos del cliente: {error.message}
+          </CardContent>
+        </Card>
+      )}
+
+      <BrandTabs tabs={TABS} active={tab} onChange={setTab} />
+
+      {/* Datos de usuario */}
+      {tab === "datos" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Datos de usuario</CardTitle>
+            <CardDescription>Información de la cuenta registrada.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8 w-full" />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col">
+                <DataRow icon={<User2 className="size-4" />} label="Nombre" value={fullName} />
+                <DataRow icon={<Mail className="size-4" />} label="Email" value={user?.email} />
+                <DataRow
+                  icon={<AtSign className="size-4" />}
+                  label="Usuario"
+                  value={user ? `@${user.username}` : undefined}
+                />
+                <DataRow
+                  icon={<Cake className="size-4" />}
+                  label="Fecha de nacimiento"
+                  value={user?.birth ? new Date(user.birth).toLocaleDateString("es-ES") : undefined}
+                />
+                <DataRow
+                  icon={<ShieldCheck className="size-4" />}
+                  label="Rol"
+                  value={user?.role ? <Badge variant="outline">{user.role}</Badge> : undefined}
+                />
+                <DataRow
+                  label="Estado"
+                  value={
+                    user?.status ? (
+                      <Badge
+                        className={
+                          user.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                        }
+                      >
+                        {user.status === "active" ? "Activo" : "Inactivo"}
+                      </Badge>
+                    ) : undefined
+                  }
+                />
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Compras */}
+      {tab === "compras" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Compras</CardTitle>
+            <CardDescription>Productos adquiridos por el cliente.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : data && data.purchases.length > 0 ? (
+              <div className="divide-y rounded-md border">
+                {data.purchases.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between gap-3 p-3">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{s.title}</span>
+                      <span className="text-muted-foreground text-xs">
+                        {s.type} · {new Date(s.date).toLocaleDateString("es-ES")}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold">
+                        {s.amount_value} {s.amount_currency}
+                      </span>
+                      <Badge variant="outline">{s.status}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">Sin compras registradas para este cliente.</p>
+            )}
+            {data?.purchasesByNameOnly && (
+              <p className="text-muted-foreground text-xs">
+                Nota: el backend aún no filtra ventas por usuario; el listado se ha filtrado por nombre y puede ser
+                aproximado. Pendiente de un endpoint de ventas por <code>user_id</code>.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Medidas y salud (onboarding) */}
+      {tab === "salud" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Medidas y datos de salud</CardTitle>
+            <CardDescription>Datos del onboarding (peso, altura, objetivo, actividad…).</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <BackendPending>
+              El admin-panel todavía no expone un endpoint <code>GET</code> de detalle de usuario que devuelva las
+              medidas del onboarding (peso, altura, género, objetivo, kcal, nivel de actividad). El tipo{" "}
+              <code>UserDetailResponse</code> ya contempla estos campos: en cuanto exista el GET, esta sección los
+              mostrará. Ver el informe de Fase 3.
+            </BackendPending>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Formularios */}
+      {tab === "formularios" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Respuestas de formularios</CardTitle>
+            <CardDescription>Evaluación inicial, seguimiento y demás cuestionarios.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : data && data.forms.length > 0 ? (
+              data.forms.map(({ formType, answer }) => (
+                <div key={formType.id} className="rounded-md border p-4">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="font-medium">{formType.name}</span>
+                    <Badge variant={answer ? "default" : "secondary"}>{answer ? "Respondido" : "Sin respuesta"}</Badge>
+                  </div>
+                  {answer ? (
+                    <dl className="grid gap-1.5">
+                      {Object.entries(answer.answers ?? {}).map(([q, a]) => (
+                        <div key={q} className="grid grid-cols-[1fr_1fr] gap-2 text-sm">
+                          <dt className="text-muted-foreground">{q}</dt>
+                          <dd className="font-medium">{String(a)}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : (
+                    <p className="text-muted-foreground text-sm">El cliente no ha completado este formulario.</p>
+                  )}
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground text-sm">No hay tipos de formulario disponibles.</p>
+            )}
+            <p className="text-muted-foreground text-xs">
+              Los tipos disponibles hoy son los de asesoramiento (Nutricional, Deportivo, Completo, Revisión Mensual).
+              Prellamada y solicitudes de empleo aún no existen como formularios en el backend (ver informe).
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

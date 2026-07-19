@@ -28,7 +28,8 @@ import { useState } from "react";
 import { Dumbbell, Shield } from "lucide-react";
 // import { Table2, CalendarPlus, Activity } from "lucide-react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BrandTabs } from "@/components/brand-tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 import { BibliotecaEjercicios } from "./_components/biblioteca-ejercicios";
 // import { EdicionMasiva } from "./_components/edicion-masiva";
@@ -52,40 +53,17 @@ export default function TrainerPage() {
       {/* Cards de adherencia (KPIs) */}
       <TrainerCards />
 
-      {/* Tabs de navegación */}
+      {/* Submenú de marca */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="border-b">
-          <TabsList className="h-auto flex-wrap justify-start gap-1 rounded-none bg-transparent p-0">
-            <TabsTrigger
-              value="biblioteca"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <Dumbbell className="mr-2 size-4" />
-              Biblioteca de Ejercicios
-            </TabsTrigger>
-            {/* <TabsTrigger
-              value="edicion"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <Table2 className="mr-2 size-4" />
-              Edición Masiva
-            </TabsTrigger> */}
-            {/* <TabsTrigger
-              value="renovar"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <CalendarPlus className="mr-2 size-4" />
-              Renovar Semana
-            </TabsTrigger> */}
-            <TabsTrigger
-              value="restricciones"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <Shield className="mr-2 size-4" />
-              Lesiones y Restricciones
-            </TabsTrigger>
-          </TabsList>
-        </div>
+        <BrandTabs
+          tabs={[
+            // TODO: Edición Masiva y Renovar Semana — pendientes de implementación backend
+            { id: "biblioteca", label: "Biblioteca de Ejercicios", icon: <Dumbbell className="size-4" /> },
+            { id: "restricciones", label: "Lesiones y Restricciones", icon: <Shield className="size-4" /> },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
 
         <TabsContent value="biblioteca" className="mt-6">
           <BibliotecaEjercicios />

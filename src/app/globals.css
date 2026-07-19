@@ -145,3 +145,12 @@
     background-clip: padding-box;
   }
 }
+
+/* Oculta la barra de scroll (submenú de marca y carruseles horizontales). */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

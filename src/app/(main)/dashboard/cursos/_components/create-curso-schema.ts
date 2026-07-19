@@ -27,7 +27,16 @@ export const createCursoFormSchema = z
       .max(9999, "El precio no puede exceder 9999"),
 
     image: z.union([z.string().url("Introduce una URL válida"), z.literal("")]).optional(),
+    // Archivo de portada elegido en el uploader (se sube y se convierte en URL al guardar).
+    image_file: z.any().optional(),
     video_presentation: z.union([z.string().url("Introduce una URL válida"), z.literal("")]).optional(),
+
+    // Duración y entrega (15.9) — opcionales; solo se envían si el backend los soporta.
+    access_type: z.enum(["permanent", "months"]).optional(),
+    access_months: z.number().optional(),
+    drip_mode: z.enum(["none", "interval", "scheduled"]).optional(),
+    drip_interval_days: z.number().optional(),
+    drip_start_delay_days: z.number().optional(),
 
     // Primer ón (opcional)
     add_course_video: z.boolean().default(false),
@@ -76,7 +85,13 @@ export const createCursoDefaultValues: CreateCursoFormValues = {
   instructor: "",
   price: 0,
   image: "",
+  image_file: undefined,
   video_presentation: "",
+  access_type: "permanent",
+  access_months: undefined,
+  drip_mode: "none",
+  drip_interval_days: undefined,
+  drip_start_delay_days: undefined,
   add_course_video: false,
   course_video_type: "external",
   course_video_title: "",

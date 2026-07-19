@@ -4,7 +4,8 @@ import { useState } from "react";
 
 import { Users, AlertTriangle } from "lucide-react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BrandTabs } from "@/components/brand-tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 // import { AgendaRevisiones } from "./_components/agenda-revisiones";
 import { AlertasCumplimiento } from "./_components/alertas-cumplimiento";
@@ -27,33 +28,17 @@ export default function SeguimientoPage() {
       {/* Cards de resumen */}
       <SeguimientoCards />
 
-      {/* Tabs de navegación */}
+      {/* Submenú de marca */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <div className="border-b">
-          <TabsList className="h-auto flex-wrap justify-start gap-1 rounded-none bg-transparent p-0">
-            <TabsTrigger
-              value="clientes"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <Users className="mr-2 size-4" />
-              Panel de Clientes
-            </TabsTrigger>
-            {/* <TabsTrigger
-              value="agenda"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <CalendarCheck className="mr-2 size-4" />
-              Agenda de Revisiones
-            </TabsTrigger> */}
-            <TabsTrigger
-              value="alertas"
-              className="data-[state=active]:border-primary relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              <AlertTriangle className="mr-2 size-4" />
-              Alertas de Cumplimiento
-            </TabsTrigger>
-          </TabsList>
-        </div>
+        <BrandTabs
+          tabs={[
+            // TODO: Agenda de Revisiones — pendiente de implementación backend
+            { id: "clientes", label: "Panel de Clientes", icon: <Users className="size-4" /> },
+            { id: "alertas", label: "Alertas de Cumplimiento", icon: <AlertTriangle className="size-4" /> },
+          ]}
+          active={activeTab}
+          onChange={setActiveTab}
+        />
 
         <TabsContent value="clientes" className="mt-6">
           <PanelClientes />
