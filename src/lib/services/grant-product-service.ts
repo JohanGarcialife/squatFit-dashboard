@@ -2,22 +2,19 @@ import { getAuthToken } from "@/lib/auth/auth-utils";
 
 import { CursosService } from "./cursos-service";
 import { LibrosService } from "./libros-service";
-import { PacksService } from "./packs-service";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
 
 // ============================================================================
 // GRANT PRODUCT
 // ----------------------------------------------------------------------------
-// La Fase 2 está creando `POST /api/v1/admin-panel/grant-product` (asignar un
-// producto a un usuario / a un pedido). A 19 jul 2026 el endpoint NO existe aún
-// en prod ni en ninguna rama del backend (verificado: 404). Dejamos la llamada
-// lista tras esta constante: cuando exista, basta poner GRANT_PRODUCT_AVAILABLE
-// en true (o quitar la guarda) y el botón «Añadir producto» funcionará.
-// Cuerpo esperado (a confirmar con Fase 2): { user_id, product_id, product_type }.
+// `POST /api/v1/admin-panel/grant-product` (desplegado 19 jul 2026, lote 3).
+// El DTO del backend valida con forbidNonWhitelisted y SOLO acepta
+// { user_id, product_type: 'course'|'book', product_id } — nada de campos
+// extra (order_id daría 400) ni packs.
 // ============================================================================
 export const GRANT_PRODUCT_ENDPOINT = "/api/v1/admin-panel/grant-product";
-export const GRANT_PRODUCT_AVAILABLE = false;
+export const GRANT_PRODUCT_AVAILABLE = true;
 
 export type GrantableProductType = "course" | "book" | "pack" | "product";
 
@@ -43,11 +40,7 @@ export class GrantProductService {
    * resto). Ordenado por tipo y nombre.
    */
   static async getGrantableProducts(): Promise<GrantableProduct[]> {
-    const [cursos, libros, packs] = await Promise.allSettled([
-      CursosService.getCursos(),
-      LibrosService.getLibros(),
-      PacksService.getPacks(),
-    ]);
+    const [cursos, libros] = await Promise.allSettled([CursosService.getCursos(), LibrosService.getLibros()]);
 
     const out: GrantableProduct[] = [];
 
@@ -68,9 +61,7 @@ export class GrantProductService {
         });
       }
     }
-    if (packs.status === "fulfilled") {
-      for (const p of packs.value) out.push({ id: p.id, name: p.name, type: "pack", price: p.price });
-    }
+    // Los packs quedan fuera: el endpoint grant-product solo admite course|book.
 
     return out.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
   }
@@ -97,7 +88,8 @@ export class GrantProductService {
         user_id: payload.userId,
         product_id: payload.productId,
         product_type: payload.productType,
-        ...(payload.orderId ? { order_id: payload.orderId } : {}),
+        // payload.orderId es solo contexto de UI: el DTO del backend
+        // (forbidNonWhitelisted) rechaza cualquier campo extra.
       }),
     });
 
