@@ -5,7 +5,13 @@ import { useState } from "react";
 import { X, FileVideo, Upload, Link2, Trash2, Edit2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 
+import { CoverImageUpload } from "@/components/cover-image-upload";
 import { InstructorSelect } from "@/components/forms/instructor-select";
+import {
+  ProductDeliveryFields,
+  PRODUCT_DELIVERY_SUPPORTED,
+  type ProductDeliveryValue,
+} from "@/components/product-delivery-fields";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +58,9 @@ interface CreateCursoFormProps {
   }>;
   videoPresentationUrl?: string;
   cursoId?: string;
+  /** Muestra la sección «Duración y entrega» (15.9). Tolerante: por defecto se
+   *  oculta salvo que el backend soporte los campos o el detalle ya los traiga. */
+  showDelivery?: boolean;
 }
 
 export function CreateCursoForm({
@@ -64,7 +73,23 @@ export function CreateCursoForm({
   currentVideos,
   videoPresentationUrl,
   cursoId,
+  showDelivery,
 }: CreateCursoFormProps) {
+  const deliveryVisible = showDelivery ?? PRODUCT_DELIVERY_SUPPORTED;
+  const deliveryValue: ProductDeliveryValue = {
+    accessType: form.watch("access_type") ?? "permanent",
+    accessMonths: form.watch("access_months"),
+    dripMode: form.watch("drip_mode") ?? "none",
+    dripIntervalDays: form.watch("drip_interval_days"),
+    dripStartDelayDays: form.watch("drip_start_delay_days"),
+  };
+  const handleDeliveryChange = (v: ProductDeliveryValue) => {
+    form.setValue("access_type", v.accessType);
+    form.setValue("access_months", v.accessMonths);
+    form.setValue("drip_mode", v.dripMode);
+    form.setValue("drip_interval_days", v.dripIntervalDays);
+    form.setValue("drip_start_delay_days", v.dripStartDelayDays);
+  };
   const deleteVideoMutation = useDeleteCursoVideo();
   const updateVideoMetadataMutation = useUpdateCursoVideoMetadata();
   const [videoToDelete, setVideoToDelete] = useState<string | null>(null);
@@ -179,52 +204,57 @@ export function CreateCursoForm({
           </div>
         </div>
 
-        {/* Bloque: Imagen y video de presentación */}
+        {/* Bloque: Portada del curso */}
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <CoverImageUpload
+                  value={{ file: form.watch("image_file") ?? null, url: field.value ?? "" }}
+                  onChange={({ file, url }) => {
+                    field.onChange(url);
+                    form.setValue("image_file", file ?? undefined);
+                  }}
+                  initialPreviewUrl={field.value || null}
+                  disabled={isLoading}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Bloque: Video de presentación */}
         <div className="border-border/70 bg-background space-y-5 rounded-lg border p-4">
-          <p className="text-muted-foreground text-sm font-medium">Imagen y video de presentación (URLs)</p>
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL de la imagen</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="url"
-                      placeholder="https://ejemplo.com/imagen.jpg"
-                      {...field}
-                      value={field.value ?? ""}
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                  <FormDescription>Enlace a la imagen del curso</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="video_presentation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL del video de presentación</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="url"
-                      placeholder="https://ejemplo.com/video.mp4"
-                      {...field}
-                      value={field.value ?? ""}
-                      disabled={isLoading}
-                    />
-                  </FormControl>
-                  <FormDescription>Enlace al video de presentación</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <p className="text-muted-foreground text-sm font-medium">Video de presentación</p>
+          <FormField
+            control={form.control}
+            name="video_presentation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>URL del video de presentación</FormLabel>
+                <FormControl>
+                  <Input
+                    type="url"
+                    placeholder="https://ejemplo.com/video.mp4"
+                    {...field}
+                    value={field.value ?? ""}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <FormDescription>Enlace al video de presentación</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
+
+        {/* Bloque: Duración y entrega (15.9) — tolerante: oculto si el backend no soporta los campos */}
+        {deliveryVisible && (
+          <ProductDeliveryFields value={deliveryValue} onChange={handleDeliveryChange} disabled={isLoading} />
+        )}
 
         {/* Bloque: Primer video de instrucción (Opcional) */}
         <div className="border-border/70 bg-background space-y-5 rounded-lg border p-4">

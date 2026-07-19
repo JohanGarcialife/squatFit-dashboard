@@ -5,8 +5,14 @@ import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
+import {
+  PRODUCT_DELIVERY_SUPPORTED,
+  apiHasDeliveryFields,
+  deliveryFromApi,
+} from "@/components/product-delivery-fields";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useUpdateCurso, useCurso } from "@/hooks/use-cursos";
+import { CursosService } from "@/lib/services/cursos-service";
 
 import { CreateCursoForm } from "./create-curso-form";
 import { createCursoFormSchema, CreateCursoFormValues, createCursoDefaultValues } from "./create-curso-schema";
@@ -31,10 +37,15 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
     defaultValues: createCursoDefaultValues,
   });
 
+  // Detecta si el detalle del curso trae campos de duración/entrega (tolerante).
+  const rawDetail = cursoDetail as unknown as Record<string, unknown> | undefined;
+  const showDelivery = PRODUCT_DELIVERY_SUPPORTED || apiHasDeliveryFields(rawDetail);
+
   // Prellenar el formulario priorizando los detalles completos de la API
   useEffect(() => {
     if (open) {
       if (cursoDetail) {
+        const delivery = rawDetail && apiHasDeliveryFields(rawDetail) ? deliveryFromApi(rawDetail) : {};
         form.reset({
           name: cursoDetail.name || "",
           description: cursoDetail.description || "",
@@ -42,6 +53,7 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
           price: cursoDetail.price || 0,
           image: cursoDetail.thumbnail || "",
           video_presentation: cursoDetail.videoPresentation || "",
+          ...delivery,
         });
       } else if (curso) {
         form.reset({
@@ -60,9 +72,16 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
     if (!curso) return;
 
     try {
+      // Si el admin eligió un archivo de portada nuevo, súbelo primero para obtener su URL.
+      let data = values;
+      if (values.image_file instanceof File) {
+        const imageUrl = await CursosService.uploadCursoImage(values.image_file);
+        data = { ...values, image: imageUrl };
+      }
+
       await updateCursoMutation.mutateAsync({
         id: curso.id,
-        data: values,
+        data,
       });
 
       // Cerrar modal
@@ -98,6 +117,7 @@ export function EditCursoModal({ curso, open, onOpenChange }: EditCursoModalProp
           currentVideos={cursoDetail?.videos}
           videoPresentationUrl={form.watch("video_presentation")}
           cursoId={curso?.id}
+          showDelivery={showDelivery}
         />
       </DialogContent>
     </Dialog>

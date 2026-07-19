@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash2, Eye, Mail, Activity } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Eye, Mail, Activity, PackagePlus } from "lucide-react";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -79,6 +79,7 @@ interface ColumnHandlers {
   onEdit?: (alumno: AlumnoUI) => void;
   onDelete?: (alumno: AlumnoUI) => void;
   onViewProfile?: (alumno: AlumnoUI) => void;
+  onGrantProduct?: (alumno: AlumnoUI) => void;
 }
 
 // ============================================================================
@@ -208,6 +209,10 @@ export const getAlumnosColumns = (handlers: ColumnHandlers = {}): ColumnDef<Alum
             <DropdownMenuItem onClick={() => handlers.onEdit?.(alumno)}>
               <Pencil className="mr-2 h-4 w-4" />
               Editar información
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handlers.onGrantProduct?.(alumno)}>
+              <PackagePlus className="mr-2 h-4 w-4" />
+              Añadir producto
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-600" onClick={() => handlers.onDelete?.(alumno)}>
