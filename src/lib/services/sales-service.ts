@@ -125,6 +125,7 @@ export class SalesService {
       queryParams.append("page", (params?.page ?? 1).toString());
       if (params?.month) queryParams.append("month", params.month.toString());
       if (params?.search) queryParams.append("search", params.search);
+      if (params?.user_id) queryParams.append("user_id", params.user_id);
 
       const response = await fetch(`/api/admin/sales?${queryParams.toString()}`, {
         method: "GET",

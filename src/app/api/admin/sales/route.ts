@@ -23,10 +23,14 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get("limit") ?? "20";
     const month = searchParams.get("month");
     const search = searchParams.get("search");
+    const userId = searchParams.get("user_id");
 
     const params = new URLSearchParams({ page, limit });
     if (month) params.append("month", month);
     if (search) params.append("search", search);
+    // Se reenvía solo cuando el cliente lo envía (gobernado por SALES_BY_USER_READY
+    // en el front). El backend lo ignorará hasta que soporte el filtro por usuario.
+    if (userId) params.append("user_id", userId);
 
     const response = await fetch(`${API_BASE_URL}/api/v1/admin-panel/sales?${params.toString()}`, {
       method: "GET",

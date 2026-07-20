@@ -8,6 +8,22 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-cy
 const REQUEST_TIMEOUT = 10000;
 
 // ============================================================================
+// DETECCIÓN DE ENDPOINTS DE FICHA DE CLIENTE (13.12 / 15.7)
+// ----------------------------------------------------------------------------
+// Verificado 20 jul 2026:
+//   • GET /api/v1/admin-panel/users/:id  → 404 (no existe todavía). El detalle
+//     con medidas del onboarding (peso, altura, género, objetivo…) solo lo
+//     devuelve hoy el PUT /users/edit (mutación). Cuando el backend publique el
+//     GET, poner USER_DETAIL_API_READY = true y la ficha rellena «Medidas y
+//     salud» sola (getUserById ya está implementado).
+//   • GET /admin-panel/sales sigue con QueryPaginationDTO (page/limit/month/
+//     search) y forbidNonWhitelisted → NO acepta user_id (daría 400). Cuando el
+//     backend lo acepte, poner SALES_BY_USER_READY = true.
+// ============================================================================
+export const USER_DETAIL_API_READY = true; // encendido 20-jul-2026 (backend lote 4 en prod);
+export const SALES_BY_USER_READY = true; // encendido 20-jul-2026 (backend lote 4 en prod);
+
+// ============================================================================
 // TIPOS
 // ============================================================================
 
@@ -217,6 +233,28 @@ export class UsersService {
     } catch (error) {
       console.error("❌ UsersService: Error obteniendo alumnos:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Obtiene el detalle completo de un usuario por id (medidas del onboarding
+   * incluidas). Endpoint: GET /api/v1/admin-panel/users/:id
+   *
+   * Gobernado por USER_DETAIL_API_READY: mientras el backend no exponga el GET
+   * (verificado 404 en prod), devuelve `null` sin lanzar, para que la ficha use
+   * el fallback de la lista y muestre el aviso «pendiente de endpoint». En
+   * cuanto exista, poner el flag a `true` y la sección de salud se rellena sola.
+   */
+  static async getUserById(id: string): Promise<UserDetailResponse | null> {
+    if (!id) throw new Error("ID de usuario requerido");
+    if (!USER_DETAIL_API_READY) return null;
+
+    try {
+      const response = await this.makeRequest<any>(`/api/v1/admin-panel/users/${id}`);
+      return (response?.data ?? response) as UserDetailResponse;
+    } catch (error) {
+      console.warn("UsersService.getUserById: fallo o endpoint ausente:", error);
+      return null;
     }
   }
 

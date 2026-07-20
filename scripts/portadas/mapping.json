@@ -1,17 +1,12 @@
 {
-  "_comment": "Mapa portada (archivo de Figma) -> producto del catálogo, asociado por nombre. Rutas relativas a la carpeta de Drive 'Portadas productos' (raíz y subcarpeta 'Módulos'). 'match' es el texto que se busca (normalizado, sin acentos/mayúsculas) dentro del nombre del producto devuelto por la API. 'kind' indica en qué catálogo vive el producto.",
+  "_comment": "Mapa portada (archivo de Figma) -> producto del catálogo, asociado por nombre (normalizado, sin acentos/mayúsculas). 'match' se busca como substring dentro del nombre del producto que devuelve la API. 'kind' indica el catálogo (book|course|pack). Verificado 20 jul 2026: el catálogo LIBROS en prod tiene 3 libros activos — «Libro de cocina 1», «Libro de cocina 2» y «Guía de Nutrición». Solo las portadas digitales de cocina 1 y 2 tienen equivalente definitivo en Figma, así que son las únicas entradas 'book' con match limpio 1:1. El resto de mockups (espiral, impreso, biblioteca, landings, super pack) NO se mapean a libros para no sobrescribir por error covers en producción. Cursos/packs: pendientes de sus endpoints de imagen (ver script).",
   "drive_root": "/Users/squatfit/Library/CloudStorage/GoogleDrive-mcasas.mcf@gmail.com/Mi unidad/07 Web Squad Fit/Diseño nueva web/0 Otras Imagenes web/0 Capturas de figma/Portadas productos",
+  "gcs_bucket": "squat-fit-storage-eu",
+  "gcs_prefix": "static/portadas",
   "items": [
-    { "file": "Libro 1 espiral mock up.png", "kind": "book", "match": ["libro 1", "volumen 1", "vol 1"] },
-    { "file": "Libro 2 espiral mock up.png", "kind": "book", "match": ["libro 2", "volumen 2", "vol 2"] },
-    { "file": "Libro 1 y 2 impreso.png", "kind": "book", "match": ["libros fisicos", "libro 1 y 2", "impreso"] },
-    { "file": "Libro 1 impreso.png", "kind": "book", "match": ["libro 1 impreso"] },
-    { "file": "Módulos/Libro 2 impreso.png", "kind": "book", "match": ["libro 2 impreso"] },
-    { "file": "Libro 1 biblioteca.png", "kind": "book", "match": ["biblioteca"] },
-    { "file": "Módulos/Libro cocina 1  digital.png", "kind": "book", "match": ["cocina 1", "cocina volumen 1", "cocina digital 1"] },
-    { "file": "Módulos/Libro cocina 2 digital.png", "kind": "book", "match": ["cocina 2", "cocina volumen 2", "cocina digital 2"] },
-    { "file": "Cocina-Landing.png", "kind": "book", "match": ["cocina mensual", "cocina"] },
-    { "file": "Libro 1y2 Super Pack.png", "kind": "pack", "match": ["super pack", "superpack", "pack 1 y 2"] },
+    { "file": "Módulos/Libro cocina 1  digital.png", "kind": "book", "match": ["libro de cocina 1", "cocina 1"] },
+    { "file": "Módulos/Libro cocina 2 digital.png", "kind": "book", "match": ["libro de cocina 2", "cocina 2"] },
+
     { "file": "Curso La Mujer parte 1.png", "kind": "course", "match": ["la mujer parte 1", "mujer p1", "mujer 1"] },
     { "file": "Curso La Mujer parte 2.png", "kind": "course", "match": ["la mujer parte 2", "mujer p2", "mujer 2"] },
     { "file": "Curso La Mujer-Landing.png", "kind": "course", "match": ["la mujer"] },
@@ -22,6 +17,8 @@
     { "file": "Módulos/TMV nutricion.png", "kind": "course", "match": ["tmv nutricion"] },
     { "file": "Módulos/Módulo Entrenamiento para Ganar musculo.png", "kind": "course", "match": ["ganar musculo", "entrenamiento para ganar"] },
     { "file": "Módulos/Módulo Nutrición para Perder grasa.png", "kind": "course", "match": ["perder grasa", "nutricion para perder"] },
-    { "file": "Módulos/Módulo de entreno - Entrena en casa.png", "kind": "course", "match": ["entrena en casa", "entreno en casa"] }
+    { "file": "Módulos/Módulo de entreno - Entrena en casa.png", "kind": "course", "match": ["entrena en casa", "entreno en casa"] },
+
+    { "file": "Libro 1y2 Super Pack.png", "kind": "pack", "match": ["super pack", "superpack", "pack 1 y 2"] }
   ]
 }

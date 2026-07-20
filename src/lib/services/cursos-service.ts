@@ -1,4 +1,9 @@
 import { Curso, CursoApi } from "@/app/(main)/dashboard/cursos/_components/schema";
+import {
+  PRODUCT_DELIVERY_WRITE_READY,
+  deliveryToApi,
+  type ProductDeliveryValue,
+} from "@/components/product-delivery-fields";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 
 // ============================================================================
@@ -32,6 +37,12 @@ export interface CreateCursoDto {
   price: number;
   image?: string;
   video_presentation?: string;
+  // Duración y entrega (15.9) — campos de la UI (ver ProductDeliveryValue).
+  access_type?: ProductDeliveryValue["accessType"];
+  access_months?: number;
+  drip_mode?: ProductDeliveryValue["dripMode"];
+  drip_interval_days?: number;
+  drip_start_delay_days?: number;
 }
 
 // DTO que espera la API (formato real del backend)
@@ -43,6 +54,33 @@ export interface CreateCursoApiDto {
   tutor_id: string;
   image?: string;
   video_presentation?: string;
+  // Duración/entrega (contrato real; solo se envían si PRODUCT_DELIVERY_WRITE_READY).
+  access_months?: number | null;
+  drip_mode?: string;
+  drip_config?: Record<string, number | string>;
+}
+
+/**
+ * Construye el fragmento de entrega del DTO (access_months/drip_mode/drip_config)
+ * a partir de los campos de la UI. Devuelve `{}` si la escritura aún no está
+ * habilitada (PRODUCT_DELIVERY_WRITE_READY), para no romper el alta/edición con
+ * un 400 del `forbidNonWhitelisted` del backend.
+ */
+function buildDeliveryApiFields(data: Partial<CreateCursoDto>): Partial<CreateCursoApiDto> {
+  if (!PRODUCT_DELIVERY_WRITE_READY) return {};
+  if (!data.access_type && !data.drip_mode && data.access_months == null) return {};
+  const payload = deliveryToApi({
+    accessType: data.access_type ?? "permanent",
+    accessMonths: data.access_months,
+    dripMode: data.drip_mode ?? "none",
+    dripIntervalDays: data.drip_interval_days,
+    dripStartDelayDays: data.drip_start_delay_days,
+  });
+  return {
+    access_months: payload.access_months,
+    drip_mode: payload.drip_mode,
+    drip_config: payload.drip_config,
+  };
 }
 
 export interface UpdateCursoDto extends Partial<CreateCursoDto> {
@@ -380,6 +418,8 @@ export class CursosService {
       tutor_id: data.instructor,
       image: data.image ?? "",
       video_presentation: data.video_presentation ?? "",
+      // Campos de duración/entrega (solo si PRODUCT_DELIVERY_WRITE_READY).
+      ...buildDeliveryApiFields(data),
     };
   }
 
@@ -438,6 +478,9 @@ export class CursosService {
       if (data.description) apiData.subtitle = data.description;
       if (data.price !== undefined) apiData.price = data.price.toString();
       if (data.instructor) apiData.tutor_id = data.instructor;
+
+      // Campos de duración/entrega (solo si PRODUCT_DELIVERY_WRITE_READY).
+      Object.assign(apiData, buildDeliveryApiFields(data));
 
       console.log("📤 CursosService: Datos enviados a la API:", apiData);
 

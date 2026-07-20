@@ -3,29 +3,55 @@ import { useQuery } from "@tanstack/react-query";
 import { getFormTypes, getFormUserAnswer, type FormType, type FormUserAnswer } from "@/lib/services/form-service";
 import { SalesService } from "@/lib/services/sales-service";
 import type { Sale } from "@/lib/services/sales-types";
-import { UsersService, type UserResponse } from "@/lib/services/users-service";
+import {
+  SALES_BY_USER_READY,
+  USER_DETAIL_API_READY,
+  UsersService,
+  type UserDetailResponse,
+  type UserResponse,
+} from "@/lib/services/users-service";
 
 export interface ClientFormEntry {
   formType: FormType;
   answer: FormUserAnswer | null;
 }
 
+/** Un acceso concedido/comprado por el cliente (curso, libro o pack). */
+export interface ClientAccess {
+  id: string;
+  title: string;
+  type: Sale["type"];
+  date: string;
+  /** Cómo obtuvo el acceso (compra o concesión manual del staff). */
+  origin: "purchase" | "grant";
+  status?: string;
+}
+
 export interface ClientProfileData {
   user: UserResponse | null;
+  /** Detalle completo (medidas del onboarding) cuando el backend expone el GET. */
+  userDetail: UserDetailResponse | null;
   purchases: Sale[];
   /** true si las compras se filtraron por nombre (el backend no filtra por user_id). */
   purchasesByNameOnly: boolean;
+  /** Accesos concedidos/comprados (13.12). Derivados de las ventas mientras no
+   *  exista un endpoint dedicado de accesos por usuario. */
+  accesses: ClientAccess[];
   forms: ClientFormEntry[];
 }
 
 /**
- * Reúne, para un usuario, los datos que hoy expone el admin-panel:
- *  • datos de usuario (de la lista `users`; no hay GET de detalle por id todavía),
- *  • compras (de `sales`, filtradas por nombre — el backend no filtra por user_id),
+ * Reúne, para un usuario, los datos del admin-panel usando DETECCIÓN de
+ * endpoints (Fase 6 en paralelo):
+ *  • datos de usuario: intenta el GET de detalle por id (USER_DETAIL_API_READY);
+ *    si no, usa la lista `users` como fallback.
+ *  • compras: intenta `sales?user_id` (SALES_BY_USER_READY); si no, filtra por
+ *    nombre (aproximado) y lo avisa.
+ *  • accesos concedidos: derivados de las compras (marca los ADMIN_GRANT como
+ *    concesión manual).
  *  • respuestas de formularios (`form-types` + `form-user-answer`).
  *
- * Cada fuente falla de forma aislada (Promise.allSettled) para que la ficha
- * muestre lo que haya disponible.
+ * Cada fuente falla de forma aislada (Promise.allSettled).
  */
 export function useClientProfile(userId: string, fallbackName?: string) {
   return useQuery<ClientProfileData>({
@@ -33,18 +59,39 @@ export function useClientProfile(userId: string, fallbackName?: string) {
     enabled: !!userId,
     staleTime: 30_000,
     queryFn: async () => {
-      const [usersRes, salesRes, formTypesRes] = await Promise.allSettled([
+      const salesParams = SALES_BY_USER_READY ? { page: 1, limit: 1000, user_id: userId } : { page: 1, limit: 1000 };
+
+      const [detailRes, usersRes, salesRes, formTypesRes] = await Promise.allSettled([
+        UsersService.getUserById(userId),
         UsersService.getAlumnos({ page: 1, limit: 1000 }),
-        SalesService.getSales({ page: 1, limit: 1000 }),
+        SalesService.getSales(salesParams),
         getFormTypes(),
       ]);
+
+      const userDetail = detailRes.status === "fulfilled" ? detailRes.value : null;
 
       const users = usersRes.status === "fulfilled" ? usersRes.value : [];
       const user = users.find((u) => u.id === userId) ?? null;
       const name = (user ? `${user.firstName}` : fallbackName)?.trim().toLowerCase();
 
       const allSales = salesRes.status === "fulfilled" ? salesRes.value.sales : [];
-      const purchases = name ? allSales.filter((s) => s.firstName?.trim().toLowerCase() === name) : [];
+      // Con el filtro por usuario del backend, las ventas ya vienen acotadas; si
+      // no, filtramos por nombre como aproximación.
+      const purchases = SALES_BY_USER_READY
+        ? allSales
+        : name
+          ? allSales.filter((s) => s.firstName?.trim().toLowerCase() === name)
+          : [];
+
+      const accesses: ClientAccess[] = purchases.map((s) => ({
+        id: s.id,
+        title: s.title,
+        type: s.type,
+        date: s.date,
+        // El backend marca las concesiones manuales con purchase_from='ADMIN_GRANT'.
+        origin: String(s.purchase_from).toUpperCase() === "ADMIN_GRANT" ? "grant" : "purchase",
+        status: s.status,
+      }));
 
       // Respuestas de formularios: una consulta por tipo de formulario.
       const formTypes = formTypesRes.status === "fulfilled" ? formTypesRes.value : [];
@@ -55,7 +102,14 @@ export function useClientProfile(userId: string, fallbackName?: string) {
         }),
       );
 
-      return { user, purchases, purchasesByNameOnly: true, forms };
+      return {
+        user,
+        userDetail: USER_DETAIL_API_READY ? userDetail : null,
+        purchases,
+        purchasesByNameOnly: !SALES_BY_USER_READY,
+        accesses,
+        forms,
+      };
     },
   });
 }

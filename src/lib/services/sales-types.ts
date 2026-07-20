@@ -94,6 +94,8 @@ export interface GetSalesParams {
   month?: number;
   /** Búsqueda por nombre del cliente (firstName) */
   search?: string;
+  /** Filtra las ventas por usuario (cuando el backend lo soporte, ver SALES_BY_USER_READY). */
+  user_id?: string;
 }
 
 // ============================================================================
