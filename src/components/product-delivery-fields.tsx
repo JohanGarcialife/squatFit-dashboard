@@ -32,7 +32,7 @@ export const PRODUCT_DELIVERY_SUPPORTED = true;
  * `Create/UpdateCourseDTO` del backend no los acepte (whitelist), mantener en
  * `false` para no provocar 400. Poner a `true` cuando la Fase 6 lo amplíe.
  */
-export const PRODUCT_DELIVERY_WRITE_READY = false;
+export const PRODUCT_DELIVERY_WRITE_READY = true; // encendido 20-jul-2026 (backend lote 4 en prod);
 
 export type AccessType = "permanent" | "months";
 export type DripMode = "none" | "interval" | "scheduled";

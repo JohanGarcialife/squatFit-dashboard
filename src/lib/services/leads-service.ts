@@ -21,7 +21,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-98
 // ============================================================================
 
 /** Interruptor global: `true` cuando el backend de leads esté desplegado. */
-export const LEADS_API_READY = false;
+export const LEADS_API_READY = true; // encendido 20-jul-2026 (backend lote 4 en prod);
 
 /** Estados del pipeline (contrato de Fase 6). El orden define las columnas kanban. */
 export const LEAD_STATES = ["Nuevo", "Contactado", "Agendado", "Asistió", "Ganado", "Perdido"] as const;

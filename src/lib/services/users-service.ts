@@ -20,8 +20,8 @@ const REQUEST_TIMEOUT = 10000;
 //     search) y forbidNonWhitelisted → NO acepta user_id (daría 400). Cuando el
 //     backend lo acepte, poner SALES_BY_USER_READY = true.
 // ============================================================================
-export const USER_DETAIL_API_READY = false;
-export const SALES_BY_USER_READY = false;
+export const USER_DETAIL_API_READY = true; // encendido 20-jul-2026 (backend lote 4 en prod);
+export const SALES_BY_USER_READY = true; // encendido 20-jul-2026 (backend lote 4 en prod);
 
 // ============================================================================
 // TIPOS
