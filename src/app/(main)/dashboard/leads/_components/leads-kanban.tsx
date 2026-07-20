@@ -1,0 +1,133 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import { Mail, Phone } from "lucide-react";
+
+import { LEAD_STATES, type Lead, type LeadState } from "@/lib/services/leads-service";
+import { cn } from "@/lib/utils";
+
+import { LeadSourceBadge, STATE_STYLES } from "./lead-badges";
+
+interface LeadsKanbanProps {
+  leads: Lead[];
+  onMove: (id: string, state: LeadState) => void;
+  onOpen: (lead: Lead) => void;
+}
+
+function LeadCard({ lead, onOpen, dragging }: { lead: Lead; onOpen?: (l: Lead) => void; dragging?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen?.(lead)}
+      className={cn(
+        "bg-card w-full rounded-lg border p-3 text-left shadow-sm transition-shadow hover:shadow-md",
+        dragging && "rotate-1 shadow-lg",
+      )}
+    >
+      <p className="truncate text-sm font-semibold">{lead.name}</p>
+      {lead.interest && <p className="text-muted-foreground mt-0.5 truncate text-xs">{lead.interest}</p>}
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <LeadSourceBadge source={lead.source} />
+        <div className="text-muted-foreground flex items-center gap-2">
+          {lead.email && <Mail className="size-3.5" />}
+          {lead.phone && <Phone className="size-3.5" />}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function DraggableCard({ lead, onOpen }: { lead: Lead; onOpen: (l: Lead) => void }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={cn("cursor-grab active:cursor-grabbing", isDragging && "opacity-40")}
+    >
+      <LeadCard lead={lead} onOpen={onOpen} />
+    </div>
+  );
+}
+
+function Column({ state, leads, onOpen }: { state: LeadState; leads: Lead[]; onOpen: (l: Lead) => void }) {
+  const { setNodeRef, isOver } = useDroppable({ id: state });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "bg-muted/40 flex w-72 shrink-0 flex-col rounded-xl border-t-4 p-2 transition-colors",
+        STATE_STYLES[state].column,
+        isOver && "bg-muted ring-primary/40 ring-2",
+      )}
+    >
+      <div className="flex items-center justify-between px-2 py-1.5">
+        <span className="text-sm font-semibold">{state}</span>
+        <span className="text-muted-foreground bg-background rounded-full px-2 py-0.5 text-xs font-medium">
+          {leads.length}
+        </span>
+      </div>
+      <div className="flex min-h-[120px] flex-col gap-2 p-1">
+        {leads.map((l) => (
+          <DraggableCard key={l.id} lead={l} onOpen={onOpen} />
+        ))}
+        {leads.length === 0 && <p className="text-muted-foreground/70 px-2 py-6 text-center text-xs">Sin leads</p>}
+      </div>
+    </div>
+  );
+}
+
+export function LeadsKanban({ leads, onMove, onOpen }: LeadsKanbanProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const byState = useMemo(() => {
+    const map = Object.fromEntries(LEAD_STATES.map((s) => [s, [] as Lead[]])) as Record<LeadState, Lead[]>;
+    for (const l of leads) map[l.state]?.push(l);
+    return map;
+  }, [leads]);
+
+  const activeLead = activeId ? (leads.find((l) => l.id === activeId) ?? null) : null;
+
+  const handleStart = (e: DragStartEvent) => setActiveId(String(e.active.id));
+  const handleEnd = (e: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = e;
+    if (!over) return;
+    const target = over.id as LeadState;
+    const lead = leads.find((l) => l.id === active.id);
+    if (lead && LEAD_STATES.includes(target) && lead.state !== target) {
+      onMove(lead.id, target);
+    }
+  };
+
+  return (
+    <DndContext sensors={sensors} onDragStart={handleStart} onDragEnd={handleEnd}>
+      <div className="flex gap-3 overflow-x-auto pb-3">
+        {LEAD_STATES.map((state) => (
+          <Column key={state} state={state} leads={byState[state]} onOpen={onOpen} />
+        ))}
+      </div>
+      <DragOverlay>
+        {activeLead ? (
+          <div className="w-72">
+            <LeadCard lead={activeLead} dragging />
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
+  );
+}

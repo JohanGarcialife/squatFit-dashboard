@@ -9,21 +9,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // ============================================================================
 // DURACIÓN Y ENTREGA DE PRODUCTO (15.9)
 // ----------------------------------------------------------------------------
-// El backend aún NO expone columnas de acceso/goteo en `course`/`products`
-// (verificado 19 jul 2026). Por eso:
-//   • La sección se OCULTA cuando el detalle del producto no trae estos campos
-//     (ver `apiHasDeliveryFields`), para no prometer controles sin efecto.
-//   • Cuando el backend los añada, poner las claves en el objeto de detalle y la
-//     sección aparece sola; además hay que enviar el DTO (gate en el servicio).
+// Estado backend (verificado 20 jul 2026):
+//   • LECTURA ✅ — las columnas `access_months`, `drip_mode`, `drip_config` YA
+//     existen en prod en `course` y `products`, y el detalle del curso
+//     (`GET /course/detail/:id`) las devuelve. Por eso `apiHasDeliveryFields`
+//     detecta soporte real y la sección aparece con los valores guardados.
+//   • ESCRITURA ⏳ — el admin de cursos (`Create/UpdateCourseDTO`) todavía NO
+//     incluye estos campos en su whitelist y el backend valida con
+//     `forbidNonWhitelisted:true` → enviarlos hoy daría 400 y rompería el alta.
+//     Por eso el ENVÍO del DTO está tras `PRODUCT_DELIVERY_WRITE_READY` (abajo),
+//     que se pondrá a `true` cuando la Fase 6 amplíe el DTO del curso.
 // ============================================================================
 
 /**
- * Interruptor global: ponlo en `true` cuando el backend acepte y devuelva los
- * campos de acceso/goteo. Mientras sea `false`, la sección solo aparece si el
- * detalle del producto ya trae las claves (`apiHasDeliveryFields`), y el DTO no
- * envía estos campos para no romper el alta/edición actuales.
+ * Muestra la sección de duración/entrega. Ya `true`: las columnas existen en
+ * prod y el detalle las devuelve, así que la UI puede leer y editar los valores.
  */
-export const PRODUCT_DELIVERY_SUPPORTED = false;
+export const PRODUCT_DELIVERY_SUPPORTED = true;
+
+/**
+ * Gobierna el ENVÍO de los campos de entrega en create/updateCurso. Mientras el
+ * `Create/UpdateCourseDTO` del backend no los acepte (whitelist), mantener en
+ * `false` para no provocar 400. Poner a `true` cuando la Fase 6 lo amplíe.
+ */
+export const PRODUCT_DELIVERY_WRITE_READY = false;
 
 export type AccessType = "permanent" | "months";
 export type DripMode = "none" | "interval" | "scheduled";
@@ -38,14 +47,11 @@ export interface ProductDeliveryValue {
   dripStartDelayDays?: number;
 }
 
-/** Claves que el backend usaría para estos campos (para detección tolerante). */
-export const DELIVERY_API_KEYS = [
-  "access_type",
-  "access_months",
-  "drip_mode",
-  "drip_interval_days",
-  "drip_start_delay_days",
-] as const;
+/**
+ * Claves reales del backend (migración 20260719000005): `access_months` (int),
+ * `drip_mode` ('none'|'weekly'|'monthly'|'custom') y `drip_config` (jsonb).
+ */
+export const DELIVERY_API_KEYS = ["access_months", "drip_mode", "drip_config"] as const;
 
 /** Devuelve true si el objeto de detalle del API trae ALGÚN campo de entrega. */
 export function apiHasDeliveryFields(raw: unknown): boolean {
@@ -61,16 +67,59 @@ export const defaultDeliveryValue: ProductDeliveryValue = {
   dripStartDelayDays: undefined,
 };
 
-/** Extrae los valores de entrega desde un objeto de detalle del API. */
+/**
+ * Extrae los valores de entrega desde el detalle del API (contrato real:
+ * `access_months`, `drip_mode`, `drip_config`). Tolera también el esquema
+ * antiguo de claves planas por si algún endpoint las devolviera así.
+ */
 export function deliveryFromApi(raw: Record<string, unknown>): ProductDeliveryValue {
   const num = (v: unknown) => (v == null || v === "" ? undefined : Number(v));
+  const cfg = (raw.drip_config ?? {}) as Record<string, unknown>;
+  const backendMode = String(raw.drip_mode ?? "none");
+  const intervalDays = num(cfg.interval_days) ?? num(raw.drip_interval_days);
+  const startDelayDays = num(cfg.start_delay_days) ?? num(raw.drip_start_delay_days);
+
+  // El backend usa 'none'|'weekly'|'monthly'|'custom'; la UI usa
+  // 'none'|'interval'|'scheduled'. Si hay retraso inicial → 'scheduled'.
+  let dripMode: DripMode = "none";
+  if (backendMode !== "none") {
+    dripMode = startDelayDays && startDelayDays > 0 ? "scheduled" : "interval";
+  }
+
   return {
-    accessType: (raw.access_type as AccessType) ?? (raw.access_months ? "months" : "permanent"),
+    accessType: raw.access_months ? "months" : "permanent",
     accessMonths: num(raw.access_months),
-    dripMode: (raw.drip_mode as DripMode) ?? "none",
-    dripIntervalDays: num(raw.drip_interval_days),
-    dripStartDelayDays: num(raw.drip_start_delay_days),
+    dripMode,
+    dripIntervalDays: intervalDays,
+    dripStartDelayDays: startDelayDays,
   };
+}
+
+/** Payload de entrega en el contrato real del backend. */
+export interface DeliveryApiPayload {
+  access_months: number | null;
+  drip_mode: "none" | "custom";
+  drip_config: Record<string, number | string>;
+}
+
+/**
+ * Mapea los valores de la UI al contrato del backend (`access_months`,
+ * `drip_mode`, `drip_config`). Los modos 'interval'/'scheduled' de la UI se
+ * envían como `drip_mode: 'custom'` con los parámetros en `drip_config`.
+ */
+export function deliveryToApi(value: ProductDeliveryValue): DeliveryApiPayload {
+  const access_months = value.accessType === "months" ? (value.accessMonths ?? null) : null;
+
+  if (value.dripMode === "none") {
+    return { access_months, drip_mode: "none", drip_config: {} };
+  }
+
+  const drip_config: Record<string, number | string> = {};
+  if (value.dripIntervalDays != null) drip_config.interval_days = value.dripIntervalDays;
+  if (value.dripStartDelayDays != null) drip_config.start_delay_days = value.dripStartDelayDays;
+  drip_config.start = value.dripStartDelayDays && value.dripStartDelayDays > 0 ? "delay" : "purchase";
+
+  return { access_months, drip_mode: "custom", drip_config };
 }
 
 interface ProductDeliveryFieldsProps {

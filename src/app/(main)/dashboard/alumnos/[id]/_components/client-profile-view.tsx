@@ -14,22 +14,35 @@ import {
   AtSign,
   Cake,
   ShieldCheck,
+  KeyRound,
+  PackagePlus,
+  GraduationCap,
+  BookOpen,
+  Package,
 } from "lucide-react";
 
 import { BrandTabs } from "@/components/brand-tabs";
+import { GrantProductDialog } from "@/components/modals/grant-product-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useClientProfile } from "@/hooks/use-client-profile";
+import { useClientProfile, type ClientAccess } from "@/hooks/use-client-profile";
 
 const TABS = [
   { id: "datos", label: "Datos de usuario", icon: <User2 className="size-4" /> },
+  { id: "accesos", label: "Accesos concedidos", icon: <KeyRound className="size-4" /> },
   { id: "compras", label: "Compras", icon: <ShoppingBag className="size-4" /> },
   { id: "salud", label: "Medidas y salud", icon: <HeartPulse className="size-4" /> },
   { id: "formularios", label: "Formularios", icon: <ClipboardList className="size-4" /> },
 ];
+
+function AccessIcon({ type }: { type: ClientAccess["type"] }) {
+  if (type === "Curso") return <GraduationCap className="size-4" />;
+  if (type === "Libro") return <BookOpen className="size-4" />;
+  return <Package className="size-4" />;
+}
 
 function DataRow({ icon, label, value }: { icon?: React.ReactNode; label: string; value?: React.ReactNode }) {
   return (
@@ -60,9 +73,11 @@ interface ClientProfileViewProps {
 export function ClientProfileView({ userId }: ClientProfileViewProps) {
   const router = useRouter();
   const [tab, setTab] = useState("datos");
+  const [grantOpen, setGrantOpen] = useState(false);
   const { data, isLoading, error } = useClientProfile(userId);
 
   const user = data?.user;
+  const detail = data?.userDetail;
   const fullName = user ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "Cliente";
   const initials =
     user && user.firstName ? `${user.firstName.charAt(0)}${user.lastName?.charAt(0) ?? ""}`.toUpperCase() : "?";
@@ -70,7 +85,7 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
   return (
     <div className="@container/main flex flex-col gap-6">
       {/* Cabecera */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
           <ArrowLeft className="size-5" />
         </Button>
@@ -85,7 +100,13 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
           )}
           <p className="text-muted-foreground text-sm">{user?.email ?? (isLoading ? "" : "Usuario")}</p>
         </div>
+        <Button className="ml-auto gap-2" onClick={() => setGrantOpen(true)}>
+          <PackagePlus className="size-4" />
+          Añadir producto
+        </Button>
       </div>
+
+      <GrantProductDialog open={grantOpen} onOpenChange={setGrantOpen} userId={userId} userName={fullName} />
 
       {error && (
         <Card>
@@ -150,6 +171,59 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
         </Card>
       )}
 
+      {/* Accesos concedidos */}
+      {tab === "accesos" && (
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div>
+              <CardTitle>Accesos concedidos</CardTitle>
+              <CardDescription>Cursos, libros y packs a los que el cliente tiene acceso.</CardDescription>
+            </div>
+            <Button size="sm" variant="outline" className="gap-2" onClick={() => setGrantOpen(true)}>
+              <PackagePlus className="size-4" />
+              Añadir
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : data && data.accesses.length > 0 ? (
+              <div className="divide-y rounded-md border">
+                {data.accesses.map((a) => (
+                  <div key={a.id} className="flex items-center justify-between gap-3 p-3">
+                    <div className="flex items-center gap-3">
+                      <span className="bg-muted text-muted-foreground rounded-md p-2">
+                        <AccessIcon type={a.type} />
+                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{a.title}</span>
+                        <span className="text-muted-foreground text-xs">
+                          {a.type} · {new Date(a.date).toLocaleDateString("es-ES")}
+                        </span>
+                      </div>
+                    </div>
+                    <Badge
+                      className={a.origin === "grant" ? "bg-[#FFEDE0] text-[#FF690B]" : "bg-[#EBEAF2] text-[#363C98]"}
+                    >
+                      {a.origin === "grant" ? "Concedido por staff" : "Comprado"}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground text-sm">Este cliente no tiene accesos registrados todavía.</p>
+            )}
+            {data?.purchasesByNameOnly && (
+              <p className="text-muted-foreground text-xs">
+                Nota: los accesos se derivan de las ventas filtradas por nombre (el backend aún no filtra por{" "}
+                <code>user_id</code>). En cuanto exista <code>sales?user_id</code> o un endpoint de accesos por usuario,
+                el listado será exacto.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Compras */}
       {tab === "compras" && (
         <Card>
@@ -200,12 +274,26 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
             <CardDescription>Datos del onboarding (peso, altura, objetivo, actividad…).</CardDescription>
           </CardHeader>
           <CardContent>
-            <BackendPending>
-              El admin-panel todavía no expone un endpoint <code>GET</code> de detalle de usuario que devuelva las
-              medidas del onboarding (peso, altura, género, objetivo, kcal, nivel de actividad). El tipo{" "}
-              <code>UserDetailResponse</code> ya contempla estos campos: en cuanto exista el GET, esta sección los
-              mostrará. Ver el informe de Fase 3.
-            </BackendPending>
+            {detail ? (
+              <div className="flex flex-col">
+                <DataRow label="Peso" value={detail.weight != null ? `${detail.weight} kg` : undefined} />
+                <DataRow label="Altura" value={detail.height != null ? `${detail.height} cm` : undefined} />
+                <DataRow label="Género" value={detail.gender ?? undefined} />
+                <DataRow
+                  label="Objetivo de kcal"
+                  value={detail.config_kcal_goal != null ? `${detail.config_kcal_goal} kcal` : undefined}
+                />
+                <DataRow label="Teléfono" value={detail.phone_number ?? undefined} />
+                <DataRow label="Plataforma" value={detail.platform ?? undefined} />
+              </div>
+            ) : (
+              <BackendPending>
+                El admin-panel todavía no expone un endpoint <code>GET</code> de detalle de usuario que devuelva las
+                medidas del onboarding (peso, altura, género, objetivo, kcal, nivel de actividad). El hook ya llama a{" "}
+                <code>GET /admin-panel/users/:id</code> tras la detección <code>USER_DETAIL_API_READY</code>: en cuanto
+                el backend lo publique, esta sección se rellena sola.
+              </BackendPending>
+            )}
           </CardContent>
         </Card>
       )}

@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Dumbbell,
   BarChart3,
+  Contact,
   type LucideIcon,
 } from "lucide-react";
 
@@ -93,6 +94,18 @@ export const sidebarItems: NavGroup[] = [
     ],
   },
   {
+    id: 6,
+    label: "CRM",
+    items: [
+      {
+        title: "Leads",
+        url: "/dashboard/leads",
+        icon: Contact,
+        isNew: true,
+      },
+    ],
+  },
+  {
     id: 3,
     label: "Nutrición",
     items: [
@@ -161,7 +174,7 @@ export const getSidebarItemsForRole = (userRole: string | null | undefined): Nav
   if (!userRole) {
     // Si no hay rol, devolver items restringidos
     return sidebarItems
-      .filter((group) => group.id !== 5) // Ocultar Marketing
+      .filter((group) => group.id !== 5 && group.id !== 6) // Ocultar Marketing y CRM
       .map((group) => {
         if (group.id === 1) {
           // Grupo "Home" - filtrar "Entrenadores", "Cursos" y "Libros"
@@ -221,9 +234,9 @@ export const getSidebarItemsForRole = (userRole: string | null | undefined): Nav
     });
   }
 
-  // Para otros roles, filtrar Entrenadores, Cursos, Libros, Packs, Usuarios y Marketing
+  // Para otros roles, filtrar Entrenadores, Cursos, Libros, Packs, Usuarios, Marketing y CRM
   return sidebarItems
-    .filter((group) => group.id !== 5) // Ocultar Marketing
+    .filter((group) => group.id !== 5 && group.id !== 6) // Ocultar Marketing y CRM
     .map((group) => {
       if (group.id === 1) {
         // Grupo "Home" - filtrar items restringidos
