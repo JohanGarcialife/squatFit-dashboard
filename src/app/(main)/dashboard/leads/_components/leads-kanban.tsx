@@ -13,9 +13,9 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { Mail, Phone } from "lucide-react";
+import { BadgeCheck, CalendarDays, Mail, Phone } from "lucide-react";
 
-import { LEAD_STATES, type Lead, type LeadState } from "@/lib/services/leads-service";
+import { PIPELINE_STATES, type Lead, type LeadState } from "@/lib/services/leads-service";
 import { cn } from "@/lib/utils";
 
 import { LeadSourceBadge, STATE_STYLES } from "./lead-badges";
@@ -36,7 +36,10 @@ function LeadCard({ lead, onOpen, dragging }: { lead: Lead; onOpen?: (l: Lead) =
         dragging && "rotate-1 shadow-lg",
       )}
     >
-      <p className="truncate text-sm font-semibold">{lead.name}</p>
+      <p className="flex items-center gap-1.5 truncate text-sm font-semibold">
+        {lead.name}
+        {lead.is_customer && <BadgeCheck className="size-3.5 shrink-0 text-green-600" aria-label="Ya es cliente" />}
+      </p>
       {lead.interest && <p className="text-muted-foreground mt-0.5 truncate text-xs">{lead.interest}</p>}
       <div className="mt-2 flex items-center justify-between gap-2">
         <LeadSourceBadge source={lead.source} />
@@ -45,6 +48,10 @@ function LeadCard({ lead, onOpen, dragging }: { lead: Lead; onOpen?: (l: Lead) =
           {lead.phone && <Phone className="size-3.5" />}
         </div>
       </div>
+      <p className="text-muted-foreground mt-1.5 flex items-center gap-1 text-[11px]">
+        <CalendarDays className="size-3" />
+        Alta {new Date(lead.intake_date).toLocaleDateString("es-ES")}
+      </p>
     </button>
   );
 }
@@ -90,12 +97,18 @@ function Column({ state, leads, onOpen }: { state: LeadState; leads: Lead[]; onO
   );
 }
 
+/**
+ * Kanban «Pipeline comercial»: Nuevo → Contactado → Agendado → Llamada hecha →
+ * Esperando pago → Ganado → Perdido. Las tarjetas llegan ya ordenadas por
+ * fecha de ingreso DESC desde la vista. «Seguimiento» no es columna: se
+ * gestiona desde el panel y vive en el kanban «Repesca».
+ */
 export function LeadsKanban({ leads, onMove, onOpen }: LeadsKanbanProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const byState = useMemo(() => {
-    const map = Object.fromEntries(LEAD_STATES.map((s) => [s, [] as Lead[]])) as Record<LeadState, Lead[]>;
+    const map = Object.fromEntries(PIPELINE_STATES.map((s) => [s, [] as Lead[]])) as Record<LeadState, Lead[]>;
     for (const l of leads) map[l.state]?.push(l);
     return map;
   }, [leads]);
@@ -109,7 +122,7 @@ export function LeadsKanban({ leads, onMove, onOpen }: LeadsKanbanProps) {
     if (!over) return;
     const target = over.id as LeadState;
     const lead = leads.find((l) => l.id === active.id);
-    if (lead && LEAD_STATES.includes(target) && lead.state !== target) {
+    if (lead && PIPELINE_STATES.includes(target as (typeof PIPELINE_STATES)[number]) && lead.state !== target) {
       onMove(lead.id, target);
     }
   };
@@ -117,7 +130,7 @@ export function LeadsKanban({ leads, onMove, onOpen }: LeadsKanbanProps) {
   return (
     <DndContext sensors={sensors} onDragStart={handleStart} onDragEnd={handleEnd}>
       <div className="flex gap-3 overflow-x-auto pb-3">
-        {LEAD_STATES.map((state) => (
+        {PIPELINE_STATES.map((state) => (
           <Column key={state} state={state} leads={byState[state]} onOpen={onOpen} />
         ))}
       </div>

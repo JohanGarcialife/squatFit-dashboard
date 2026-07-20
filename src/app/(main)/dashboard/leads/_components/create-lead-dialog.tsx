@@ -23,9 +23,11 @@ import { LEAD_SOURCE_LABEL, LEAD_SOURCES, type LeadSource } from "@/lib/services
 interface CreateLeadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** En `?demo=1` el lead se crea en el store de ejemplo, no en la API real. */
+  demo?: boolean;
 }
 
-export function CreateLeadDialog({ open, onOpenChange }: CreateLeadDialogProps) {
+export function CreateLeadDialog({ open, onOpenChange, demo }: CreateLeadDialogProps) {
   const createLead = useCreateLead();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -48,11 +50,14 @@ export function CreateLeadDialog({ open, onOpenChange }: CreateLeadDialogProps) 
     }
     createLead.mutate(
       {
-        name: name.trim(),
-        email: email.trim() || undefined,
-        phone: phone.trim() || undefined,
-        interest: interest.trim() || undefined,
-        source,
+        input: {
+          name: name.trim(),
+          email: email.trim() || undefined,
+          phone: phone.trim() || undefined,
+          interest: interest.trim() || undefined,
+          source,
+        },
+        demo,
       },
       {
         onSuccess: () => {

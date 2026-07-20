@@ -2,7 +2,20 @@
 
 import { useState } from "react";
 
-import { Mail, Phone, Clock, StickyNote, Send, Tag } from "lucide-react";
+import Link from "next/link";
+
+import {
+  Mail,
+  Phone,
+  Clock,
+  StickyNote,
+  Send,
+  Tag,
+  CalendarDays,
+  UserCheck,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,10 +24,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { useAddLeadNote, useUpdateLeadState } from "@/hooks/use-leads";
-import { LEAD_STATES, type Lead, type LeadState } from "@/lib/services/leads-service";
+import { useAddLeadNote, useConvertLead, useUpdateLead } from "@/hooks/use-leads";
+import {
+  LEAD_CONVERT_READY,
+  LEAD_OBJECTIONS,
+  LEAD_OBJECTION_LABEL,
+  LEAD_STATES,
+  leadsV2WritesEnabled,
+  type Lead,
+  type LeadObjection,
+  type LeadState,
+} from "@/lib/services/leads-service";
 
-import { LeadSourceBadge, LeadStateBadge } from "./lead-badges";
+import { LeadCustomerBadge, LeadSourceBadge, LeadStateBadge } from "./lead-badges";
 
 interface LeadPanelProps {
   lead: Lead | null;
@@ -31,21 +53,48 @@ function InfoRow({ icon, children }: { icon: React.ReactNode; children: React.Re
   );
 }
 
+/** Valor centinela del select de objeción para «sin clasificar». */
+const NO_OBJECTION = "none";
+
 export function LeadPanel({ lead, open, onOpenChange }: LeadPanelProps) {
-  const updateState = useUpdateLeadState();
+  const updateLead = useUpdateLead();
+  const convertLead = useConvertLead();
   const addNote = useAddLeadNote();
   const [noteDraft, setNoteDraft] = useState("");
 
   if (!lead) return null;
 
+  const isSample = lead.id.startsWith("sample-");
+  const v2Writes = isSample || leadsV2WritesEnabled();
+  const canConvert = isSample || LEAD_CONVERT_READY;
+
   const handleState = (state: LeadState) => {
-    updateState.mutate(
-      { id: lead.id, state },
+    updateLead.mutate(
+      { id: lead.id, patch: { state } },
       {
         onSuccess: () => toast.success(`Estado → ${state}`),
         onError: (e) => toast.error(e instanceof Error ? e.message : "Error"),
       },
     );
+  };
+
+  const handleObjection = (value: string) => {
+    const objection = value === NO_OBJECTION ? null : (value as LeadObjection);
+    updateLead.mutate(
+      { id: lead.id, patch: { objection } },
+      {
+        onSuccess: () =>
+          toast.success(objection ? `Objeción → ${LEAD_OBJECTION_LABEL[objection]}` : "Objeción retirada"),
+        onError: (e) => toast.error(e instanceof Error ? e.message : "Error"),
+      },
+    );
+  };
+
+  const handleConvert = () => {
+    convertLead.mutate(lead.id, {
+      onSuccess: () => toast.success(`${lead.name} convertido en cliente ✅`),
+      onError: (e) => toast.error(e instanceof Error ? e.message : "Error"),
+    });
   };
 
   const handleAddNote = () => {
@@ -67,9 +116,10 @@ export function LeadPanel({ lead, open, onOpenChange }: LeadPanelProps) {
       <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto sm:max-w-md">
         <SheetHeader className="space-y-1">
           <SheetTitle className="text-xl">{lead.name}</SheetTitle>
-          <SheetDescription className="flex items-center gap-3">
+          <SheetDescription className="flex flex-wrap items-center gap-3">
             <LeadSourceBadge source={lead.source} />
             <LeadStateBadge state={lead.state} />
+            {lead.is_customer && <LeadCustomerBadge />}
           </SheetDescription>
         </SheetHeader>
 
@@ -79,9 +129,54 @@ export function LeadPanel({ lead, open, onOpenChange }: LeadPanelProps) {
             {lead.email && <InfoRow icon={<Mail className="size-4" />}>{lead.email}</InfoRow>}
             {lead.phone && <InfoRow icon={<Phone className="size-4" />}>{lead.phone}</InfoRow>}
             {lead.interest && <InfoRow icon={<Tag className="size-4" />}>{lead.interest}</InfoRow>}
-            <InfoRow icon={<Clock className="size-4" />}>
-              Alta {new Date(lead.created_at).toLocaleDateString("es-ES")}
+            {(lead.setter ?? lead.closer) && (
+              <InfoRow icon={<UserCheck className="size-4" />}>
+                {[lead.setter && `Setter: ${lead.setter}`, lead.closer && `Closer: ${lead.closer}`]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </InfoRow>
+            )}
+            <InfoRow icon={<CalendarDays className="size-4" />}>
+              Alta {new Date(lead.intake_date).toLocaleDateString("es-ES")}
             </InfoRow>
+          </div>
+
+          {/* Conversión en cliente */}
+          <Separator />
+          <div className="space-y-2">
+            {lead.is_customer ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <LeadCustomerBadge />
+                {lead.converted_user_id && (
+                  <Button asChild variant="outline" size="sm" className="gap-1.5">
+                    <Link href={`/dashboard/alumnos/${lead.converted_user_id}`}>
+                      Ver ficha del cliente
+                      <ExternalLink className="size-3.5" />
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <>
+                <Button
+                  className="w-full gap-2"
+                  onClick={handleConvert}
+                  disabled={!canConvert || convertLead.isPending}
+                >
+                  {convertLead.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <UserCheck className="size-4" />
+                  )}
+                  Convertir en cliente
+                </Button>
+                {!canConvert && (
+                  <p className="text-muted-foreground text-xs">
+                    Se activará cuando el backend (Fase 9) publique <code>POST /admin-panel/leads/:id/convert</code>.
+                  </p>
+                )}
+              </>
+            )}
           </div>
 
           <Separator />
@@ -89,22 +184,49 @@ export function LeadPanel({ lead, open, onOpenChange }: LeadPanelProps) {
           {/* Cambio de estado */}
           <div className="space-y-2">
             <Label>Estado del pipeline</Label>
+            <Select value={lead.state} onValueChange={(v: LeadState) => handleState(v)} disabled={updateLead.isPending}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAD_STATES.map((s) => {
+                  const v2Only = s === "Esperando pago" || s === "Seguimiento";
+                  return (
+                    <SelectItem key={s} value={s} disabled={v2Only && !v2Writes}>
+                      {s}
+                      {v2Only && !v2Writes ? " · Fase 9" : ""}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Objeción (repesca) */}
+          <div className="space-y-2">
+            <Label>Objeción de venta</Label>
             <Select
-              value={lead.state}
-              onValueChange={(v: LeadState) => handleState(v)}
-              disabled={updateState.isPending}
+              value={lead.objection ?? NO_OBJECTION}
+              onValueChange={handleObjection}
+              disabled={updateLead.isPending || !v2Writes}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {LEAD_STATES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
+                <SelectItem value={NO_OBJECTION}>Sin clasificar</SelectItem>
+                {LEAD_OBJECTIONS.map((o) => (
+                  <SelectItem key={o} value={o}>
+                    {LEAD_OBJECTION_LABEL[o]}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {!v2Writes && (
+              <p className="text-muted-foreground text-xs">
+                Editable cuando el backend (Fase 9) publique el campo <code>objection</code>.
+              </p>
+            )}
           </div>
 
           <Separator />
