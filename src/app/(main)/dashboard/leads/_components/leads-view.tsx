@@ -30,6 +30,16 @@ import { LeadsKanban } from "./leads-kanban";
 import { LeadsRepesca } from "./leads-repesca";
 import { LeadsTable } from "./leads-table";
 
+/** Debounce local: evita disparar un GET (limit=200) en cada tecla. */
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debounced;
+}
+
 const VIEW_TABS = [
   { id: "tabla", label: "Tabla", icon: <LayoutList className="size-4" /> },
   { id: "pipeline", label: "Pipeline comercial", icon: <KanbanSquare className="size-4" /> },
@@ -65,9 +75,10 @@ export function LeadsView() {
   // UN solo listado: origen y setter/closer son FILTROS, no tableros. La tabla
   // filtra además por estado; en los kanbans el estado lo marcan las columnas
   // (pipeline) o el par Perdido/Seguimiento (repesca).
+  const debouncedSearch = useDebounce(search, 350);
   const query = useMemo(
-    () => ({ search, source, state: view === "tabla" ? state : ("all" as const), demo }),
-    [search, source, state, view, demo],
+    () => ({ search: debouncedSearch, source, state: view === "tabla" ? state : ("all" as const), demo }),
+    [debouncedSearch, source, state, view, demo],
   );
   const { data: leads = [], isLoading } = useLeads(query);
   const updateLead = useUpdateLead();

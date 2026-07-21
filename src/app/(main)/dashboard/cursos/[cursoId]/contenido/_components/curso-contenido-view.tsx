@@ -331,9 +331,12 @@ function ModuleName({ module: m, onRename }: { module: ContentModule; onRename: 
         variant="ghost"
         size="icon"
         className="size-7 text-green-600"
+        disabled={!value.trim()}
         onClick={(e) => {
           e.preventDefault();
-          onRename(value.trim());
+          const name = value.trim();
+          if (!name) return; // no permitir guardar un nombre vacío
+          onRename(name);
           setEditing(false);
         }}
       >

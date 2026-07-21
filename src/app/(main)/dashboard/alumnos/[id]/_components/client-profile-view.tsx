@@ -40,7 +40,7 @@ import { useClientProfile, type ClientAccess } from "@/hooks/use-client-profile"
 function ExpiryBadge({ end }: { end: string | null }) {
   if (!end) {
     return (
-      <Badge className="gap-1 bg-green-100 text-green-800">
+      <Badge className="gap-1 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200">
         <InfinityIcon className="size-3" /> Permanente
       </Badge>
     );
@@ -49,7 +49,13 @@ function ExpiryBadge({ end }: { end: string | null }) {
   const expired = date.getTime() < Date.now();
   const label = date.toLocaleDateString("es-ES");
   return (
-    <Badge className={expired ? "gap-1 bg-rose-100 text-rose-700" : "gap-1 bg-[#EBEAF2] text-[#363C98]"}>
+    <Badge
+      className={
+        expired
+          ? "gap-1 bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-200"
+          : "gap-1 bg-[#EBEAF2] text-[#363C98] dark:bg-[#363C98]/30 dark:text-[#b9bce8]"
+      }
+    >
       <CalendarClock className="size-3" />
       {expired ? `Caducó ${label}` : `Caduca ${label}`}
     </Badge>
@@ -183,7 +189,9 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
                     user?.status ? (
                       <Badge
                         className={
-                          user.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                          user.status === "active"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
                         }
                       >
                         {user.status === "active" ? "Activo" : "Inactivo"}

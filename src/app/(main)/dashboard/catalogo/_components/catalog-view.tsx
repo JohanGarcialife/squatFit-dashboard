@@ -23,11 +23,11 @@ import {
 import { ProductGrantModal } from "./product-grant-modal";
 
 const GRANT_BADGE_STYLE: Record<GrantType, string> = {
-  course: "bg-sky-100 text-sky-800",
-  program: "bg-[#EBEAF2] text-[#363C98]",
-  book: "bg-amber-100 text-amber-800",
-  pack: "bg-violet-100 text-violet-800",
-  digital_library: "bg-teal-100 text-teal-800",
+  course: "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200",
+  program: "bg-[#EBEAF2] text-[#363C98] dark:bg-[#363C98]/30 dark:text-[#b9bce8]",
+  book: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
+  pack: "bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200",
+  digital_library: "bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200",
 };
 
 function GrantCell({ product }: { product: Product }) {
@@ -36,7 +36,7 @@ function GrantCell({ product }: { product: Product }) {
   }
   if (product.needsMapping) {
     return (
-      <Badge className="gap-1 bg-[#FFEDE0] text-[#8a3d06]">
+      <Badge className="gap-1 bg-[#FFEDE0] text-[#8a3d06] dark:bg-[#FF690B]/15 dark:text-[#FFB07A]">
         <AlertTriangle className="size-3" /> Sin mapear
       </Badge>
     );

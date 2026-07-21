@@ -2,6 +2,8 @@ import { handleUnauthorized } from "@/lib/api-client";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
+/** Corta peticiones colgadas para que la UI no quede en isLoading para siempre. */
+const REQUEST_TIMEOUT = 12000;
 
 // ============================================================================
 // CRM — LEADS (13.13 · Fase 10)
@@ -657,7 +659,10 @@ export class LeadsService {
   }
 
   private static async request<T>(path: string, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${API_BASE_URL}${path}`, init);
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      signal: init?.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT),
+    });
     if (res.status === 401) {
       handleUnauthorized();
       throw new Error("Sesión caducada");

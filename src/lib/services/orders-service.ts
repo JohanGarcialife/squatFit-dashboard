@@ -2,6 +2,8 @@ import { handleUnauthorized } from "@/lib/api-client";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
+/** Corta peticiones colgadas para que la UI no quede en isLoading para siempre. */
+const REQUEST_TIMEOUT = 12000;
 
 // ============================================================================
 // PEDIDOS (módulo Pedidos · Fase 6 + catálogo Fase 12) — EN PROD 21-jul-2026
@@ -36,11 +38,19 @@ interface StatusMeta {
 }
 
 export const ORDER_STATUS_META: Record<OrderStatus, StatusMeta> = {
-  completed: { label: "Completado", badge: "bg-green-100 text-green-800" },
-  processing: { label: "Procesando", badge: "bg-[#EBEAF2] text-[#363C98]" },
-  pending: { label: "Pendiente", badge: "bg-[#FFEDE0] text-[#FF690B]" },
-  refunded: { label: "Devuelto", badge: "bg-slate-200 text-slate-700", struck: true },
-  cancelled: { label: "Cancelado", badge: "bg-slate-200 text-slate-700", struck: true },
+  completed: { label: "Completado", badge: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200" },
+  processing: { label: "Procesando", badge: "bg-[#EBEAF2] text-[#363C98] dark:bg-[#363C98]/30 dark:text-[#b9bce8]" },
+  pending: { label: "Pendiente", badge: "bg-[#FFEDE0] text-[#FF690B] dark:bg-[#FF690B]/15 dark:text-[#FFB07A]" },
+  refunded: {
+    label: "Devuelto",
+    badge: "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200",
+    struck: true,
+  },
+  cancelled: {
+    label: "Cancelado",
+    badge: "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200",
+    struck: true,
+  },
 };
 
 /** Métodos de pago manuales/instrumento (contrato PAYMENT_METHODS). */
@@ -183,7 +193,10 @@ export class OrdersService {
   }
 
   private static async request<T>(path: string, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${API_BASE_URL}${path}`, init);
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      signal: init?.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT),
+    });
     if (res.status === 401) {
       handleUnauthorized();
       throw new Error("Sesión caducada");
@@ -259,6 +272,7 @@ export class OrdersService {
       method: "POST",
       headers: this.authHeaders(),
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT),
     });
     if (res.status === 401) {
       handleUnauthorized();

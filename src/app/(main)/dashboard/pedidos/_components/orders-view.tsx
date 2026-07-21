@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
 
@@ -27,6 +27,16 @@ import {
 import { OrderDetailSheet } from "./order-detail-sheet";
 import { OrderStatusBadge, PaymentBadge } from "./order-status-badge";
 
+/** Debounce local: evita disparar un GET (limit=200) en cada tecla. */
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debounced;
+}
+
 /** Pestañas: Todos + los 5 estados del diseño, con contador. */
 const STATUS_TABS: { id: OrderStatus | "all"; countKey: string }[] = [
   { id: "all", countKey: "all" },
@@ -44,7 +54,8 @@ export function OrdersView() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [refundOrder, setRefundOrder] = useState<Order | null>(null);
 
-  const { data, isLoading } = useOrders({ status: tab, search });
+  const debouncedSearch = useDebounce(search, 350);
+  const { data, isLoading } = useOrders({ status: tab, search: debouncedSearch });
   const updateStatus = useUpdateOrderStatus();
   const sendEmail = useSendOrderEmail();
 
@@ -135,6 +146,9 @@ export function OrdersView() {
                     orders.map((o) => {
                       const struck = o.status === "refunded" || o.status === "cancelled";
                       const canComplete = o.status === "pending" || o.status === "processing";
+                      // Estado por fila: solo la fila mutada muestra spinner / se deshabilita.
+                      const isCompleting = updateStatus.isPending && updateStatus.variables?.id === o.id;
+                      const isEmailing = sendEmail.isPending && sendEmail.variables?.id === o.id;
                       return (
                         <TableRow key={o.id} className="hover:bg-[#FFEDE0]/40">
                           <TableCell>
@@ -189,10 +203,10 @@ export function OrdersView() {
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => markCompleted(o)}
-                                  disabled={updateStatus.isPending}
+                                  disabled={isCompleting}
                                   title="Marcar como completado"
                                 >
-                                  {updateStatus.isPending ? (
+                                  {isCompleting ? (
                                     <Loader2 className="size-4 animate-spin" />
                                   ) : (
                                     <CheckCircle2 className="size-4 text-green-600" />
@@ -211,9 +225,10 @@ export function OrdersView() {
                                     },
                                   )
                                 }
+                                disabled={isEmailing}
                                 title="Enviar email de estado"
                               >
-                                <Mail className="size-4" />
+                                {isEmailing ? <Loader2 className="size-4 animate-spin" /> : <Mail className="size-4" />}
                               </Button>
                               {(o.status === "completed" || o.status === "processing") && (
                                 <Button
