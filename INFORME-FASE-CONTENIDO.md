@@ -43,6 +43,6 @@ Servicio `src/lib/services/curso-contenido-service.ts` contra
 
 ## Pendiente
 - Encender `COURSE_CONTENT_API_READY = true` cuando `features-lote-7` esté en prod.
-- Al conectar la API real, las 3 clases de Perder Grasa marcadas para revisión en el backend
-  (11, 23, 24) aparecerán con el icono «sin vídeo» / a confirmar: se rellenan pegando la URL
-  de Bunny en el propio editor.
+- Las clases 11 y 24 de Perder Grasa que faltaban ya están (subidas 21-jul); queda solo la
+  **clase 23** marcada para confirmar en el backend (rótulo de Bunny dudoso). Si hay que
+  corregir su URL, se hace pegando la URL de Bunny correcta en el propio editor.
