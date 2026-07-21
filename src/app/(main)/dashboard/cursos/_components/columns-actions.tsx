@@ -1,6 +1,8 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Trash2, Eye, Power, Video } from "lucide-react";
+import Link from "next/link";
+
+import { MoreHorizontal, Pencil, Trash2, Eye, Power, Video, ListTree } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +51,12 @@ export function CursoActions({ curso, onEdit, onDelete, onToggleStatus, onView, 
         <DropdownMenuItem onClick={() => onUploadVideo(curso)}>
           <Video className="mr-2 h-4 w-4" />
           Subir video
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href={`/dashboard/cursos/${curso.id}/contenido`}>
+            <ListTree className="mr-2 h-4 w-4" />
+            Gestionar contenido
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onToggleStatus(curso)}>
           <Power className="mr-2 h-4 w-4" />
