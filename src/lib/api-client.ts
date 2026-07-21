@@ -18,14 +18,25 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+/**
+ * Cierra la sesión ante un 401 (token expirado/inválido) y manda al login.
+ * Reutilizable desde los servicios que usan `fetch` crudo (leads, orders,
+ * products, notifications) para que un 401 no se pinte como «no hay datos».
+ */
+export const handleUnauthorized = (): void => {
+  removeAuthToken();
+  if (typeof window !== "undefined") {
+    window.location.href = "/auth/v1/login";
+  }
+};
+
 // Interceptor para manejar errores de autenticación y rate limiting
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
       // Token expirado o inválido
-      removeAuthToken();
-      window.location.href = "/auth/v1/login";
+      handleUnauthorized();
     } else if (error.response?.status === 429) {
       // Rate limiting
       console.warn("Rate limiting detectado. Esperando antes de reintentar...");

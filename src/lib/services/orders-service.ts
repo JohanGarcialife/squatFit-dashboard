@@ -1,3 +1,4 @@
+import { handleUnauthorized } from "@/lib/api-client";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
@@ -183,6 +184,10 @@ export class OrdersService {
 
   private static async request<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await fetch(`${API_BASE_URL}${path}`, init);
+    if (res.status === 401) {
+      handleUnauthorized();
+      throw new Error("Sesión caducada");
+    }
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.message ?? body.error ?? `Error ${res.status}`);
@@ -255,6 +260,10 @@ export class OrdersService {
       headers: this.authHeaders(),
       body: JSON.stringify(body),
     });
+    if (res.status === 401) {
+      handleUnauthorized();
+      throw new Error("Sesión caducada");
+    }
     if (!res.ok) {
       const payload = await res.json().catch(() => ({}));
       throw new Error(payload.message ?? payload.error ?? `Error ${res.status} al procesar el reembolso`);
