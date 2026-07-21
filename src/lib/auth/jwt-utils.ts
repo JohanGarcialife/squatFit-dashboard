@@ -29,3 +29,27 @@ export const decodeToken = (token: string): AuthToken | null => {
     return null;
   }
 };
+
+// Roles de staff (tabla `roles` del backend, seed 08_roles.ts). El único rol que
+// NO es staff es `user` (cliente). El back office es solo para staff, así que el
+// token debe traer uno de estos role.name; cualquier otro (o ausente) se rechaza.
+export const STAFF_ROLES = [
+  "admin",
+  "adviser",
+  "support_agent",
+  "dietitian",
+  "sales",
+  "psychologist",
+] as const;
+
+export const isStaffToken = (token: string): boolean => {
+  try {
+    const decoded = jwtDecode<AuthToken>(token);
+    return (
+      typeof decoded.role === "string" &&
+      (STAFF_ROLES as readonly string[]).includes(decoded.role)
+    );
+  } catch {
+    return false;
+  }
+};
