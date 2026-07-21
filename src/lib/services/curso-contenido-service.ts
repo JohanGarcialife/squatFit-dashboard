@@ -149,6 +149,39 @@ function demoTree(courseId: string): ContentTree {
   };
 }
 
+// Objetos plausibles que devuelven las MUTACIONES en modo demo (sin fetch real).
+// La vista recarga el árbol de ejemplo tras cada acción, así que estos valores
+// solo evitan que la UI reviente; los cambios no se persisten (igual que el aviso).
+function demoModule(name: string, subtitle: string | null, priority: number, id?: string): ContentModule {
+  return {
+    id: id ?? `demo-m-${Date.now()}`,
+    name,
+    subtitle,
+    priority,
+    module_test: null,
+    lessons: [],
+  };
+}
+
+function demoLesson(
+  title: string,
+  video_url: string | null,
+  module_id: string | null,
+  lesson_number: number | null,
+  priority: number,
+  id?: string,
+): Lesson {
+  return {
+    id: id ?? `demo-l-${Date.now()}`,
+    title,
+    video_url,
+    lesson_number,
+    priority,
+    module_id,
+    test: null,
+  };
+}
+
 function demoTest(testId: string): FullTest {
   return {
     id: testId,
@@ -183,21 +216,30 @@ export const CursoContenidoService = {
   },
 
   async createModule(courseId: string, body: { name: string; subtitle?: string; priority?: number }) {
+    // En modo demo NO se toca la API real (evita crear módulos reales en prod sin querer).
+    if (!COURSE_CONTENT_API_READY) {
+      return demoModule(body.name, body.subtitle ?? null, body.priority ?? 0);
+    }
     return request(`/api/v1/admin-panel/courses/${courseId}/modules`, {
       method: "POST",
       body: JSON.stringify(body),
     });
   },
   async updateModule(moduleId: string, body: { name?: string; subtitle?: string; priority?: number }) {
+    if (!COURSE_CONTENT_API_READY) {
+      return demoModule(body.name ?? "Módulo (demo)", body.subtitle ?? null, body.priority ?? 0, moduleId);
+    }
     return request(`/api/v1/admin-panel/courses/modules/${moduleId}`, {
       method: "PUT",
       body: JSON.stringify(body),
     });
   },
   async deleteModule(moduleId: string) {
+    if (!COURSE_CONTENT_API_READY) return { id: moduleId, deleted: true };
     return request(`/api/v1/admin-panel/courses/modules/${moduleId}`, { method: "DELETE" });
   },
   async reorderModules(items: { id: string; priority: number }[]) {
+    if (!COURSE_CONTENT_API_READY) return { items };
     return request(`/api/v1/admin-panel/courses/modules-order`, {
       method: "PUT",
       body: JSON.stringify({ items }),
@@ -208,6 +250,9 @@ export const CursoContenidoService = {
     moduleId: string,
     body: { title: string; video_url?: string; lesson_number?: number; priority?: number },
   ) {
+    if (!COURSE_CONTENT_API_READY) {
+      return demoLesson(body.title, body.video_url ?? null, moduleId, body.lesson_number ?? null, body.priority ?? 0);
+    }
     return request(`/api/v1/admin-panel/courses/modules/${moduleId}/lessons`, {
       method: "POST",
       body: JSON.stringify(body),
@@ -215,17 +260,28 @@ export const CursoContenidoService = {
   },
   async updateLesson(
     lessonId: string,
-    body: { title?: string; video_url?: string; lesson_number?: number; priority?: number; module_id?: string },
+    body: {
+      title?: string;
+      video_url?: string | null;
+      lesson_number?: number;
+      priority?: number;
+      module_id?: string;
+    },
   ) {
+    if (!COURSE_CONTENT_API_READY) {
+      return demoLesson(body.title ?? "Clase (demo)", body.video_url ?? null, body.module_id ?? null, body.lesson_number ?? null, body.priority ?? 0, lessonId);
+    }
     return request(`/api/v1/admin-panel/courses/lessons/${lessonId}`, {
       method: "PUT",
       body: JSON.stringify(body),
     });
   },
   async deleteLesson(lessonId: string) {
+    if (!COURSE_CONTENT_API_READY) return { id: lessonId, deleted: true };
     return request(`/api/v1/admin-panel/courses/lessons/${lessonId}`, { method: "DELETE" });
   },
   async reorderLessons(items: { id: string; priority: number }[]) {
+    if (!COURSE_CONTENT_API_READY) return { items };
     return request(`/api/v1/admin-panel/courses/lessons-order`, {
       method: "PUT",
       body: JSON.stringify({ items }),

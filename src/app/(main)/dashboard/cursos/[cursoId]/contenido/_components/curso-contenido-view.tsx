@@ -113,7 +113,7 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
       });
       toast.success("Clase añadida");
     });
-  const saveLesson = (l: Lesson, patch: { title?: string; video_url?: string }) =>
+  const saveLesson = (l: Lesson, patch: { title?: string; video_url?: string | null }) =>
     guard(async () => {
       await CursoContenidoService.updateLesson(l.id, patch);
       toast.success("Clase guardada");
@@ -202,7 +202,7 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
       <Accordion type="multiple" className="flex flex-col gap-3">
         {tree?.modules.map((m, mi) => (
           <AccordionItem key={m.id} value={m.id} className="rounded-lg border px-4">
-            <div className="flex items-center gap-2 py-2">
+            <div className="group flex items-center gap-2 py-2">
               <div className="flex flex-col">
                 <Button
                   variant="ghost"
@@ -234,7 +234,7 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
               <Badge variant="outline" className="shrink-0">
                 {m.lessons.length} clases
               </Badge>
-              <Button variant="ghost" size="sm" className="gap-1" onClick={() => openModuleTest(m)}>
+              <Button variant="ghost" size="sm" className="gap-1" onClick={() => openModuleTest(m)} disabled={busy}>
                 <FileQuestion className="size-4" /> Test módulo
               </Button>
               <Button
@@ -242,6 +242,7 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
                 size="icon"
                 className="text-red-600"
                 onClick={() => deleteModule(m)}
+                disabled={busy}
                 aria-label="Eliminar módulo"
               >
                 <Trash2 className="size-4" />
@@ -255,13 +256,14 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
                     lesson={l}
                     index={li}
                     count={m.lessons.length}
+                    busy={busy}
                     onSave={(patch) => saveLesson(l, patch)}
                     onDelete={() => deleteLesson(l)}
                     onMove={(dir) => moveLesson(m, li, dir)}
                     onEditTest={() => l.test && openTest(l.test.id)}
                   />
                 ))}
-                <Button variant="ghost" size="sm" className="w-fit gap-1" onClick={() => addLesson(m)}>
+                <Button variant="ghost" size="sm" className="w-fit gap-1" onClick={() => addLesson(m)} disabled={busy}>
                   <Plus className="size-3" /> Añadir clase
                 </Button>
               </div>
@@ -281,7 +283,7 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
             onKeyDown={(e) => e.key === "Enter" && addModule()}
             placeholder="Nombre descriptivo del módulo"
           />
-          <Button className="gap-2" onClick={addModule} disabled={!newModuleName.trim()}>
+          <Button className="gap-2" onClick={addModule} disabled={!newModuleName.trim() || busy}>
             <Plus className="size-4" /> Crear módulo
           </Button>
         </CardContent>
@@ -358,6 +360,7 @@ function LessonRow({
   lesson,
   index,
   count,
+  busy,
   onSave,
   onDelete,
   onMove,
@@ -366,7 +369,8 @@ function LessonRow({
   lesson: Lesson;
   index: number;
   count: number;
-  onSave: (patch: { title?: string; video_url?: string }) => void;
+  busy?: boolean;
+  onSave: (patch: { title?: string; video_url?: string | null }) => void;
   onDelete: () => void;
   onMove: (dir: -1 | 1) => void;
   onEditTest: () => void;
@@ -429,17 +433,24 @@ function LessonRow({
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1">
-        <Button variant="outline" size="sm" className="gap-1" onClick={onEditTest} disabled={!lesson.test}>
+        <Button variant="outline" size="sm" className="gap-1" onClick={onEditTest} disabled={!lesson.test || busy}>
           <FileQuestion className="size-4" /> Test
         </Button>
         <Button
           size="sm"
-          disabled={!dirty}
-          onClick={() => onSave({ title: title.trim(), video_url: url.trim() || undefined })}
+          disabled={!dirty || busy}
+          onClick={() => onSave({ title: title.trim(), video_url: url.trim() || null })}
         >
           Guardar
         </Button>
-        <Button variant="ghost" size="icon" className="text-red-600" onClick={onDelete} aria-label="Eliminar clase">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-red-600"
+          onClick={onDelete}
+          disabled={busy}
+          aria-label="Eliminar clase"
+        >
           <Trash2 className="size-4" />
         </Button>
       </div>

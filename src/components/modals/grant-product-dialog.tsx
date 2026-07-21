@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, ChevronsUpDown, Loader2, PackagePlus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -47,6 +47,7 @@ export function GrantProductDialog({ open, onOpenChange, userId, userName, order
   const [selected, setSelected] = useState<GrantableProduct | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
   const {
     data: products = [],
@@ -76,6 +77,8 @@ export function GrantProductDialog({ open, onOpenChange, userId, userName, order
         orderId,
       });
       toast.success(`«${selected.name}» asignado${userName ? ` a ${userName}` : ""}`);
+      // Refresca la ficha del cliente para que el nuevo acceso aparezca al momento.
+      void queryClient.invalidateQueries({ queryKey: ["client-profile", userId] });
       reset();
       onOpenChange(false);
     } catch (e) {

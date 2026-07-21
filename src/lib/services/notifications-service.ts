@@ -1,3 +1,4 @@
+import { handleUnauthorized } from "@/lib/api-client";
 import { getAuthToken } from "@/lib/auth/auth-utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
@@ -146,11 +147,16 @@ export class NotificationsService {
 
   private static async request<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await fetch(`${API_BASE_URL}${path}`, init);
+    if (res.status === 401) {
+      handleUnauthorized();
+      throw new Error("Sesión caducada");
+    }
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.message ?? body.error ?? `Error ${res.status}`);
     }
-    return res.json();
+    // Los POST (p. ej. marcar leídas) pueden responder 204/cuerpo vacío.
+    return res.json().catch(() => ({})) as Promise<T>;
   }
 
   /** Últimos eventos, más recientes primero. */
