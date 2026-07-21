@@ -131,8 +131,8 @@ export function OrderDetailSheet({ order, open, onOpenChange, onRefund }: OrderD
           {order.refundReason && (
             <>
               <Separator />
-              <div className="rounded-md bg-slate-100 p-3 text-sm">
-                <p className="font-medium text-slate-700">Reembolsado</p>
+              <div className="rounded-md bg-slate-100 p-3 text-sm dark:bg-slate-800">
+                <p className="font-medium text-slate-700 dark:text-slate-200">Reembolsado</p>
                 <p className="text-muted-foreground">Motivo: {formatRefundReason(order.refundReason)}</p>
                 {order.refundNote && <p className="text-muted-foreground">Nota: {order.refundNote}</p>}
               </div>
