@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 
 import { AccountSwitcher } from "./_components/sidebar/account-switcher";
 import { LayoutControls } from "./_components/sidebar/layout-controls";
+import { NotificationsBell } from "./_components/sidebar/notifications-bell";
 import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
@@ -42,6 +43,7 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
               </div>
               <div className="bg-sidebar-accent/80 flex items-center gap-2 rounded-lg px-2 py-1.5">
                 {/* <LayoutControls contentLayout={contentLayout} variant={sidebarVariant} collapsible={sidebarCollapsible} /> */}
+                <NotificationsBell />
                 <ThemeSwitcher />
                 <AccountSwitcher users={users} />
               </div>

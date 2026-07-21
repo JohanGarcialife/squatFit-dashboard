@@ -1,11 +1,11 @@
 "use client";
 
-import { Mail, Phone } from "lucide-react";
+import { BadgeCheck, Mail, Phone } from "lucide-react";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { Lead } from "@/lib/services/leads-service";
 
-import { LeadSourceBadge, LeadStateBadge } from "./lead-badges";
+import { LeadObjectionBadge, LeadSourceBadge, LeadStateBadge } from "./lead-badges";
 
 interface LeadsTableProps {
   leads: Lead[];
@@ -27,13 +27,21 @@ export function LeadsTable({ leads, onOpen }: LeadsTableProps) {
             <TableHead>Origen</TableHead>
             <TableHead>Interés</TableHead>
             <TableHead>Estado</TableHead>
+            <TableHead>Objeción</TableHead>
             <TableHead className="text-right">Alta</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {leads.map((lead) => (
             <TableRow key={lead.id} className="cursor-pointer" onClick={() => onOpen(lead)}>
-              <TableCell className="font-medium">{lead.name}</TableCell>
+              <TableCell className="font-medium">
+                <span className="flex items-center gap-1.5">
+                  {lead.name}
+                  {lead.is_customer && (
+                    <BadgeCheck className="size-4 shrink-0 text-green-600" aria-label="Ya es cliente" />
+                  )}
+                </span>
+              </TableCell>
               <TableCell>
                 <div className="text-muted-foreground flex flex-col gap-0.5 text-xs">
                   {lead.email && (
@@ -58,8 +66,15 @@ export function LeadsTable({ leads, onOpen }: LeadsTableProps) {
               <TableCell>
                 <LeadStateBadge state={lead.state} />
               </TableCell>
+              <TableCell>
+                {lead.objection ? (
+                  <LeadObjectionBadge objection={lead.objection} />
+                ) : (
+                  <span className="text-muted-foreground text-xs">—</span>
+                )}
+              </TableCell>
               <TableCell className="text-muted-foreground text-right text-xs">
-                {new Date(lead.created_at).toLocaleDateString("es-ES")}
+                {new Date(lead.intake_date).toLocaleDateString("es-ES")}
               </TableCell>
             </TableRow>
           ))}

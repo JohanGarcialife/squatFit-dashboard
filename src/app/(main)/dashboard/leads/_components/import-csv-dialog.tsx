@@ -20,24 +20,31 @@ import { LEADS_API_READY } from "@/lib/services/leads-service";
 interface ImportCsvDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** En `?demo=1` los leads se importan al store de ejemplo, no a la API real. */
+  demo?: boolean;
 }
 
-export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
+export function ImportCsvDialog({ open, onOpenChange, demo }: ImportCsvDialogProps) {
   const importCsv = useImportLeadsCsv();
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
 
   const handleImport = () => {
     if (!file) return;
-    importCsv.mutate(file, {
-      onSuccess: (res) => {
-        toast.success(`${res.imported} lead(s) importados${res.errors.length ? `, ${res.errors.length} avisos` : ""}`);
-        if (res.errors.length) console.warn("Import CSV avisos:", res.errors);
-        setFile(null);
-        onOpenChange(false);
+    importCsv.mutate(
+      { file, demo },
+      {
+        onSuccess: (res) => {
+          toast.success(
+            `${res.imported} lead(s) importados${res.errors.length ? `, ${res.errors.length} avisos` : ""}`,
+          );
+          if (res.errors.length) console.warn("Import CSV avisos:", res.errors);
+          setFile(null);
+          onOpenChange(false);
+        },
+        onError: (e) => toast.error(e instanceof Error ? e.message : "No se pudo importar el CSV"),
       },
-      onError: (e) => toast.error(e instanceof Error ? e.message : "No se pudo importar el CSV"),
-    });
+    );
   };
 
   return (
@@ -56,8 +63,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           </DialogTitle>
           <DialogDescription>
             Cabeceras aceptadas: <code>name</code>/nombre, <code>email</code>, <code>phone</code>/teléfono,{" "}
-            <code>source</code>/origen (web · instagram), <code>state</code>/estado, <code>interest</code>/interés. Solo{" "}
-            <code>name</code> es obligatorio.
+            <code>source</code>/origen (web · instagram), <code>state</code>/estado, <code>interest</code>/interés,{" "}
+            <code>objection</code>/objeción, <code>setter</code>, <code>closer</code>. Solo <code>name</code> es
+            obligatorio.
           </DialogDescription>
         </DialogHeader>
 
