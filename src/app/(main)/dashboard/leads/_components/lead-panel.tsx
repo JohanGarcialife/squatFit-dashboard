@@ -92,7 +92,16 @@ export function LeadPanel({ lead, open, onOpenChange }: LeadPanelProps) {
 
   const handleConvert = () => {
     convertLead.mutate(lead.id, {
-      onSuccess: () => toast.success(`${lead.name} convertido en cliente ✅`),
+      onSuccess: (result) => {
+        if (result.linked) {
+          toast.success(`${lead.name} convertido en cliente ✅`);
+        } else {
+          // Ganado pero sin usuario enlazado: aviso claro (Fase 9.4).
+          toast.warning(result.warning ?? "Convertido a ganado, pero sin usuario enlazado.", {
+            duration: 8000,
+          });
+        }
+      },
       onError: (e) => toast.error(e instanceof Error ? e.message : "Error"),
     });
   };
@@ -129,11 +138,13 @@ export function LeadPanel({ lead, open, onOpenChange }: LeadPanelProps) {
             {lead.email && <InfoRow icon={<Mail className="size-4" />}>{lead.email}</InfoRow>}
             {lead.phone && <InfoRow icon={<Phone className="size-4" />}>{lead.phone}</InfoRow>}
             {lead.interest && <InfoRow icon={<Tag className="size-4" />}>{lead.interest}</InfoRow>}
-            {(lead.setter ?? lead.closer) && (
+            {(lead.assigned ?? lead.setter ?? lead.closer) && (
               <InfoRow icon={<UserCheck className="size-4" />}>
-                {[lead.setter && `Setter: ${lead.setter}`, lead.closer && `Closer: ${lead.closer}`]
-                  .filter(Boolean)
-                  .join(" · ")}
+                {lead.assigned
+                  ? `Asignado: ${lead.assigned}`
+                  : [lead.setter && `Setter: ${lead.setter}`, lead.closer && `Closer: ${lead.closer}`]
+                      .filter(Boolean)
+                      .join(" · ")}
               </InfoRow>
             )}
             <InfoRow icon={<CalendarDays className="size-4" />}>
@@ -158,6 +169,12 @@ export function LeadPanel({ lead, open, onOpenChange }: LeadPanelProps) {
               </div>
             ) : (
               <>
+                {lead.state === "Ganado" && (
+                  <p className="rounded-md bg-amber-50 px-2.5 py-1.5 text-xs text-amber-800">
+                    Ganado sin cliente enlazado: no había un usuario con su email o teléfono. Reintenta el enlace cuando
+                    el cliente cree su cuenta.
+                  </p>
+                )}
                 <Button
                   className="w-full gap-2"
                   onClick={handleConvert}
@@ -168,7 +185,7 @@ export function LeadPanel({ lead, open, onOpenChange }: LeadPanelProps) {
                   ) : (
                     <UserCheck className="size-4" />
                   )}
-                  Convertir en cliente
+                  {lead.state === "Ganado" ? "Reintentar enlace de cliente" : "Convertir en cliente"}
                 </Button>
                 {!canConvert && (
                   <p className="text-muted-foreground text-xs">

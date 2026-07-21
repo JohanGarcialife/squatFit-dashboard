@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import {
@@ -19,6 +20,11 @@ import {
   GraduationCap,
   BookOpen,
   Package,
+  Library,
+  CalendarClock,
+  Infinity as InfinityIcon,
+  Contact,
+  ExternalLink,
 } from "lucide-react";
 
 import { BrandTabs } from "@/components/brand-tabs";
@@ -29,6 +35,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClientProfile, type ClientAccess } from "@/hooks/use-client-profile";
+
+/** Píldora de caducidad para accesos de curso / suscripciones. */
+function ExpiryBadge({ end }: { end: string | null }) {
+  if (!end) {
+    return (
+      <Badge className="gap-1 bg-green-100 text-green-800">
+        <InfinityIcon className="size-3" /> Permanente
+      </Badge>
+    );
+  }
+  const date = new Date(end);
+  const expired = date.getTime() < Date.now();
+  const label = date.toLocaleDateString("es-ES");
+  return (
+    <Badge className={expired ? "gap-1 bg-rose-100 text-rose-700" : "gap-1 bg-[#EBEAF2] text-[#363C98]"}>
+      <CalendarClock className="size-3" />
+      {expired ? `Caducó ${label}` : `Caduca ${label}`}
+    </Badge>
+  );
+}
 
 const TABS = [
   { id: "datos", label: "Datos de usuario", icon: <User2 className="size-4" /> },
@@ -165,6 +191,25 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
                     ) : undefined
                   }
                 />
+                {/* Lead de origen: enlaza el lead que se convirtió en este cliente. */}
+                {data?.convertedLead && (
+                  <DataRow
+                    icon={<Contact className="size-4" />}
+                    label="Lead de origen"
+                    value={
+                      <Button asChild variant="outline" size="sm" className="gap-1.5">
+                        <Link
+                          href={`/dashboard/leads?search=${encodeURIComponent(
+                            data.convertedLead.email ?? data.convertedLead.name ?? "",
+                          )}`}
+                        >
+                          {data.convertedLead.name ?? "Ver lead"}
+                          <ExternalLink className="size-3.5" />
+                        </Link>
+                      </Button>
+                    }
+                  />
+                )}
               </div>
             )}
           </CardContent>
@@ -184,35 +229,110 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
               Añadir
             </Button>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-5">
+            {/* Cursos con su CADUCIDAD (expires_at) — fuente autoritativa (Fase 14.4). */}
+            {data && data.courses.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-muted-foreground flex items-center gap-2 text-xs font-medium tracking-wide uppercase">
+                  <GraduationCap className="size-3.5" /> Cursos y caducidad
+                </p>
+                <div className="divide-y rounded-md border">
+                  {data.courses.map((c) => (
+                    <div key={c.course_id} className="flex items-center justify-between gap-3 p-3">
+                      <div className="flex items-center gap-3">
+                        <span className="bg-muted text-muted-foreground rounded-md p-2">
+                          <GraduationCap className="size-4" />
+                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">{c.course_title ?? "Curso"}</span>
+                          {c.purchased_at && (
+                            <span className="text-muted-foreground text-xs">
+                              Desde {new Date(c.purchased_at).toLocaleDateString("es-ES")}
+                              {String(c.purchase_from).toUpperCase() === "ADMIN_GRANT" && " · concedido por staff"}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <ExpiryBadge end={c.expires_at} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Suscripciones de biblioteca digital con su FIN (end_date). */}
+            {data && data.librarySubscriptions.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-muted-foreground flex items-center gap-2 text-xs font-medium tracking-wide uppercase">
+                  <Library className="size-3.5" /> Biblioteca digital
+                </p>
+                <div className="divide-y rounded-md border">
+                  {data.librarySubscriptions.map((s) => {
+                    const active = String(s.status).toLowerCase() === "active";
+                    return (
+                      <div key={s.id} className="flex items-center justify-between gap-3 p-3">
+                        <div className="flex items-center gap-3">
+                          <span className="bg-muted text-muted-foreground rounded-md p-2">
+                            <Library className="size-4" />
+                          </span>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium capitalize">
+                              {s.subscription_type ?? "Biblioteca"}
+                            </span>
+                            <span className="text-muted-foreground text-xs">
+                              <Badge
+                                variant="outline"
+                                className={active ? "border-green-300 text-green-700" : "text-muted-foreground"}
+                              >
+                                {active ? "Activa" : (s.status ?? "inactiva")}
+                              </Badge>
+                            </span>
+                          </div>
+                        </div>
+                        <ExpiryBadge end={s.end_date} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Accesos derivados de las ventas (fallback / complemento). */}
             {isLoading ? (
               <Skeleton className="h-24 w-full" />
             ) : data && data.accesses.length > 0 ? (
-              <div className="divide-y rounded-md border">
-                {data.accesses.map((a) => (
-                  <div key={a.id} className="flex items-center justify-between gap-3 p-3">
-                    <div className="flex items-center gap-3">
-                      <span className="bg-muted text-muted-foreground rounded-md p-2">
-                        <AccessIcon type={a.type} />
-                      </span>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">{a.title}</span>
-                        <span className="text-muted-foreground text-xs">
-                          {a.type} · {new Date(a.date).toLocaleDateString("es-ES")}
+              <div className="space-y-2">
+                {(data.courses.length > 0 || data.librarySubscriptions.length > 0) && (
+                  <p className="text-muted-foreground flex items-center gap-2 text-xs font-medium tracking-wide uppercase">
+                    <ShoppingBag className="size-3.5" /> Otros accesos (compras)
+                  </p>
+                )}
+                <div className="divide-y rounded-md border">
+                  {data.accesses.map((a) => (
+                    <div key={a.id} className="flex items-center justify-between gap-3 p-3">
+                      <div className="flex items-center gap-3">
+                        <span className="bg-muted text-muted-foreground rounded-md p-2">
+                          <AccessIcon type={a.type} />
                         </span>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">{a.title}</span>
+                          <span className="text-muted-foreground text-xs">
+                            {a.type} · {new Date(a.date).toLocaleDateString("es-ES")}
+                          </span>
+                        </div>
                       </div>
+                      <Badge
+                        className={a.origin === "grant" ? "bg-[#FFEDE0] text-[#FF690B]" : "bg-[#EBEAF2] text-[#363C98]"}
+                      >
+                        {a.origin === "grant" ? "Concedido por staff" : "Comprado"}
+                      </Badge>
                     </div>
-                    <Badge
-                      className={a.origin === "grant" ? "bg-[#FFEDE0] text-[#FF690B]" : "bg-[#EBEAF2] text-[#363C98]"}
-                    >
-                      {a.origin === "grant" ? "Concedido por staff" : "Comprado"}
-                    </Badge>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            ) : (
+            ) : data && data.courses.length === 0 && data.librarySubscriptions.length === 0 ? (
               <p className="text-muted-foreground text-sm">Este cliente no tiene accesos registrados todavía.</p>
-            )}
+            ) : null}
             {data?.purchasesByNameOnly && (
               <p className="text-muted-foreground text-xs">
                 Nota: los accesos se derivan de las ventas filtradas por nombre (el backend aún no filtra por{" "}
