@@ -1,0 +1,257 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
+import Link from "next/link";
+
+import { Search, Eye, User, CheckCircle2, Mail, Undo2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { BrandTabs } from "@/components/brand-tabs";
+import { RefundOrderDialog } from "@/components/modals/refund-order-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useOrders, useSendOrderEmail, useUpdateOrderStatus } from "@/hooks/use-orders";
+import {
+  ORDER_STATUS_META,
+  formatOrderPrice,
+  itemsSummary,
+  relativeDate,
+  type Order,
+  type OrderStatus,
+} from "@/lib/services/orders-service";
+
+import { OrderDetailSheet } from "./order-detail-sheet";
+import { OrderStatusBadge, PaymentBadge } from "./order-status-badge";
+
+/** Pestañas: Todos + los 5 estados del diseño, con contador. */
+const STATUS_TABS: { id: OrderStatus | "all"; countKey: string }[] = [
+  { id: "all", countKey: "all" },
+  { id: "pending", countKey: "pending" },
+  { id: "processing", countKey: "processing" },
+  { id: "completed", countKey: "completed" },
+  { id: "refunded", countKey: "refunded" },
+  { id: "cancelled", countKey: "cancelled" },
+];
+
+export function OrdersView() {
+  const [tab, setTab] = useState<OrderStatus | "all">("all");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Order | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [refundOrder, setRefundOrder] = useState<Order | null>(null);
+
+  const { data, isLoading } = useOrders({ status: tab, search });
+  const updateStatus = useUpdateOrderStatus();
+  const sendEmail = useSendOrderEmail();
+
+  const orders = data?.orders ?? [];
+  const counts = data?.counts ?? {};
+
+  // Mantener el pedido abierto sincronizado con los datos frescos.
+  const openOrder = selected ? (orders.find((o) => o.id === selected.id) ?? selected) : null;
+
+  const tabs = useMemo(
+    () =>
+      STATUS_TABS.map((t) => {
+        const label = t.id === "all" ? "Todos" : ORDER_STATUS_META[t.id].label;
+        const n = counts[t.countKey];
+        return { id: t.id, label: typeof n === "number" ? `${label} · ${n}` : label };
+      }),
+    [counts],
+  );
+
+  const openDetail = (order: Order) => {
+    setSelected(order);
+    setDetailOpen(true);
+  };
+
+  const markCompleted = (order: Order) =>
+    updateStatus.mutate(
+      { id: order.id, status: "completed" },
+      {
+        onSuccess: () => toast.success("Pedido marcado como completado"),
+        onError: (e) => toast.error(e instanceof Error ? e.message : "Error"),
+      },
+    );
+
+  return (
+    <div className="@container/main flex flex-col gap-5">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold tracking-tight">Pedidos</h1>
+        <p className="text-muted-foreground text-sm">
+          Compras de la web y del catálogo con su estado, método de pago y origen.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="text-muted-foreground absolute top-2.5 left-2 size-4" />
+          <Input
+            placeholder="Buscar por nombre, email o nº de pedido…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+      </div>
+
+      <BrandTabs tabs={tabs} active={tab} onChange={(id) => setTab(id as OrderStatus | "all")} />
+
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-[#EBEAF2]/60 hover:bg-[#EBEAF2]/60">
+                    <TableHead className="text-[#363C98]">Cliente</TableHead>
+                    <TableHead className="text-[#363C98]">Pedido</TableHead>
+                    <TableHead className="text-[#363C98]">Productos</TableHead>
+                    <TableHead className="text-[#363C98]">Origen</TableHead>
+                    <TableHead className="text-[#363C98]">Pago</TableHead>
+                    <TableHead className="text-[#363C98]">Estado</TableHead>
+                    <TableHead className="text-[#363C98]">Total</TableHead>
+                    <TableHead className="text-right text-[#363C98]">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {orders.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-muted-foreground py-8 text-center">
+                        No hay pedidos en esta vista.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    orders.map((o) => {
+                      const struck = o.status === "refunded" || o.status === "cancelled";
+                      const canComplete = o.status === "pending" || o.status === "processing";
+                      return (
+                        <TableRow key={o.id} className="hover:bg-[#FFEDE0]/40">
+                          <TableCell>
+                            <p className="font-medium">{o.customerName}</p>
+                            <p className="text-muted-foreground text-xs">{o.customerEmail}</p>
+                          </TableCell>
+                          <TableCell>
+                            <button
+                              className="text-[#FF690B] hover:underline"
+                              onClick={() => openDetail(o)}
+                              title="Ver pedido"
+                            >
+                              #{o.id.slice(0, 8)}
+                            </button>
+                            <p className="text-muted-foreground text-xs">{relativeDate(o.createdAt)}</p>
+                          </TableCell>
+                          <TableCell
+                            className="text-muted-foreground max-w-[220px] truncate text-sm"
+                            title={itemsSummary(o.items)}
+                          >
+                            {itemsSummary(o.items)}
+                          </TableCell>
+                          <TableCell
+                            className="text-muted-foreground max-w-[140px] truncate text-xs"
+                            title={o.origin ?? ""}
+                          >
+                            {o.origin ?? "—"}
+                          </TableCell>
+                          <TableCell>
+                            <PaymentBadge method={o.paymentMethod} />
+                          </TableCell>
+                          <TableCell>
+                            <OrderStatusBadge status={o.status} />
+                          </TableCell>
+                          <TableCell className={struck ? "text-muted-foreground line-through" : ""}>
+                            {formatOrderPrice(o.total, o.currency)}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-end gap-0.5">
+                              <Button variant="ghost" size="icon" onClick={() => openDetail(o)} title="Ver pedido">
+                                <Eye className="size-4" />
+                              </Button>
+                              {o.userId && (
+                                <Button asChild variant="ghost" size="icon" title="Ficha del cliente">
+                                  <Link href={`/dashboard/alumnos/${o.userId}`}>
+                                    <User className="size-4" />
+                                  </Link>
+                                </Button>
+                              )}
+                              {canComplete && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => markCompleted(o)}
+                                  disabled={updateStatus.isPending}
+                                  title="Marcar como completado"
+                                >
+                                  {updateStatus.isPending ? (
+                                    <Loader2 className="size-4 animate-spin" />
+                                  ) : (
+                                    <CheckCircle2 className="size-4 text-green-600" />
+                                  )}
+                                </Button>
+                              )}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() =>
+                                  sendEmail.mutate(
+                                    { id: o.id },
+                                    {
+                                      onSuccess: (r) => toast.success(r.message || "Email enviado"),
+                                      onError: (e) => toast.error(e instanceof Error ? e.message : "Error"),
+                                    },
+                                  )
+                                }
+                                title="Enviar email de estado"
+                              >
+                                <Mail className="size-4" />
+                              </Button>
+                              {(o.status === "completed" || o.status === "processing") && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-rose-600"
+                                  onClick={() => setRefundOrder(o)}
+                                  title="Reembolsar"
+                                >
+                                  <Undo2 className="size-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <OrderDetailSheet
+        order={openOrder}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onRefund={(o) => setRefundOrder(o)}
+      />
+      <RefundOrderDialog
+        open={refundOrder != null}
+        onOpenChange={(o) => !o && setRefundOrder(null)}
+        orderId={refundOrder?.id ?? ""}
+        orderRef={refundOrder ? `#${refundOrder.id.slice(0, 8)}` : undefined}
+        onRefunded={() => setRefundOrder(null)}
+      />
+    </div>
+  );
+}

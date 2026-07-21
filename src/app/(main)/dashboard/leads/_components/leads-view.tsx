@@ -41,14 +41,20 @@ export function LeadsView() {
   const [search, setSearch] = useState("");
   const [source, setSource] = useState<LeadSource | "all">("all");
   const [state, setState] = useState<LeadState | "all">("all");
-  const [setter, setSetter] = useState<string>("all");
-  const [closer, setCloser] = useState<string>("all");
+  // Backend expone UN solo asignado (`assigned_to`/`assigned_to_name`), así que
+  // setter y closer se unifican en un único filtro «Asignado».
+  const [assigned, setAssigned] = useState<string>("all");
 
   // `?demo=1` fuerza los datos de ejemplo (revisar Fase 10 antes de Fase 9).
-  // Se lee tras montar para no desincronizar la hidratación SSR.
+  // `?search=` preselecciona la búsqueda (p. ej. al llegar desde la ficha del
+  // cliente, «Lead de origen»). Se lee tras montar para no desincronizar la
+  // hidratación SSR.
   const [demo, setDemo] = useState(false);
   useEffect(() => {
-    setDemo(new URLSearchParams(window.location.search).has("demo"));
+    const params = new URLSearchParams(window.location.search);
+    setDemo(params.has("demo"));
+    const initialSearch = params.get("search");
+    if (initialSearch) setSearch(initialSearch);
   }, []);
 
   const [selected, setSelected] = useState<Lead | null>(null);
@@ -66,18 +72,21 @@ export function LeadsView() {
   const { data: leads = [], isLoading } = useLeads(query);
   const updateLead = useUpdateLead();
 
-  // setter/closer aún no viajan a la API (fuera del contrato de Fase 9): se
-  // filtran en cliente y los selectores solo aparecen si algún lead los trae.
-  const setterOptions = useMemo(() => [...new Set(leads.map((l) => l.setter).filter(Boolean))] as string[], [leads]);
-  const closerOptions = useMemo(() => [...new Set(leads.map((l) => l.closer).filter(Boolean))] as string[], [leads]);
+  // El filtro «Asignado» opera sobre `assigned_to_name` (datos reales) y, en
+  // demo, sobre setter/closer. El selector solo aparece si hay algún nombre.
+  const assignedOptions = useMemo(
+    () => [...new Set(leads.flatMap((l) => [l.assigned, l.setter, l.closer]).filter(Boolean))] as string[],
+    [leads],
+  );
 
   const visibleLeads = useMemo(() => {
     let out = leads;
-    if (setter !== "all") out = out.filter((l) => l.setter === setter);
-    if (closer !== "all") out = out.filter((l) => l.closer === closer);
+    if (assigned !== "all") {
+      out = out.filter((l) => l.assigned === assigned || l.setter === assigned || l.closer === assigned);
+    }
     // Fecha de ingreso DESC: las nuevas arriba (tabla y tarjetas kanban).
     return [...out].sort((a, b) => new Date(b.intake_date).getTime() - new Date(a.intake_date).getTime());
-  }, [leads, setter, closer]);
+  }, [leads, assigned]);
 
   // Mantener sincronizado el lead abierto en el panel con los datos frescos.
   const openLead = selected ? (leads.find((l) => l.id === selected.id) ?? selected) : null;
@@ -160,31 +169,16 @@ export function LeadsView() {
             ))}
           </SelectContent>
         </Select>
-        {setterOptions.length > 0 && (
-          <Select value={setter} onValueChange={setSetter}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Setter" />
+        {assignedOptions.length > 0 && (
+          <Select value={assigned} onValueChange={setAssigned}>
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Asignado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los setters</SelectItem>
-              {setterOptions.map((s) => (
+              <SelectItem value="all">Todo el equipo</SelectItem>
+              {assignedOptions.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-        {closerOptions.length > 0 && (
-          <Select value={closer} onValueChange={setCloser}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Closer" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los closers</SelectItem>
-              {closerOptions.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
                 </SelectItem>
               ))}
             </SelectContent>

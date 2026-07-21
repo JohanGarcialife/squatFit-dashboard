@@ -3,29 +3,62 @@ import { getAuthToken } from "@/lib/auth/auth-utils";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-985835765452.europe-southwest1.run.app";
 
 // ============================================================================
-// PEDIDOS / REEMBOLSOS (15.11)
+// PEDIDOS (módulo Pedidos · Fase 6 + catálogo Fase 12) — EN PROD 21-jul-2026
 // ----------------------------------------------------------------------------
-// El backend (Fase 6, módulo Pedidos) ya expone:
-//   • GET    /api/v1/admin-panel/orders           (lista con estado/búsqueda)
-//   • GET    /api/v1/admin-panel/orders/:id        (detalle; incluye refund_reason)
-//   • POST   /api/v1/admin-panel/orders/:id/refund { reason, amount_cents? }
+//   • GET    /api/v1/admin-panel/orders            (lista + counts; status/search/limit)
+//   • GET    /api/v1/admin-panel/orders/:id         (detalle: items, envío, reembolso)
+//   • PUT    /api/v1/admin-panel/orders/:id/status  { status }
+//   • PUT    /api/v1/admin-panel/orders/:id/payment { payment_method }   (pagos manuales)
+//   • POST   /api/v1/admin-panel/orders/:id/email   { status? }          (email por estado)
+//   • POST   /api/v1/admin-panel/orders/:id/refund  { reason, note?, amount_cents? }
 //
-// El endpoint de reembolso VALIDA `reason` como obligatorio (IsNotEmpty) y, si
-// hay PaymentIntent de Stripe, ejecuta el reembolso; si es pago manual, marca
-// el pedido como devuelto con el motivo. El motivo se guarda en la columna
-// `refund_reason` y vuelve en el detalle del pedido.
+// El checkout/webhook de Stripe (y los pedidos de CATÁLOGO de Fase 12) pueblan
+// `orders`/`order_items` con `payment_method` (instrumento real) y `origin`
+// (UTM/atribución). Verificado contra prod: la lista devuelve ambos campos.
 //
-// Los seis motivos son el contrato acordado con el backend (RefundOrderDTO):
-//   Equivocación · Pausa/Baja · Insatisfecho · Completa con éxito ·
-//   Atrasos entrega · Cambia tarifa
-//
-// NOTA DE INTEGRACIÓN: este repo aún no tiene la página de Pedidos (es un build
-// aparte, ver INFORME-FASE-7). Cuando exista, la acción «Reembolsar» de cada
-// fila abre `RefundOrderDialog` (components/modals/refund-order-dialog.tsx) y el
-// detalle muestra el motivo con `formatRefundReason`.
+// ⚠️ Cambios de contrato respecto a Fase 7 (verificados 21-jul-2026):
+//   • `reason` del reembolso es un SLUG cerrado (equivocacion|pausa_baja|…), no
+//     el texto; la nota va en `note` aparte (antes se concatenaba → 400).
+//   • payment_method válidos: card|sepa_debit|klarna|sequra|cash.
 // ============================================================================
 
-/** Motivos de reembolso (contrato exacto con RefundOrderDTO del backend). */
+/** Estados del pedido (contrato ADMIN_STATUSES del backend). */
+export const ORDER_STATUSES = ["completed", "processing", "pending", "refunded", "cancelled"] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+interface StatusMeta {
+  label: string;
+  /** Clase de la píldora (paleta de marca + neutros). */
+  badge: string;
+  /** El total se muestra tachado (reembolsado/cancelado). */
+  struck?: boolean;
+}
+
+export const ORDER_STATUS_META: Record<OrderStatus, StatusMeta> = {
+  completed: { label: "Completado", badge: "bg-green-100 text-green-800" },
+  processing: { label: "Procesando", badge: "bg-[#EBEAF2] text-[#363C98]" },
+  pending: { label: "Pendiente", badge: "bg-[#FFEDE0] text-[#FF690B]" },
+  refunded: { label: "Devuelto", badge: "bg-slate-200 text-slate-700", struck: true },
+  cancelled: { label: "Cancelado", badge: "bg-slate-200 text-slate-700", struck: true },
+};
+
+/** Métodos de pago manuales/instrumento (contrato PAYMENT_METHODS). */
+export const PAYMENT_METHODS = ["card", "sepa_debit", "klarna", "sequra", "cash"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
+  card: "Tarjeta",
+  sepa_debit: "SEPA",
+  klarna: "Klarna",
+  sequra: "seQura",
+  cash: "Efectivo",
+};
+
+/** Métodos que el staff puede fijar a mano (pagos no automáticos de Stripe). */
+export const MANUAL_PAYMENT_METHODS: PaymentMethod[] = ["sequra", "cash"];
+
+// ─── Motivos de reembolso ────────────────────────────────────────────────────
+// Etiqueta legible ↔ slug del backend (RefundOrderDTO).
 export const REFUND_REASONS = [
   "Equivocación",
   "Pausa/Baja",
@@ -34,26 +67,109 @@ export const REFUND_REASONS = [
   "Atrasos entrega",
   "Cambia tarifa",
 ] as const;
-
 export type RefundReason = (typeof REFUND_REASONS)[number];
+
+const REFUND_REASON_SLUG: Record<RefundReason, string> = {
+  Equivocación: "equivocacion",
+  "Pausa/Baja": "pausa_baja",
+  Insatisfecho: "insatisfecho",
+  "Completa con éxito": "completa_exito",
+  "Atrasos entrega": "atrasos_entrega",
+  "Cambia tarifa": "cambia_tarifa",
+};
+
+const SLUG_TO_REFUND_LABEL: Record<string, string> = Object.fromEntries(
+  Object.entries(REFUND_REASON_SLUG).map(([label, slug]) => [slug, label]),
+);
+
+export interface OrderItem {
+  id: string;
+  product_type?: string;
+  product_id?: string;
+  product_name: string;
+  quantity: number;
+  unit_price: string | number;
+}
+
+export interface Order {
+  id: string;
+  userId: string | null;
+  customerName: string;
+  customerEmail: string;
+  status: OrderStatus;
+  total: number;
+  currency: string;
+  paymentMethod: PaymentMethod | null;
+  origin: string | null;
+  refundReason: string | null;
+  refundNote: string | null;
+  shippingAddress: Record<string, unknown> | null;
+  stripePaymentIntentId: string | null;
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrdersListResult {
+  orders: Order[];
+  total: number;
+  counts: Record<string, number>;
+}
+
+export interface OrdersQuery {
+  status?: OrderStatus | "all";
+  search?: string;
+}
 
 export interface RefundOrderPayload {
   orderId: string;
-  /** Motivo obligatorio (uno de REFUND_REASONS). */
   reason: RefundReason;
-  /** Nota interna opcional; se concatena al motivo enviado al backend. */
   note?: string;
-  /** Importe parcial en céntimos; si se omite, reembolso total. */
   amountCents?: number;
 }
 
-/**
- * Devuelve el motivo de reembolso en formato legible. El backend guarda en
- * `refund_reason` el motivo (y, si el staff añadió nota, «Motivo — nota»).
- */
+function toNumber(v: unknown): number {
+  if (v == null || v === "") return 0;
+  const n = typeof v === "number" ? v : parseFloat(String(v));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function normalizeStatus(v: unknown): OrderStatus {
+  const s = String(v ?? "").toLowerCase();
+  return (ORDER_STATUSES as readonly string[]).includes(s) ? (s as OrderStatus) : "pending";
+}
+
+function normalizePayment(v: unknown): PaymentMethod | null {
+  const s = String(v ?? "").toLowerCase();
+  return (PAYMENT_METHODS as readonly string[]).includes(s) ? (s as PaymentMethod) : null;
+}
+
+export function normalizeOrder(raw: any): Order {
+  return {
+    id: String(raw.id),
+    userId: raw.user_id ?? null,
+    customerName: raw.customer_name ?? "(sin nombre)",
+    customerEmail: raw.customer_email ?? "",
+    status: normalizeStatus(raw.status),
+    total: toNumber(raw.total_amount),
+    currency: (raw.currency ?? "eur").toLowerCase(),
+    paymentMethod: normalizePayment(raw.payment_method),
+    origin: raw.origin ?? null,
+    refundReason: raw.refund_reason ?? null,
+    refundNote: raw.refund_note ?? null,
+    shippingAddress: raw.shipping_address ?? null,
+    stripePaymentIntentId: raw.stripe_payment_intent_id ?? null,
+    items: Array.isArray(raw.items) ? raw.items : [],
+    createdAt: raw.created_at ?? raw.createdAt ?? new Date().toISOString(),
+    updatedAt: raw.updated_at ?? raw.updatedAt ?? raw.created_at ?? new Date().toISOString(),
+  };
+}
+
+/** Motivo de reembolso legible (traduce el slug del backend). */
 export function formatRefundReason(raw: string | null | undefined): string {
   if (!raw || !raw.trim()) return "—";
-  return raw.trim();
+  const t = raw.trim();
+  return SLUG_TO_REFUND_LABEL[t] ?? t;
 }
 
 export class OrdersService {
@@ -65,39 +181,122 @@ export class OrdersService {
     };
   }
 
+  private static async request<T>(path: string, init?: RequestInit): Promise<T> {
+    const res = await fetch(`${API_BASE_URL}${path}`, init);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.message ?? body.error ?? `Error ${res.status}`);
+    }
+    return res.json();
+  }
+
+  static async list(query?: OrdersQuery): Promise<OrdersListResult> {
+    // Solo params del QueryOrdersDTO (forbidNonWhitelisted): status, search, limit.
+    const params = new URLSearchParams();
+    if (query?.status && query.status !== "all") params.set("status", query.status);
+    if (query?.search) params.set("search", query.search);
+    params.set("limit", "200");
+    const qs = params.toString();
+    const data = await this.request<any>(`/api/v1/admin-panel/orders${qs ? `?${qs}` : ""}`, {
+      headers: this.authHeaders(),
+    });
+    const rows: any[] = Array.isArray(data) ? data : (data.data ?? data.orders ?? []);
+    return {
+      orders: rows.map(normalizeOrder),
+      total: Number(data?.total) || rows.length,
+      counts: data?.counts ?? {},
+    };
+  }
+
+  static async getById(id: string): Promise<Order> {
+    const data = await this.request<any>(`/api/v1/admin-panel/orders/${id}`, { headers: this.authHeaders() });
+    return normalizeOrder(data?.data ?? data);
+  }
+
+  static async updateStatus(id: string, status: OrderStatus): Promise<Order> {
+    const data = await this.request<any>(`/api/v1/admin-panel/orders/${id}/status`, {
+      method: "PUT",
+      headers: this.authHeaders(),
+      body: JSON.stringify({ status }),
+    });
+    return normalizeOrder(data?.data ?? data);
+  }
+
+  static async updatePayment(id: string, payment_method: PaymentMethod): Promise<Order> {
+    const data = await this.request<any>(`/api/v1/admin-panel/orders/${id}/payment`, {
+      method: "PUT",
+      headers: this.authHeaders(),
+      body: JSON.stringify({ payment_method }),
+    });
+    return normalizeOrder(data?.data ?? data);
+  }
+
+  /** Envía el email al cliente según el estado del pedido (o el indicado). */
+  static async sendEmail(id: string, status?: OrderStatus): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/api/v1/admin-panel/orders/${id}/email`, {
+      method: "POST",
+      headers: this.authHeaders(),
+      body: JSON.stringify(status ? { status } : {}),
+    });
+  }
+
   /**
-   * Reembolsa (o marca como devuelto) un pedido con motivo obligatorio.
-   * POST /api/v1/admin-panel/orders/:id/refund
-   *
-   * Tolerante: si un backend antiguo aún no aceptara el campo `reason`, la
-   * llamada seguiría enviándolo (el DTO lo exige); ante un 4xx se propaga el
-   * mensaje del backend para mostrarlo en el toast.
+   * Reembolsa (o marca como devuelto) un pedido. El backend exige `reason` como
+   * SLUG cerrado; la nota va aparte en `note`.
    */
   static async refundOrder({ orderId, reason, note, amountCents }: RefundOrderPayload): Promise<{ message: string }> {
-    if (!reason) {
-      throw new Error("El motivo del reembolso es obligatorio.");
-    }
-
-    // El backend guarda un único string en `refund_reason`. Si hay nota, la
-    // adjuntamos al motivo con un separador legible.
-    const reasonWithNote = note?.trim() ? `${reason} — ${note.trim()}` : reason;
-
-    const body: Record<string, unknown> = { reason: reasonWithNote };
-    if (typeof amountCents === "number" && amountCents > 0) {
-      body.amount_cents = amountCents;
-    }
+    if (!reason) throw new Error("El motivo del reembolso es obligatorio.");
+    const body: Record<string, unknown> = { reason: REFUND_REASON_SLUG[reason] };
+    if (note?.trim()) body.note = note.trim();
+    if (typeof amountCents === "number" && amountCents > 0) body.amount_cents = amountCents;
 
     const res = await fetch(`${API_BASE_URL}/api/v1/admin-panel/orders/${orderId}/refund`, {
       method: "POST",
       headers: this.authHeaders(),
       body: JSON.stringify(body),
     });
-
     if (!res.ok) {
       const payload = await res.json().catch(() => ({}));
       throw new Error(payload.message ?? payload.error ?? `Error ${res.status} al procesar el reembolso`);
     }
-
     return res.json().catch(() => ({ message: "Reembolso procesado" }));
   }
+}
+
+// ─── Formato de fecha relativa (diseño: «Hace 3 horas» / «Ayer» / «3 Dic 2025») ─
+export function relativeDate(iso: string): string {
+  const d = new Date(iso);
+  const now = Date.now();
+  const diffMs = now - d.getTime();
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return "Justo ahora";
+  if (min < 60) return `Hace ${min} min`;
+  const hours = Math.floor(min / 60);
+  if (hours < 24) return `Hace ${hours} h`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return `Ayer, ${d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}`;
+  if (days < 7) return `Hace ${days} días`;
+  return d.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/** Resumen legible de los productos del pedido para la columna «Productos». */
+export function itemsSummary(items: OrderItem[]): string {
+  if (!items.length) return "—";
+  const names = items.map((i) => (i.quantity > 1 ? `${i.product_name} ×${i.quantity}` : i.product_name));
+  if (names.length <= 2) return names.join(", ");
+  return `${names.slice(0, 2).join(", ")} +${names.length - 2}`;
+}
+
+const CURRENCY_SYMBOL: Record<string, string> = {
+  eur: "€",
+  usd: "$",
+  gbp: "£",
+  mxn: "$",
+  cop: "$",
+  clp: "$",
+  pen: "S/",
+};
+export function formatOrderPrice(total: number, currency: string): string {
+  const sym = CURRENCY_SYMBOL[currency] ?? currency.toUpperCase();
+  return `${total.toFixed(2)} ${sym}`;
 }

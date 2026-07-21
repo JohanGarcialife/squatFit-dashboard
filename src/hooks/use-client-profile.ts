@@ -7,7 +7,10 @@ import {
   SALES_BY_USER_READY,
   USER_DETAIL_API_READY,
   UsersService,
+  type ConvertedLead,
+  type UserCourseAccess,
   type UserDetailResponse,
+  type UserLibrarySubscription,
   type UserResponse,
 } from "@/lib/services/users-service";
 
@@ -37,6 +40,12 @@ export interface ClientProfileData {
   /** Accesos concedidos/comprados (13.12). Derivados de las ventas mientras no
    *  exista un endpoint dedicado de accesos por usuario. */
   accesses: ClientAccess[];
+  /** Cursos con su caducidad (Fase 14.4; presente tras el deploy backend). */
+  courses: UserCourseAccess[];
+  /** Suscripciones de biblioteca con su fin. */
+  librarySubscriptions: UserLibrarySubscription[];
+  /** Lead que se convirtió en este cliente (enlace inverso). */
+  convertedLead: ConvertedLead | null;
   forms: ClientFormEntry[];
 }
 
@@ -108,6 +117,9 @@ export function useClientProfile(userId: string, fallbackName?: string) {
         purchases,
         purchasesByNameOnly: !SALES_BY_USER_READY,
         accesses,
+        courses: userDetail?.courses ?? [],
+        librarySubscriptions: userDetail?.library_subscriptions ?? [],
+        convertedLead: userDetail?.converted_lead ?? null,
         forms,
       };
     },

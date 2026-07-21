@@ -51,6 +51,35 @@ export interface UserResponse {
   status: string; // "active" o "inactive"
 }
 
+/** Acceso a un curso con su caducidad (Fase 14.4 · getUserDetail extendido). */
+export interface UserCourseAccess {
+  course_id: string;
+  course_title: string | null;
+  /** null = acceso permanente; con fecha, caduca ese día. */
+  expires_at: string | null;
+  purchased_at?: string | null;
+  purchase_from?: string | null;
+}
+
+/** Suscripción a la biblioteca digital con su fin. */
+export interface UserLibrarySubscription {
+  id: string;
+  subscription_type: string | null;
+  status: string | null;
+  start_date: string | null;
+  end_date: string | null;
+}
+
+/** Lead que se convirtió en este cliente (enlace inverso desde la ficha). */
+export interface ConvertedLead {
+  id: string;
+  name: string | null;
+  email: string | null;
+  status: string | null;
+  objection: string | null;
+  intake_date: string | null;
+}
+
 // Respuesta completa del API para detalles de usuario (PUT)
 export interface UserDetailResponse {
   id: string;
@@ -80,6 +109,11 @@ export interface UserDetailResponse {
   daily_activity_id: string | null;
   steps_peer_day_id: string | null;
   strength_training_id: string | null;
+  // Colecciones aditivas de getUserDetail (Fase 14.4; presentes tras el deploy
+  // de la rama backend `features-ficha-cliente-accesos`).
+  courses?: UserCourseAccess[];
+  library_subscriptions?: UserLibrarySubscription[];
+  converted_lead?: ConvertedLead | null;
 }
 
 export interface GetAlumnosParams {

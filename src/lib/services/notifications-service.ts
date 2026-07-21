@@ -22,8 +22,8 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-98
 // del tipo (+ resource_id cuando aplique).
 // ============================================================================
 
-/** `true` cuando Fase 9 publique GET/POST /admin-panel/notifications (404 a 20-jul-2026). */
-export const NOTIFICATIONS_API_READY = false;
+/** ENCENDIDO 21-jul-2026 por el coordinador: GET/POST /admin-panel/notifications verificados vivos en prod (401, ya no 404). */
+export const NOTIFICATIONS_API_READY = true;
 
 /** Cada cuánto sondea la campana (ms). */
 export const NOTIFICATIONS_POLL_MS = 45_000;

@@ -5,49 +5,55 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://squatfit-api-98
 // ============================================================================
 // CRM — LEADS (13.13 · Fase 10)
 // ----------------------------------------------------------------------------
-// Backend v1 (lote 4, EN PROD desde el 20-jul-2026):
-//   • GET    /api/v1/admin-panel/leads                (lista)
+// Backend (Fase 9 + Fase 12, EN PROD desde el 21-jul-2026, rev 00201-6sq):
+//   • GET    /api/v1/admin-panel/leads                (lista + counts por estado)
 //   • POST   /api/v1/admin-panel/leads                (crear)
-//   • PUT    /api/v1/admin-panel/leads/:id            (actualizar; incl. estado)
+//   • PUT    /api/v1/admin-panel/leads/:id            (actualizar; incl. estado y objeción)
 //   • DELETE /api/v1/admin-panel/leads/:id            (borrar)
 //   • POST   /api/v1/admin-panel/leads/import         (importar CSV; multipart)
-//   • POST   /api/v1/admin-panel/leads/:id/notes      (añadir nota)
+//   • POST   /api/v1/admin-panel/leads/:id/convert    (convertir en cliente)
 //
-// Contrato v2 (Fase 9, backend en paralelo — AÚN NO publicado):
-//   • status ampliado: `realizada` (llamada hecha) y `esperando_pago`
-//     (+ `seguimiento` para repesca; ver decisión abajo)
-//   • campos nuevos por lead: `objection`, `intake_date`, `converted_user_id`,
-//     `is_customer`
-//   • POST /api/v1/admin-panel/leads/:id/convert      (convertir en cliente)
+// Contrato v2 (Fase 9, YA desplegado):
+//   • status ampliado: `realizada` (llamada hecha), `esperando_pago` y
+//     `seguimiento` (repesca) — 8 estados en total.
+//   • campos por lead: `objection`, `intake_date`, `converted_user_id`,
+//     `is_customer`, `assigned_to` (uuid) + `assigned_to_name` (display),
+//     `origin` (web|instagram|email|youtube|otro).
+//   • `convert` responde `{ lead, linked, converted_user_id, warning? }`:
+//     `warning` presente cuando NO encuentra usuario con el email/teléfono.
 //
-// Sondeo 20-jul-2026: `/admin-panel/leads` responde 401 (existe, v1);
-// `/admin-panel/leads/:id/convert` responde 404 (no existe todavía).
+// Verificado contra prod 21-jul-2026 (token admin): `GET /admin-panel/leads`
+// → 200 con los 8 estados en `counts`; `convert` → existe (404 "Lead no
+// encontrado" con id inexistente). El endpoint `leads/:id/notes` NO existe
+// en backend (notes es una columna de texto única); el composer de notas solo
+// persiste en modo demo hasta que backend publique una colección de notas.
+//
+// OJO: la tabla `leads` está VACÍA en prod (total=0) hasta que se corra el
+// import de ~160 leads (`scripts/import-leads.ts --commit`). Hasta entonces
+// Pipeline/Repesca salen vacíos con datos reales; usar `?demo=1` para revisar.
 //
 // Estrategia de encendido:
-//   • Los campos v2 se AUTODETECTAN: si el GET devuelve leads con `objection`/
-//     `intake_date`/`is_customer`, se habilita la escritura v2 sola. Además
-//     `LEADS_V2_WRITE_READY` fuerza el encendido manual si hiciera falta.
-//   • Mientras no haya v2: «Llamada hecha» se escribe como el estado legado
-//     «Asistió» (equivalente semántico que el v1 sí acepta); «Esperando pago»
-//     y «Seguimiento» no se pueden persistir (error claro al usuario) y la
-//     objeción no es editable contra la API real.
 //   • `?demo=1` en /dashboard/leads fuerza los datos de ejemplo (cubren ambos
-//     kanbans) aunque la API real esté activa, para poder revisar la UI de
-//     Fase 10 antes de que Fase 9 publique.
+//     kanbans) aunque la API real esté activa.
 // ============================================================================
 
-/** Interruptor global: `true` cuando el backend de leads esté desplegado. */
+/** Interruptor global: `true` con el backend de leads desplegado. */
 export const LEADS_API_READY = true; // encendido 20-jul-2026 (backend lote 4 en prod);
 
 /**
  * Escritura del contrato v2 (Fase 9): estados `realizada`/`esperando_pago`/
- * `seguimiento` y campo `objection` en el PUT. Se autodetecta cuando el GET
- * devuelve los campos nuevos; esta constante solo fuerza el encendido manual.
+ * `seguimiento` y campo `objection` en el PUT. Encendido manual 21-jul-2026
+ * (backend v2 en prod, rev 00201). Se mantiene la autodetección como refuerzo,
+ * pero con la tabla vacía (total=0) el autodetect no puede disparar, así que
+ * este flag garantiza que la escritura v2 quede activa.
  */
-export const LEADS_V2_WRITE_READY = false;
+export const LEADS_V2_WRITE_READY = true;
 
-/** `POST /admin-panel/leads/:id/convert` — 404 en prod a 20-jul-2026. */
-export const LEAD_CONVERT_READY = false;
+/**
+ * `POST /admin-panel/leads/:id/convert` — DESPLEGADO en prod (rev 00201,
+ * 21-jul-2026). Devuelve `{ lead, linked, converted_user_id, warning? }`.
+ */
+export const LEAD_CONVERT_READY = true;
 
 /** Columnas del kanban «Pipeline comercial» (en orden). */
 export const PIPELINE_STATES = [
@@ -74,23 +80,27 @@ export type LeadState = (typeof LEAD_STATES)[number];
 /** Estados que entran en el kanban «Repesca». */
 export const REPESCA_STATES: readonly LeadState[] = ["Perdido", "Seguimiento"];
 
-/** Orígenes soportados por el filtro. */
-export const LEAD_SOURCES = ["web", "ig"] as const;
+/** Orígenes soportados por el filtro (enum backend: web|instagram|email|youtube|otro). */
+export const LEAD_SOURCES = ["web", "ig", "email", "youtube", "otro"] as const;
 export type LeadSource = (typeof LEAD_SOURCES)[number];
 
 export const LEAD_SOURCE_LABEL: Record<LeadSource, string> = {
   web: "Web",
   ig: "Instagram",
+  email: "Email",
+  youtube: "YouTube",
+  otro: "Otro",
 };
 
 /** Objeciones de venta (contrato Fase 9) — agrupan el kanban «Repesca». */
-export const LEAD_OBJECTIONS = ["precio", "timing", "confianza", "otros"] as const;
+export const LEAD_OBJECTIONS = ["precio", "timing", "confianza", "presupuesto", "otros"] as const;
 export type LeadObjection = (typeof LEAD_OBJECTIONS)[number];
 
 export const LEAD_OBJECTION_LABEL: Record<LeadObjection, string> = {
   precio: "Precio",
   timing: "Timing / Pospone",
   confianza: "Confianza",
+  presupuesto: "Presupuesto",
   otros: "Otros",
 };
 
@@ -127,9 +137,15 @@ export interface Lead {
   is_customer: boolean;
   /** Usuario creado al convertir → enlaza a /dashboard/alumnos/:id. */
   converted_user_id?: string;
-  /** Setter asignado (solo filtro; el contrato de Fase 9 no lo incluye aún). */
+  /**
+   * Persona asignada (setter/closer). El backend tiene UN solo `assigned_to`
+   * (uuid) con su nombre en `assigned_to_name`; el filtro «Asignado» opera
+   * sobre este valor. Los datos de ejemplo aún distinguen setter/closer.
+   */
+  assigned?: string;
+  /** Setter asignado — solo datos de ejemplo (backend colapsa en `assigned`). */
   setter?: string;
-  /** Closer asignado (solo filtro; el contrato de Fase 9 no lo incluye aún). */
+  /** Closer asignado — solo datos de ejemplo (backend colapsa en `assigned`). */
   closer?: string;
   notes: LeadNote[];
   history: LeadHistoryEntry[];
@@ -161,6 +177,18 @@ export interface UpdateLeadInput {
   state?: LeadState;
   /** `null` limpia la objeción. */
   objection?: LeadObjection | null;
+}
+
+/**
+ * Resultado de convertir un lead. El backend responde
+ * `{ lead, linked, converted_user_id, warning? }`: `linked=false` (y su
+ * `warning`) cuando no encontró un usuario con el email/teléfono del lead —
+ * queda «ganado» pero sin enlazar.
+ */
+export interface ConvertLeadResult {
+  lead: Lead;
+  linked: boolean;
+  warning?: string;
 }
 
 // ─── Normalización estado/objeción (tolerante a v1, v2 y CSVs) ───────────────
@@ -199,6 +227,9 @@ const OBJECTION_ALIASES: Record<string, LeadObjection> = {
   tiempo: "timing",
   confianza: "confianza",
   trust: "confianza",
+  presupuesto: "presupuesto",
+  budget: "presupuesto",
+  dinero: "presupuesto",
   otros: "otros",
   otro: "otros",
   other: "otros",
@@ -216,6 +247,14 @@ const SOURCE_ALIASES: Record<string, LeadSource> = {
   ig: "ig",
   instagram: "ig",
   insta: "ig",
+  email: "email",
+  correo: "email",
+  mail: "email",
+  youtube: "youtube",
+  yt: "youtube",
+  otro: "otro",
+  otros: "otro",
+  other: "otro",
 };
 
 // ─── Detección runtime de los campos v2 (Fase 9) ─────────────────────────────
@@ -241,24 +280,50 @@ function detectV2Fields(raw: unknown): void {
   }
 }
 
+/**
+ * El backend guarda las notas en UNA columna de texto (`notes`), no en una
+ * colección. Cada nota se persiste como una línea `[ISO] cuerpo`; aquí se
+ * parsea de vuelta a la lista que espera la UI (más recientes primero).
+ */
+function parseNotes(value: unknown, fallbackDate: string): LeadNote[] {
+  if (Array.isArray(value)) return value as LeadNote[]; // datos de ejemplo
+  if (typeof value === "string" && value.trim()) {
+    return value
+      .split("\n")
+      .filter((l) => l.trim())
+      .map((line, i) => {
+        const m = line.match(/^\[(.+?)\]\s?([\s\S]*)$/);
+        return m
+          ? { id: `db-${i}`, body: m[2], author: "Staff", created_at: m[1] }
+          : { id: `db-${i}`, body: line, author: "Staff", created_at: fallbackDate };
+      })
+      .reverse();
+  }
+  return [];
+}
+
 /** Tolerante a alias de campo entre v1 y v2. */
 function normalizeLead(raw: any): Lead {
   const created = raw.created_at ?? raw.createdAt ?? nowIso();
+  // Backend v2 usa `origin`; los datos de ejemplo y CSVs, `source`.
+  const rawSource = String(raw.origin ?? raw.source ?? "").toLowerCase();
+  const assigned = raw.assigned_to_name ?? raw.assigned ?? undefined;
   return {
     id: String(raw.id),
     name: raw.name ?? "(sin nombre)",
     email: raw.email ?? undefined,
     phone: raw.phone ?? undefined,
-    source: SOURCE_ALIASES[String(raw.source ?? "").toLowerCase()] ?? "web",
+    source: SOURCE_ALIASES[rawSource] ?? "web",
     state: normalizeLeadState(raw.state ?? raw.status) ?? "Nuevo",
     interest: raw.interest ?? undefined,
     objection: normalizeLeadObjection(raw.objection),
     intake_date: raw.intake_date ?? raw.intakeDate ?? created,
     is_customer: Boolean(raw.is_customer ?? raw.isCustomer ?? raw.converted_user_id),
     converted_user_id: raw.converted_user_id ?? raw.convertedUserId ?? undefined,
+    assigned: assigned || undefined,
     setter: raw.setter ?? raw.setter_name ?? undefined,
     closer: raw.closer ?? raw.closer_name ?? undefined,
-    notes: Array.isArray(raw.notes) ? raw.notes : [],
+    notes: parseNotes(raw.notes, raw.updated_at ?? raw.updatedAt ?? created),
     history: Array.isArray(raw.history) ? raw.history : [],
     created_at: created,
     updated_at: raw.updated_at ?? raw.updatedAt ?? created,
@@ -266,23 +331,40 @@ function normalizeLead(raw: any): Lead {
 }
 
 /**
- * Estado UI → valor que la API acepta HOY. Sin v2, «Llamada hecha» se escribe
- * como «Asistió» (equivalente v1); «Esperando pago»/«Seguimiento» no se pueden
- * persistir todavía → error claro (la tarjeta vuelve a su columna).
+ * Estado UI → `status` del backend (enum LOWERCASE del QueryLeadsDTO). El
+ * backend valida con forbidNonWhitelisted, así que hay que enviar exactamente
+ * `nuevo|contactado|agendado|realizada|esperando_pago|ganado|perdido|seguimiento`.
  */
+const STATE_TO_API: Record<LeadState, string> = {
+  Nuevo: "nuevo",
+  Contactado: "contactado",
+  Agendado: "agendado",
+  "Llamada hecha": "realizada",
+  "Esperando pago": "esperando_pago",
+  Ganado: "ganado",
+  Perdido: "perdido",
+  Seguimiento: "seguimiento",
+};
+
 function stateToApi(state: LeadState): string {
-  if (leadsV2WritesEnabled()) {
-    if (state === "Llamada hecha") return "realizada";
-    if (state === "Esperando pago") return "esperando_pago";
-    if (state === "Seguimiento") return "seguimiento";
-    return state;
-  }
+  if (leadsV2WritesEnabled()) return STATE_TO_API[state];
+  // Contrato legado (v1): «Llamada hecha» ≡ «Asistió»; el resto de estados v2
+  // (esperando_pago/seguimiento) no se pueden persistir.
   if (state === "Llamada hecha") return "Asistió";
   if (state === "Esperando pago" || state === "Seguimiento") {
     throw new Error(`El estado «${state}» se activará cuando el backend (Fase 9) publique el nuevo contrato de leads.`);
   }
-  return state;
+  return STATE_TO_API[state];
 }
+
+/** Origen UI → `origin` del backend (enum web|instagram|email|youtube|otro). */
+const SOURCE_TO_API: Record<LeadSource, string> = {
+  web: "web",
+  ig: "instagram",
+  email: "email",
+  youtube: "youtube",
+  otro: "otro",
+};
 
 // ─── Datos de ejemplo (con `!LEADS_API_READY` o `?demo=1`) ───────────────────
 // Cubren los DOS kanbans: los 7 estados del pipeline + «Seguimiento», las 4
@@ -588,10 +670,14 @@ export class LeadsService {
       // referencias, react-query/useMemo no verían los cambios tras mutar.
       return applyFilters(getSampleStore(), query).map((l) => ({ ...l, notes: [...l.notes], history: [...l.history] }));
     }
+    // El backend valida con forbidNonWhitelisted: SOLO acepta los params del
+    // QueryLeadsDTO (status, origin, assigned_to, objection, intake_from/to,
+    // search, page, limit). Enviar `source`/`state` (nombres de la UI) daría
+    // 400. Como los kanbans agrupan por estado en cliente, pedimos la lista
+    // completa (limit alto) y filtramos origen/estado localmente.
     const params = new URLSearchParams();
     if (query?.search) params.set("search", query.search);
-    if (query?.source && query.source !== "all") params.set("source", query.source);
-    if (query?.state && query.state !== "all") params.set("state", query.state);
+    params.set("limit", "200"); // cubre los ~160 leads importados (máx. backend 200)
     const qs = params.toString();
     const data = await this.request<any>(`/api/v1/admin-panel/leads${qs ? `?${qs}` : ""}`, {
       headers: this.authHeaders(),
@@ -626,16 +712,17 @@ export class LeadsService {
       getSampleStore().unshift(lead);
       return lead;
     }
-    // El DTO v1 valida con forbidNonWhitelisted: los campos v2 (objection) y
-    // los que no están en ningún contrato (setter/closer) solo se envían
-    // cuando la escritura v2 está habilitada — si no, 400.
+    // El DTO valida con forbidNonWhitelisted: solo campos del CreateLeadDTO
+    // (name, email, phone, instagram, origin, status, notes, objection, …).
+    // `interest` no es columna → se guarda como nota; `source`→`origin`,
+    // `state`→`status` (ambos con el nombre y el enum que el backend espera).
     const body: Record<string, unknown> = {
       name: input.name,
-      email: input.email,
-      phone: input.phone,
-      source: input.source,
-      interest: input.interest,
-      ...(input.state ? { state: stateToApi(input.state) } : {}),
+      ...(input.email ? { email: input.email } : {}),
+      ...(input.phone ? { phone: input.phone } : {}),
+      origin: SOURCE_TO_API[input.source],
+      ...(input.interest ? { notes: `Interés: ${input.interest}` } : {}),
+      ...(input.state ? { status: stateToApi(input.state) } : {}),
       ...(leadsV2WritesEnabled() && input.objection ? { objection: input.objection } : {}),
     };
     const raw = await this.request<any>(`/api/v1/admin-panel/leads`, {
@@ -680,8 +767,9 @@ export class LeadsService {
     if (patch.objection !== undefined && !leadsV2WritesEnabled()) {
       throw new Error("La objeción se guardará cuando el backend (Fase 9) publique el nuevo contrato de leads.");
     }
+    // Backend: `status` (no `state`); `objection: null` limpia la objeción.
     const body: Record<string, unknown> = {
-      ...(patch.state ? { state: stateToApi(patch.state) } : {}),
+      ...(patch.state ? { status: stateToApi(patch.state) } : {}),
       ...(patch.objection !== undefined ? { objection: patch.objection } : {}),
     };
     const raw = await this.request<any>(`/api/v1/admin-panel/leads/${id}`, {
@@ -700,10 +788,10 @@ export class LeadsService {
 
   /**
    * Convierte el lead en cliente (crea/enlaza el usuario en backend).
-   * `POST /admin-panel/leads/:id/convert` — tras `LEAD_CONVERT_READY` hasta
-   * que Fase 9 lo publique (hoy 404).
+   * `POST /admin-panel/leads/:id/convert` → `{ lead, linked, converted_user_id,
+   * warning? }`. Devuelve el aviso cuando el lead queda ganado SIN enlazar.
    */
-  static async convertLead(id: string): Promise<Lead> {
+  static async convertLead(id: string): Promise<ConvertLeadResult> {
     if (!LEADS_API_READY || isSampleId(id)) {
       const lead = getSampleStore().find((l) => l.id === id);
       if (!lead) throw new Error("Lead no encontrado");
@@ -712,7 +800,7 @@ export class LeadsService {
       lead.state = "Ganado";
       lead.history.push({ id: `h-${Date.now()}`, event: "Convertido en cliente ✅", created_at: nowIso() });
       lead.updated_at = nowIso();
-      return { ...lead };
+      return { lead: { ...lead }, linked: true };
     }
     if (!LEAD_CONVERT_READY) {
       throw new Error("«Convertir en cliente» se activará cuando el backend (Fase 9) publique el endpoint.");
@@ -721,8 +809,20 @@ export class LeadsService {
       method: "POST",
       headers: this.authHeaders(),
     });
-    detectV2Fields(raw);
-    return normalizeLead(raw);
+    // El backend envuelve la respuesta: { lead, linked, converted_user_id, warning? }.
+    const leadRaw = raw?.lead ?? raw;
+    detectV2Fields(leadRaw);
+    const lead = normalizeLead(leadRaw);
+    // Si el backend no incluyó converted_user_id en la fila (envuelto aparte).
+    if (!lead.converted_user_id && raw?.converted_user_id) {
+      lead.converted_user_id = raw.converted_user_id;
+      lead.is_customer = true;
+    }
+    return {
+      lead,
+      linked: Boolean(raw?.linked ?? lead.converted_user_id),
+      warning: raw?.warning ?? undefined,
+    };
   }
 
   static async addNote(id: string, body: string): Promise<LeadNote> {
@@ -735,11 +835,20 @@ export class LeadsService {
       lead.updated_at = nowIso();
       return note;
     }
-    return this.request<LeadNote>(`/api/v1/admin-panel/leads/${id}/notes`, {
-      method: "POST",
+    // El backend no tiene endpoint de notas: se anexa a la columna de texto
+    // `notes` (línea `[ISO] cuerpo`) leyendo el valor actual y reescribiéndolo.
+    const current = await this.request<any>(`/api/v1/admin-panel/leads/${id}`, {
       headers: this.authHeaders(),
-      body: JSON.stringify({ body }),
     });
+    const existing = typeof current?.notes === "string" ? current.notes : "";
+    const created = nowIso();
+    const line = `[${created}] ${body}`;
+    await this.request<any>(`/api/v1/admin-panel/leads/${id}`, {
+      method: "PUT",
+      headers: this.authHeaders(),
+      body: JSON.stringify({ notes: existing ? `${existing}\n${line}` : line }),
+    });
+    return { id: `n-${Date.now()}`, body, author: "Staff", created_at: created };
   }
 
   /**

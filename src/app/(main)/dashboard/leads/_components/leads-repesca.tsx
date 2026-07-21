@@ -44,6 +44,7 @@ const OBJECTION_STYLES: Record<LeadObjection, string> = {
   precio: "border-t-[#FF690B]",
   timing: "border-t-amber-500",
   confianza: "border-t-[#363C98]",
+  presupuesto: "border-t-rose-500",
   otros: "border-t-slate-400",
 };
 
