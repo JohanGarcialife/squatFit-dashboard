@@ -33,6 +33,13 @@ export interface Lesson {
   priority: number;
   module_id: string | null;
   test: TestMeta | null;
+  // ── Fase 17: goteo y metadatos ──
+  /** Días tras la compra/matrícula para desbloquear la clase (null = sin goteo, se hereda el del módulo). */
+  drip_days: number | null;
+  /** Duración estimada en minutos (metadato informativo para el alumno). */
+  duration_minutes: number | null;
+  /** Descripción corta que ve el alumno bajo el título. */
+  description: string | null;
 }
 
 export interface ContentModule {
@@ -42,6 +49,9 @@ export interface ContentModule {
   priority: number;
   module_test: TestMeta | null;
   lessons: Lesson[];
+  // ── Fase 17: goteo ──
+  /** Días tras la compra/matrícula para desbloquear el módulo completo (null = disponible desde el día 0). */
+  drip_days: number | null;
 }
 
 export interface ContentTree {
@@ -111,6 +121,9 @@ function demoTree(courseId: string): ContentTree {
     priority: n,
     module_id: "demo-m-1",
     test: { id: `demo-t-${n}`, title: `Test — ${title}`, kind: "class" },
+    drip_days: n <= 2 ? 0 : 7,
+    duration_minutes: 12 + n * 3,
+    description: n === 1 ? "Qué es nutrir(se): del alimento a la célula." : null,
   });
   return {
     course_id: courseId,
@@ -120,6 +133,7 @@ function demoTree(courseId: string): ContentTree {
         name: "Fundamentos de la nutrición",
         subtitle: null,
         priority: 1,
+        drip_days: 0,
         module_test: { id: "demo-mt-1", title: "Test del módulo — Fundamentos", kind: "module" },
         lessons: [
           mk(
@@ -140,6 +154,7 @@ function demoTree(courseId: string): ContentTree {
         name: "Energía y composición corporal",
         subtitle: null,
         priority: 2,
+        drip_days: 14,
         module_test: null,
         lessons: [mk(4, "Bioenergética y balance energético: cálculo del gasto y del déficit", null)],
       },
@@ -158,6 +173,7 @@ function demoModule(name: string, subtitle: string | null, priority: number, id?
     name,
     subtitle,
     priority,
+    drip_days: null,
     module_test: null,
     lessons: [],
   };
@@ -179,6 +195,29 @@ function demoLesson(
     priority,
     module_id,
     test: null,
+    drip_days: null,
+    duration_minutes: null,
+    description: null,
+  };
+}
+
+// La API real puede no devolver aún los campos de la Fase 17 (drip/metadatos);
+// se rellenan a null para que la vista no distinga entre «no soportado» y «vacío».
+function normalizeTree(tree: ContentTree): ContentTree {
+  const lesson = (l: Lesson): Lesson => ({
+    ...l,
+    drip_days: l.drip_days ?? null,
+    duration_minutes: l.duration_minutes ?? null,
+    description: l.description ?? null,
+  });
+  return {
+    ...tree,
+    modules: (tree.modules ?? []).map((m) => ({
+      ...m,
+      drip_days: m.drip_days ?? null,
+      lessons: (m.lessons ?? []).map(lesson),
+    })),
+    lessons_without_module: (tree.lessons_without_module ?? []).map(lesson),
   };
 }
 
@@ -212,7 +251,7 @@ export const CursoContenidoService = {
 
   async getContentTree(courseId: string): Promise<ContentTree> {
     if (!COURSE_CONTENT_API_READY) return demoTree(courseId);
-    return request<ContentTree>(`/api/v1/admin-panel/courses/${courseId}/content`);
+    return normalizeTree(await request<ContentTree>(`/api/v1/admin-panel/courses/${courseId}/content`));
   },
 
   async createModule(courseId: string, body: { name: string; subtitle?: string; priority?: number }) {
@@ -225,7 +264,10 @@ export const CursoContenidoService = {
       body: JSON.stringify(body),
     });
   },
-  async updateModule(moduleId: string, body: { name?: string; subtitle?: string; priority?: number }) {
+  async updateModule(
+    moduleId: string,
+    body: { name?: string; subtitle?: string | null; priority?: number; drip_days?: number | null },
+  ) {
     if (!COURSE_CONTENT_API_READY) {
       return demoModule(body.name ?? "Módulo (demo)", body.subtitle ?? null, body.priority ?? 0, moduleId);
     }
@@ -266,10 +308,20 @@ export const CursoContenidoService = {
       lesson_number?: number;
       priority?: number;
       module_id?: string;
+      drip_days?: number | null;
+      duration_minutes?: number | null;
+      description?: string | null;
     },
   ) {
     if (!COURSE_CONTENT_API_READY) {
-      return demoLesson(body.title ?? "Clase (demo)", body.video_url ?? null, body.module_id ?? null, body.lesson_number ?? null, body.priority ?? 0, lessonId);
+      return demoLesson(
+        body.title ?? "Clase (demo)",
+        body.video_url ?? null,
+        body.module_id ?? null,
+        body.lesson_number ?? null,
+        body.priority ?? 0,
+        lessonId,
+      );
     }
     return request(`/api/v1/admin-panel/courses/lessons/${lessonId}`, {
       method: "PUT",

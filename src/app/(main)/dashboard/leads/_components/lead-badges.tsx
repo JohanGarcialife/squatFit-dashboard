@@ -12,8 +12,16 @@ import { cn } from "@/lib/utils";
 
 /** Colores de estado con la paleta de marca (naranja/índigo/melocotón/lavanda). */
 export const STATE_STYLES: Record<LeadState, { badge: string; dot: string; column: string }> = {
-  Nuevo: { badge: "bg-[#EBEAF2] text-[#363C98]", dot: "bg-[#363C98]", column: "border-t-[#363C98]" },
-  Contactado: { badge: "bg-[#FFEDE0] text-[#FF690B]", dot: "bg-[#FF690B]", column: "border-t-[#FF690B]" },
+  Nuevo: {
+    badge: "bg-[#EBEAF2] text-[#363C98] dark:bg-[#363C98]/30 dark:text-[#b9bce8]",
+    dot: "bg-[#363C98]",
+    column: "border-t-[#363C98]",
+  },
+  Contactado: {
+    badge: "bg-[#FFEDE0] text-[#FF690B] dark:bg-[#FF690B]/20 dark:text-[#ffa266]",
+    dot: "bg-[#FF690B]",
+    column: "border-t-[#FF690B]",
+  },
   Agendado: { badge: "bg-amber-100 text-amber-800", dot: "bg-amber-500", column: "border-t-amber-500" },
   "Llamada hecha": { badge: "bg-sky-100 text-sky-800", dot: "bg-sky-500", column: "border-t-sky-500" },
   "Esperando pago": { badge: "bg-violet-100 text-violet-800", dot: "bg-violet-500", column: "border-t-violet-500" },

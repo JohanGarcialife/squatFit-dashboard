@@ -159,7 +159,7 @@ export function NotificationsBell() {
                   !n.read && "bg-[#FFEDE0]/60 dark:bg-[#FF690B]/10",
                 )}
               >
-                <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-[#EBEAF2] text-[#363C98]">
+                <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-[#EBEAF2] text-[#363C98] dark:bg-[#363C98]/30 dark:text-[#b9bce8]">
                   <Icon className="size-4" />
                 </span>
                 <span className="min-w-0 flex-1">

@@ -18,6 +18,8 @@ import {
   Check,
   X,
   TriangleAlert,
+  Clock,
+  CalendarClock,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -113,10 +115,15 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
       });
       toast.success("Clase añadida");
     });
-  const saveLesson = (l: Lesson, patch: { title?: string; video_url?: string | null }) =>
+  const saveLesson = (l: Lesson, patch: LessonPatch) =>
     guard(async () => {
       await CursoContenidoService.updateLesson(l.id, patch);
       toast.success("Clase guardada");
+    });
+  const saveModuleMeta = (m: ContentModule, patch: { subtitle?: string | null; drip_days?: number | null }) =>
+    guard(async () => {
+      await CursoContenidoService.updateModule(m.id, patch);
+      toast.success("Módulo actualizado");
     });
   const deleteLesson = (l: Lesson) => {
     if (!confirm(`¿Eliminar la clase «${l.title}»?`)) return;
@@ -185,7 +192,9 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
           <AlertDescription>
             Los endpoints de contenido (rama <code>features-lote-7</code>) aún no están desplegados. Se muestra un árbol
             de ejemplo; los cambios no se guardan. Al desplegar el backend, poner
-            <code> COURSE_CONTENT_API_READY = true</code> en <code>curso-contenido-service.ts</code>.
+            <code> COURSE_CONTENT_API_READY = true</code> en <code>curso-contenido-service.ts</code>. El goteo y los
+            metadatos (Fase 17) requieren además las columnas <code>drip_days</code>, <code>duration_minutes</code> y{" "}
+            <code>description</code> (ver INFORME-FASE-17).
           </AlertDescription>
         </Alert>
       )}
@@ -234,6 +243,11 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
               <Badge variant="outline" className="shrink-0">
                 {m.lessons.length} clases
               </Badge>
+              {m.drip_days != null && m.drip_days > 0 && (
+                <Badge variant="secondary" className="shrink-0 gap-1" title="Goteo: días hasta el desbloqueo">
+                  <CalendarClock className="size-3" /> día {m.drip_days}
+                </Badge>
+              )}
               <Button variant="ghost" size="sm" className="gap-1" onClick={() => openModuleTest(m)} disabled={busy}>
                 <FileQuestion className="size-4" /> Test módulo
               </Button>
@@ -250,6 +264,7 @@ export function CursoContenidoView({ cursoId }: { cursoId: string }) {
             </div>
             <AccordionContent className="pb-4">
               <div className="flex flex-col gap-2">
+                <ModuleMetaRow module={m} busy={busy} onSave={(patch) => saveModuleMeta(m, patch)} />
                 {m.lessons.map((l, li) => (
                   <LessonRow
                     key={l.id}
@@ -358,7 +373,71 @@ function ModuleName({ module: m, onRename }: { module: ContentModule; onRename: 
   );
 }
 
+// ── metadatos y goteo del módulo ──
+function ModuleMetaRow({
+  module: m,
+  busy,
+  onSave,
+}: {
+  module: ContentModule;
+  busy?: boolean;
+  onSave: (patch: { subtitle?: string | null; drip_days?: number | null }) => void;
+}) {
+  const [subtitle, setSubtitle] = useState(m.subtitle ?? "");
+  const [drip, setDrip] = useState(m.drip_days != null ? String(m.drip_days) : "");
+  const dirty = subtitle !== (m.subtitle ?? "") || drip !== (m.drip_days != null ? String(m.drip_days) : "");
+
+  useEffect(() => {
+    setSubtitle(m.subtitle ?? "");
+    setDrip(m.drip_days != null ? String(m.drip_days) : "");
+  }, [m.subtitle, m.drip_days]);
+
+  return (
+    <div className="bg-muted/30 flex flex-col gap-2 rounded-md border border-dashed p-3 md:flex-row md:items-center">
+      <Input
+        value={subtitle}
+        onChange={(e) => setSubtitle(e.target.value)}
+        placeholder="Subtítulo del módulo (opcional)"
+        className="text-sm md:flex-1"
+      />
+      <div className="flex items-center gap-2">
+        <CalendarClock className="text-muted-foreground size-4 shrink-0" />
+        <Input
+          type="number"
+          min={0}
+          value={drip}
+          onChange={(e) => setDrip(e.target.value)}
+          placeholder="0"
+          className="w-24 text-sm"
+          aria-label="Días de goteo del módulo"
+        />
+        <span className="text-muted-foreground text-xs whitespace-nowrap">días para desbloquear</span>
+        <Button
+          size="sm"
+          disabled={!dirty || busy}
+          onClick={() =>
+            onSave({
+              subtitle: subtitle.trim() || null,
+              drip_days: drip.trim() === "" ? null : Math.max(0, Number(drip)),
+            })
+          }
+        >
+          Guardar
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 // ── fila de clase ──
+type LessonPatch = {
+  title?: string;
+  video_url?: string | null;
+  drip_days?: number | null;
+  duration_minutes?: number | null;
+  description?: string | null;
+};
+
 function LessonRow({
   lesson,
   index,
@@ -373,19 +452,39 @@ function LessonRow({
   index: number;
   count: number;
   busy?: boolean;
-  onSave: (patch: { title?: string; video_url?: string | null }) => void;
+  onSave: (patch: LessonPatch) => void;
   onDelete: () => void;
   onMove: (dir: -1 | 1) => void;
   onEditTest: () => void;
 }) {
   const [title, setTitle] = useState(lesson.title);
   const [url, setUrl] = useState(lesson.video_url ?? "");
-  const dirty = title !== lesson.title || url !== (lesson.video_url ?? "");
+  const [description, setDescription] = useState(lesson.description ?? "");
+  const [drip, setDrip] = useState(lesson.drip_days != null ? String(lesson.drip_days) : "");
+  const [duration, setDuration] = useState(lesson.duration_minutes != null ? String(lesson.duration_minutes) : "");
+  const dirty =
+    title !== lesson.title ||
+    url !== (lesson.video_url ?? "") ||
+    description !== (lesson.description ?? "") ||
+    drip !== (lesson.drip_days != null ? String(lesson.drip_days) : "") ||
+    duration !== (lesson.duration_minutes != null ? String(lesson.duration_minutes) : "");
 
   useEffect(() => {
     setTitle(lesson.title);
     setUrl(lesson.video_url ?? "");
-  }, [lesson.title, lesson.video_url]);
+    setDescription(lesson.description ?? "");
+    setDrip(lesson.drip_days != null ? String(lesson.drip_days) : "");
+    setDuration(lesson.duration_minutes != null ? String(lesson.duration_minutes) : "");
+  }, [lesson.title, lesson.video_url, lesson.description, lesson.drip_days, lesson.duration_minutes]);
+
+  const save = () =>
+    onSave({
+      title: title.trim(),
+      video_url: url.trim() || null,
+      description: description.trim() || null,
+      drip_days: drip.trim() === "" ? null : Math.max(0, Number(drip)),
+      duration_minutes: duration.trim() === "" ? null : Math.max(0, Number(duration)),
+    });
 
   return (
     <div className="bg-background flex flex-col gap-2 rounded-md border p-3 md:flex-row md:items-center">
@@ -434,16 +533,46 @@ function LessonRow({
             className="text-xs"
           />
         </div>
+        <Input
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Descripción corta (opcional, la ve el alumno)"
+          className="text-xs"
+        />
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span className="flex items-center gap-1.5" title="Goteo: días tras la compra para desbloquear la clase">
+            <CalendarClock className="text-muted-foreground size-4 shrink-0" />
+            <Input
+              type="number"
+              min={0}
+              value={drip}
+              onChange={(e) => setDrip(e.target.value)}
+              placeholder="—"
+              className="h-8 w-20 text-xs"
+              aria-label="Días de goteo de la clase"
+            />
+            <span className="text-muted-foreground text-xs">días goteo</span>
+          </span>
+          <span className="flex items-center gap-1.5" title="Duración estimada de la clase">
+            <Clock className="text-muted-foreground size-4 shrink-0" />
+            <Input
+              type="number"
+              min={0}
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="—"
+              className="h-8 w-20 text-xs"
+              aria-label="Duración en minutos"
+            />
+            <span className="text-muted-foreground text-xs">min</span>
+          </span>
+        </div>
       </div>
       <div className="flex shrink-0 items-center gap-1">
         <Button variant="outline" size="sm" className="gap-1" onClick={onEditTest} disabled={!lesson.test || busy}>
           <FileQuestion className="size-4" /> Test
         </Button>
-        <Button
-          size="sm"
-          disabled={!dirty || busy}
-          onClick={() => onSave({ title: title.trim(), video_url: url.trim() || null })}
-        >
+        <Button size="sm" disabled={!dirty || busy} onClick={save}>
           Guardar
         </Button>
         <Button

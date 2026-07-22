@@ -30,7 +30,11 @@ const getStatusBadge = (status: string | null | undefined) => {
       return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">Activo</Badge>;
     case "inactive":
     case "inactivo":
-      return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200">Inactivo</Badge>;
+      return (
+        <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+          Inactivo
+        </Badge>
+      );
     default:
       return <Badge variant="secondary">{status}</Badge>;
   }
@@ -44,7 +48,10 @@ const getRoleBadge = (role: string | null | undefined) => {
   switch (role.toLowerCase()) {
     case "user":
       return (
-        <Badge className="border-blue-200 bg-blue-50 text-blue-700" variant="outline">
+        <Badge
+          className="border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+          variant="outline"
+        >
           Usuario
         </Badge>
       );
@@ -118,7 +125,9 @@ export const getAlumnosColumns = (handlers: ColumnHandlers = {}): ColumnDef<Alum
       return (
         <div className="flex items-center gap-3">
           <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-blue-100 font-semibold text-blue-700">{initials}</AvatarFallback>
+            <AvatarFallback className="bg-blue-100 font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+              {initials}
+            </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <span className="font-medium">{row.original.fullName}</span>

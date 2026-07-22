@@ -99,7 +99,7 @@ export function CatalogView() {
       </div>
 
       {needMappingCount > 0 && (
-        <div className="flex items-start gap-2 rounded-md border border-dashed border-[#FF690B]/40 bg-[#FFEDE0]/50 px-4 py-2.5 text-sm text-[#8a3d06]">
+        <div className="flex items-start gap-2 rounded-md border border-dashed border-[#FF690B]/40 bg-[#FFEDE0]/50 px-4 py-2.5 text-sm text-[#8a3d06] dark:bg-[#FF690B]/10 dark:text-[#ffa266]">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <span>
             <strong>{needMappingCount}</strong> {needMappingCount === 1 ? "producto tiene" : "productos tienen"} precio
@@ -135,14 +135,14 @@ export function CatalogView() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-[#EBEAF2]/60 hover:bg-[#EBEAF2]/60">
-                    <TableHead className="text-[#363C98]">Producto</TableHead>
-                    <TableHead className="text-[#363C98]">Tipo</TableHead>
-                    <TableHead className="text-[#363C98]">Precio</TableHead>
-                    <TableHead className="text-[#363C98]">Tramo</TableHead>
-                    <TableHead className="text-[#363C98]">Concede</TableHead>
-                    <TableHead className="text-[#363C98]">Estado</TableHead>
-                    <TableHead className="text-right text-[#363C98]">Acción</TableHead>
+                  <TableRow className="bg-[#EBEAF2]/60 hover:bg-[#EBEAF2]/60 dark:bg-[#363C98]/25 dark:hover:bg-[#363C98]/25">
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Producto</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Tipo</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Precio</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Tramo</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Concede</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Estado</TableHead>
+                    <TableHead className="text-right text-[#363C98] dark:text-[#b9bce8]">Acción</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -154,7 +154,11 @@ export function CatalogView() {
                     </TableRow>
                   ) : (
                     visible.map((p) => (
-                      <TableRow key={p.id} className="cursor-pointer hover:bg-[#FFEDE0]/40" onClick={() => openEdit(p)}>
+                      <TableRow
+                        key={p.id}
+                        className="cursor-pointer hover:bg-[#FFEDE0]/40 dark:hover:bg-[#FF690B]/10"
+                        onClick={() => openEdit(p)}
+                      >
                         <TableCell className="font-medium">
                           {p.name}
                           {p.area && <span className="text-muted-foreground ml-2 text-xs">· {p.area}</span>}
