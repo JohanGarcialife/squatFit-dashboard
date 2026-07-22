@@ -144,13 +144,13 @@ export function LeadsView() {
       </div>
 
       {!LEADS_API_READY && (
-        <div className="rounded-md border border-dashed bg-[#FFEDE0]/40 px-4 py-2.5 text-sm text-[#8a3d06]">
+        <div className="rounded-md border border-dashed bg-[#FFEDE0]/40 px-4 py-2.5 text-sm text-[#8a3d06] dark:bg-[#FF690B]/10 dark:text-[#ffa266]">
           Datos de ejemplo: el backend de leads (<code>/admin-panel/leads</code>) aún no está desplegado. Todo (tabla,
           kanban, notas, importación) queda listo para encender con <code>LEADS_API_READY = true</code>.
         </div>
       )}
       {LEADS_API_READY && demo && (
-        <div className="rounded-md border border-dashed bg-[#FFEDE0]/40 px-4 py-2.5 text-sm text-[#8a3d06]">
+        <div className="rounded-md border border-dashed bg-[#FFEDE0]/40 px-4 py-2.5 text-sm text-[#8a3d06] dark:bg-[#FF690B]/10 dark:text-[#ffa266]">
           Vista de demostración (<code>?demo=1</code>): datos de ejemplo en memoria, no se toca la API real. Quita el
           parámetro de la URL para volver a los leads reales.
         </div>

@@ -683,16 +683,31 @@ export class LeadsService {
     // El backend valida con forbidNonWhitelisted: SOLO acepta los params del
     // QueryLeadsDTO (status, origin, assigned_to, objection, intake_from/to,
     // search, page, limit). Enviar `source`/`state` (nombres de la UI) daría
-    // 400. Como los kanbans agrupan por estado en cliente, pedimos la lista
-    // completa (limit alto) y filtramos origen/estado localmente.
-    const params = new URLSearchParams();
-    if (query?.search) params.set("search", query.search);
-    params.set("limit", "200"); // cubre los ~160 leads importados (máx. backend 200)
-    const qs = params.toString();
-    const data = await this.request<any>(`/api/v1/admin-panel/leads${qs ? `?${qs}` : ""}`, {
-      headers: this.authHeaders(),
-    });
-    const raw: any[] = Array.isArray(data) ? data : (data.data ?? data.leads ?? []);
+    // 400. Como los kanbans agrupan por estado en cliente, paginamos en
+    // servidor (limit máx. 200) acumulando páginas hasta agotar la lista, y
+    // filtramos origen/estado localmente (Fase 17.3: antes se cortaba en 200).
+    const PAGE_LIMIT = 200; // máximo que acepta el backend por página
+    const MAX_PAGES = 25; // tope de seguridad: 5.000 leads
+    const raw: any[] = [];
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      const params = new URLSearchParams();
+      if (query?.search) params.set("search", query.search);
+      params.set("limit", String(PAGE_LIMIT));
+      params.set("page", String(page));
+      const data = await this.request<any>(`/api/v1/admin-panel/leads?${params.toString()}`, {
+        headers: this.authHeaders(),
+      });
+      const chunk: any[] = Array.isArray(data) ? data : (data.data ?? data.leads ?? []);
+      // Guarda anti-bucle: si el backend ignorase `page` y repitiera la misma
+      // página, cortamos en cuanto no aparezca ningún id nuevo.
+      const seen = new Set(raw.map((l) => l.id));
+      const fresh = chunk.filter((l) => !seen.has(l.id));
+      raw.push(...fresh);
+      if (chunk.length < PAGE_LIMIT || fresh.length === 0) break; // última página
+      if (page === MAX_PAGES) {
+        console.warn(`Leads: alcanzado el tope de ${MAX_PAGES * PAGE_LIMIT}; hay más leads sin cargar.`);
+      }
+    }
     raw.forEach(detectV2Fields);
     // Refiltra en cliente por si el backend ignora algún parámetro.
     return applyFilters(raw.map(normalizeLead), query);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,13 +9,10 @@ import {
   ArrowLeft,
   User2,
   ShoppingBag,
-  HeartPulse,
-  ClipboardList,
   Mail,
   AtSign,
   Cake,
   ShieldCheck,
-  KeyRound,
   PackagePlus,
   GraduationCap,
   BookOpen,
@@ -25,6 +22,12 @@ import {
   Infinity as InfinityIcon,
   Contact,
   ExternalLink,
+  Target,
+  Flame,
+  Ruler,
+  Scale,
+  Activity,
+  EyeOff,
 } from "lucide-react";
 
 import { BrandTabs } from "@/components/brand-tabs";
@@ -35,6 +38,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClientProfile, type ClientAccess } from "@/hooks/use-client-profile";
+import { useStaffRole } from "@/hooks/use-staff-role";
+import { canGrantProducts, visibleFichaSections } from "@/lib/ficha-visibility";
+
+import { StaffNotesSection } from "./staff-notes-section";
 
 /** Píldora de caducidad para accesos de curso / suscripciones. */
 function ExpiryBadge({ end }: { end: string | null }) {
@@ -62,13 +69,7 @@ function ExpiryBadge({ end }: { end: string | null }) {
   );
 }
 
-const TABS = [
-  { id: "datos", label: "Datos de usuario", icon: <User2 className="size-4" /> },
-  { id: "accesos", label: "Accesos concedidos", icon: <KeyRound className="size-4" /> },
-  { id: "compras", label: "Compras", icon: <ShoppingBag className="size-4" /> },
-  { id: "salud", label: "Medidas y salud", icon: <HeartPulse className="size-4" /> },
-  { id: "formularios", label: "Formularios", icon: <ClipboardList className="size-4" /> },
-];
+// Las pestañas se derivan de la matriz de visibilidad por rol (ficha-visibility.ts).
 
 function AccessIcon({ type }: { type: ClientAccess["type"] }) {
   if (type === "Curso") return <GraduationCap className="size-4" />;
@@ -108,6 +109,28 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
   const [grantOpen, setGrantOpen] = useState(false);
   const { data, isLoading, error } = useClientProfile(userId);
 
+  // Matriz de visibilidad por rol (Doc 0 1.5–1.6): cada rol de staff ve solo
+  // sus secciones. Rol desconocido → solo «datos».
+  const role = useStaffRole();
+  const sections = useMemo(() => visibleFichaSections(role), [role]);
+  const tabs = useMemo(
+    () =>
+      sections.map(({ id, label, icon: Icon }) => ({
+        id,
+        label,
+        icon: <Icon className="size-4" />,
+      })),
+    [sections],
+  );
+  const canGrant = canGrantProducts(role);
+  const can = (id: string) => sections.some((s) => s.id === id);
+
+  // Si el rol no puede ver la pestaña activa, volver a «datos».
+  useEffect(() => {
+    if (!can(tab)) setTab("datos");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sections, tab]);
+
   const user = data?.user;
   const detail = data?.userDetail;
   const fullName = user ? `${user.firstName} ${user.lastName ?? ""}`.trim() : "Cliente";
@@ -122,7 +145,9 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
           <ArrowLeft className="size-5" />
         </Button>
         <Avatar className="size-12">
-          <AvatarFallback className="bg-blue-100 font-semibold text-blue-700">{initials}</AvatarFallback>
+          <AvatarFallback className="bg-blue-100 font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+            {initials}
+          </AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
           {isLoading ? (
@@ -132,10 +157,12 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
           )}
           <p className="text-muted-foreground text-sm">{user?.email ?? (isLoading ? "" : "Usuario")}</p>
         </div>
-        <Button className="ml-auto gap-2" onClick={() => setGrantOpen(true)}>
-          <PackagePlus className="size-4" />
-          Añadir producto
-        </Button>
+        {canGrant && (
+          <Button className="ml-auto gap-2" onClick={() => setGrantOpen(true)}>
+            <PackagePlus className="size-4" />
+            Añadir producto
+          </Button>
+        )}
       </div>
 
       <GrantProductDialog open={grantOpen} onOpenChange={setGrantOpen} userId={userId} userName={fullName} />
@@ -148,7 +175,14 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
         </Card>
       )}
 
-      <BrandTabs tabs={TABS} active={tab} onChange={setTab} />
+      <BrandTabs tabs={tabs} active={tab} onChange={setTab} />
+
+      {role && role !== "admin" && (
+        <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
+          <EyeOff className="size-3.5" />
+          Vista limitada por rol «{role}»: se ocultan las secciones que no corresponden (matriz Doc 0, 1.5–1.6).
+        </p>
+      )}
 
       {/* Datos de usuario */}
       {tab === "datos" && (
@@ -232,10 +266,12 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
               <CardTitle>Accesos concedidos</CardTitle>
               <CardDescription>Cursos, libros y packs a los que el cliente tiene acceso.</CardDescription>
             </div>
-            <Button size="sm" variant="outline" className="gap-2" onClick={() => setGrantOpen(true)}>
-              <PackagePlus className="size-4" />
-              Añadir
-            </Button>
+            {canGrant && (
+              <Button size="sm" variant="outline" className="gap-2" onClick={() => setGrantOpen(true)}>
+                <PackagePlus className="size-4" />
+                Añadir
+              </Button>
+            )}
           </CardHeader>
           <CardContent className="space-y-5">
             {/* Cursos con su CADUCIDAD (expires_at) — fuente autoritativa (Fase 14.4). */}
@@ -330,7 +366,11 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
                         </div>
                       </div>
                       <Badge
-                        className={a.origin === "grant" ? "bg-[#FFEDE0] text-[#FF690B]" : "bg-[#EBEAF2] text-[#363C98]"}
+                        className={
+                          a.origin === "grant"
+                            ? "bg-[#FFEDE0] text-[#FF690B] dark:bg-[#FF690B]/20 dark:text-[#ffa266]"
+                            : "bg-[#EBEAF2] text-[#363C98] dark:bg-[#363C98]/30 dark:text-[#b9bce8]"
+                        }
                       >
                         {a.origin === "grant" ? "Concedido por staff" : "Comprado"}
                       </Badge>
@@ -425,6 +465,116 @@ export function ClientProfileView({ userId }: ClientProfileViewProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Objetivos */}
+      {tab === "objetivos" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="size-5" /> Objetivos
+            </CardTitle>
+            <CardDescription>Objetivo de entrenamiento, actividad y meta calórica del cliente.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : detail ? (
+              <div className="flex flex-col">
+                <DataRow
+                  icon={<Flame className="size-4" />}
+                  label="Objetivo de kcal"
+                  value={detail.config_kcal_goal != null ? `${detail.config_kcal_goal} kcal/día` : undefined}
+                />
+                <DataRow
+                  icon={<Target className="size-4" />}
+                  label="Objetivo de entrenamiento"
+                  value={detail.training_goal_id ?? undefined}
+                />
+                <DataRow
+                  icon={<Activity className="size-4" />}
+                  label="Actividad diaria"
+                  value={detail.daily_activity_id ?? undefined}
+                />
+                <DataRow label="Cardio semanal" value={detail.weekly_cardio_frequency_id ?? undefined} />
+                <DataRow label="Pasos al día" value={detail.steps_peer_day_id ?? undefined} />
+                <DataRow label="Fuerza" value={detail.strength_training_id ?? undefined} />
+                <p className="text-muted-foreground pt-3 text-xs">
+                  Los campos de objetivo llegan como identificadores de catálogo; falta que el admin-panel exponga los
+                  catálogos (training_goals, daily_activities…) para mostrar las etiquetas legibles (ver
+                  INFORME-FASE-17).
+                </p>
+              </div>
+            ) : (
+              <BackendPending>
+                Los objetivos salen del detalle de usuario (<code>GET /admin-panel/users/:id</code>, campos{" "}
+                <code>config_kcal_goal</code>, <code>training_goal_id</code>, <code>daily_activity_id</code>…). En
+                cuanto el backend publique ese GET (detección <code>USER_DETAIL_API_READY</code>), esta sección se
+                rellena sola.
+              </BackendPending>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Progreso */}
+      {tab === "progreso" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="size-5" /> Progreso
+            </CardTitle>
+            <CardDescription>Estado actual y evolución de las medidas del cliente.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isLoading ? (
+              <Skeleton className="h-24 w-full" />
+            ) : detail ? (
+              <div className="flex flex-col">
+                <DataRow
+                  icon={<Scale className="size-4" />}
+                  label="Peso actual"
+                  value={detail.weight != null ? `${detail.weight} kg` : undefined}
+                />
+                <DataRow
+                  icon={<Ruler className="size-4" />}
+                  label="Altura"
+                  value={detail.height != null ? `${detail.height} cm` : undefined}
+                />
+                <DataRow
+                  label="IMC"
+                  value={
+                    detail.weight != null && detail.height != null && detail.height > 0
+                      ? (detail.weight / Math.pow(detail.height / 100, 2)).toFixed(1)
+                      : undefined
+                  }
+                />
+                <DataRow
+                  icon={<CalendarClock className="size-4" />}
+                  label="Último acceso a la app"
+                  value={
+                    detail.last_logged_in_time
+                      ? new Date(detail.last_logged_in_time).toLocaleString("es-ES")
+                      : undefined
+                  }
+                />
+              </div>
+            ) : (
+              <BackendPending>
+                Sin el detalle de usuario aún no hay medidas que mostrar (<code>USER_DETAIL_API_READY</code>).
+              </BackendPending>
+            )}
+            <BackendPending>
+              La <strong>serie histórica</strong> (peso/medidas a lo largo del tiempo, adherencia al plan y hábitos)
+              necesita un endpoint nuevo, propuesto como <code>GET /admin-panel/users/:id/progress?from&to</code>{" "}
+              devolviendo <code>{`[{ date, weight, measurements?, habits_score? }]`}</code> — conectará también con el
+              motor de hábitos de Alertas (ver INFORME-FASE-17).
+            </BackendPending>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Notas de staff */}
+      {tab === "notas" && <StaffNotesSection userId={userId} authorRole={role} />}
 
       {/* Formularios */}
       {tab === "formularios" && (

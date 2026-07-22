@@ -105,14 +105,16 @@ export function ProductGrantModal({ product, open, onOpenChange }: ProductGrantM
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <PackageCheck className="size-5 text-[#363C98]" />
+            <PackageCheck className="size-5 text-[#363C98] dark:text-[#b9bce8]" />
             {product.name}
           </DialogTitle>
           <DialogDescription className="flex flex-wrap items-center gap-2">
             <span>{formatPrice(product.price, product.currency)}</span>
             {product.area && <Badge variant="outline">{product.area}</Badge>}
             <Badge variant="outline">{product.type}</Badge>
-            {product.needsMapping && <Badge className="bg-[#FFEDE0] text-[#8a3d06]">Sin mapear</Badge>}
+            {product.needsMapping && (
+              <Badge className="bg-[#FFEDE0] text-[#8a3d06] dark:bg-[#FF690B]/20 dark:text-[#ffa266]">Sin mapear</Badge>
+            )}
           </DialogDescription>
         </DialogHeader>
 

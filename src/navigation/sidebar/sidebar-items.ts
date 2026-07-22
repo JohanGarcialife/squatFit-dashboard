@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   UtensilsCrossed,
   Apple,
+  ChefHat,
   FileText,
   TrendingUp,
   Dumbbell,
@@ -132,6 +133,12 @@ export const sidebarItems: NavGroup[] = [
             title: "Dieta",
             url: "/dashboard/dieta",
             icon: Apple,
+          },
+          {
+            title: "Recetas",
+            url: "/dashboard/recetas",
+            icon: ChefHat,
+            isNew: true,
           },
           {
             title: "Pautas",

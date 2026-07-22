@@ -124,15 +124,15 @@ export function OrdersView() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-[#EBEAF2]/60 hover:bg-[#EBEAF2]/60">
-                    <TableHead className="text-[#363C98]">Cliente</TableHead>
-                    <TableHead className="text-[#363C98]">Pedido</TableHead>
-                    <TableHead className="text-[#363C98]">Productos</TableHead>
-                    <TableHead className="text-[#363C98]">Origen</TableHead>
-                    <TableHead className="text-[#363C98]">Pago</TableHead>
-                    <TableHead className="text-[#363C98]">Estado</TableHead>
-                    <TableHead className="text-[#363C98]">Total</TableHead>
-                    <TableHead className="text-right text-[#363C98]">Acciones</TableHead>
+                  <TableRow className="bg-[#EBEAF2]/60 hover:bg-[#EBEAF2]/60 dark:bg-[#363C98]/25 dark:hover:bg-[#363C98]/25">
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Cliente</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Pedido</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Productos</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Origen</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Pago</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Estado</TableHead>
+                    <TableHead className="text-[#363C98] dark:text-[#b9bce8]">Total</TableHead>
+                    <TableHead className="text-right text-[#363C98] dark:text-[#b9bce8]">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -150,7 +150,7 @@ export function OrdersView() {
                       const isCompleting = updateStatus.isPending && updateStatus.variables?.id === o.id;
                       const isEmailing = sendEmail.isPending && sendEmail.variables?.id === o.id;
                       return (
-                        <TableRow key={o.id} className="hover:bg-[#FFEDE0]/40">
+                        <TableRow key={o.id} className="hover:bg-[#FFEDE0]/40 dark:hover:bg-[#FF690B]/10">
                           <TableCell>
                             <p className="font-medium">{o.customerName}</p>
                             <p className="text-muted-foreground text-xs">{o.customerEmail}</p>
